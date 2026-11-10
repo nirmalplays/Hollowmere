@@ -1,60 +1,192 @@
-[gd_resource type="Resource" script_class="SpriteSheetDef" load_steps=9 format=3]
+[gd_resource type="Resource" script_class="SpriteSheetDef" load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scripts/systems/animation/sprite_sheet_def.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/systems/animation/sprite_anim_row.gd" id="2"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/unlaid_16x24.png" id="3"]
 
-[sub_resource type="Resource" id="row_0"]
+[sub_resource type="Resource" id="a0"]
 script = ExtResource("2")
 name = &"idle_down"
 row = 0
+column = 0
 frame_count = 4
 fps = 5.0
 loop = true
 
-[sub_resource type="Resource" id="row_1"]
-script = ExtResource("2")
-name = &"idle_up"
-row = 1
-frame_count = 4
-fps = 5.0
-loop = true
-
-[sub_resource type="Resource" id="row_2"]
-script = ExtResource("2")
-name = &"idle_side"
-row = 2
-frame_count = 4
-fps = 5.0
-loop = true
-
-[sub_resource type="Resource" id="row_3"]
+[sub_resource type="Resource" id="a1"]
 script = ExtResource("2")
 name = &"walk_down"
 row = 3
+column = 0
 frame_count = 6
 fps = 10.0
 loop = true
 
-[sub_resource type="Resource" id="row_4"]
+[sub_resource type="Resource" id="a2"]
+script = ExtResource("2")
+name = &"attack_windup_down"
+row = 6
+column = 0
+frame_count = 1
+fps = 1.0
+loop = true
+
+[sub_resource type="Resource" id="a3"]
+script = ExtResource("2")
+name = &"attack_strike_down"
+row = 6
+column = 1
+frame_count = 1
+fps = 1.0
+loop = true
+
+[sub_resource type="Resource" id="a4"]
+script = ExtResource("2")
+name = &"attack_recover_down"
+row = 6
+column = 2
+frame_count = 1
+fps = 1.0
+loop = true
+
+[sub_resource type="Resource" id="a5"]
+script = ExtResource("2")
+name = &"block_down"
+row = 9
+column = 0
+frame_count = 1
+fps = 1.0
+loop = true
+
+[sub_resource type="Resource" id="a6"]
+script = ExtResource("2")
+name = &"idle_up"
+row = 1
+column = 0
+frame_count = 4
+fps = 5.0
+loop = true
+
+[sub_resource type="Resource" id="a7"]
 script = ExtResource("2")
 name = &"walk_up"
 row = 4
+column = 0
 frame_count = 6
 fps = 10.0
 loop = true
 
-[sub_resource type="Resource" id="row_5"]
+[sub_resource type="Resource" id="a8"]
+script = ExtResource("2")
+name = &"attack_windup_up"
+row = 7
+column = 0
+frame_count = 1
+fps = 1.0
+loop = true
+
+[sub_resource type="Resource" id="a9"]
+script = ExtResource("2")
+name = &"attack_strike_up"
+row = 7
+column = 1
+frame_count = 1
+fps = 1.0
+loop = true
+
+[sub_resource type="Resource" id="a10"]
+script = ExtResource("2")
+name = &"attack_recover_up"
+row = 7
+column = 2
+frame_count = 1
+fps = 1.0
+loop = true
+
+[sub_resource type="Resource" id="a11"]
+script = ExtResource("2")
+name = &"block_up"
+row = 10
+column = 0
+frame_count = 1
+fps = 1.0
+loop = true
+
+[sub_resource type="Resource" id="a12"]
+script = ExtResource("2")
+name = &"idle_side"
+row = 2
+column = 0
+frame_count = 4
+fps = 5.0
+loop = true
+
+[sub_resource type="Resource" id="a13"]
 script = ExtResource("2")
 name = &"walk_side"
 row = 5
+column = 0
 frame_count = 6
 fps = 10.0
 loop = true
+
+[sub_resource type="Resource" id="a14"]
+script = ExtResource("2")
+name = &"attack_windup_side"
+row = 8
+column = 0
+frame_count = 1
+fps = 1.0
+loop = true
+
+[sub_resource type="Resource" id="a15"]
+script = ExtResource("2")
+name = &"attack_strike_side"
+row = 8
+column = 1
+frame_count = 1
+fps = 1.0
+loop = true
+
+[sub_resource type="Resource" id="a16"]
+script = ExtResource("2")
+name = &"attack_recover_side"
+row = 8
+column = 2
+frame_count = 1
+fps = 1.0
+loop = true
+
+[sub_resource type="Resource" id="a17"]
+script = ExtResource("2")
+name = &"block_side"
+row = 11
+column = 0
+frame_count = 1
+fps = 1.0
+loop = true
+
+[sub_resource type="Resource" id="a18"]
+script = ExtResource("2")
+name = &"dodge"
+row = 12
+column = 0
+frame_count = 4
+fps = 11.0
+loop = false
+
+[sub_resource type="Resource" id="a19"]
+script = ExtResource("2")
+name = &"dead"
+row = 13
+column = 0
+frame_count = 4
+fps = 5.0
+loop = false
 
 [resource]
 script = ExtResource("1")
 texture = ExtResource("3")
 frame_size = Vector2i(16, 24)
-animations = Array[ExtResource("2")]([SubResource("row_0"), SubResource("row_1"), SubResource("row_2"), SubResource("row_3"), SubResource("row_4"), SubResource("row_5")])
+animations = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4"), SubResource("a5"), SubResource("a6"), SubResource("a7"), SubResource("a8"), SubResource("a9"), SubResource("a10"), SubResource("a11"), SubResource("a12"), SubResource("a13"), SubResource("a14"), SubResource("a15"), SubResource("a16"), SubResource("a17"), SubResource("a18"), SubResource("a19")])
 foot_inset = 1

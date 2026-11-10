@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/enemy/enemy_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/entities/enemy/enemy_attack_data.gd" id="2"]
+[ext_resource type="Resource" path="res://data/sprites/training_dummy.tres" id="3"]
+[ext_resource type="Resource" path="res://data/fx/hit_spark.tres" id="4"]
+
+[sub_resource type="Resource" id="sweep"]
+script = ExtResource("2")
+id = &"sweep"
+trigger_range = 30.0
+telegraph_ms = 700
+active_ms = 120
+recovery_ms = 600
+cooldown_ms = 1800
+damage = 14.0
+damage_type = &"physical"
+knockback = 120.0
+poise_damage = 20.0
+aoe_radius = 22.0
+weight = 1.0
+
+[resource]
+script = ExtResource("1")
+id = &"training_dummy"
+display_name = "Hollowed Training Dummy"
+max_hp = 200.0
+defense = 0.0
+resistances = {}
+max_poise = 60.0
+poise_regen = 15.0
+poise_regen_delay = 2.0
+stagger_ms = 1600
+stagger_damage_mult = 2.0
+attacks = Array[ExtResource("2")]([SubResource("sweep")])
+revive_ms = 3000
+sprite_sheet = ExtResource("3")
+hit_fx = ExtResource("4")
+telegraph_color = Color(1, 0.35, 0.25, 1)

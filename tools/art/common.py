@@ -45,6 +45,23 @@ class Canvas:
     def dot(self, x, y, color):
         self.rect(x, y, x, y, color)
 
+    def line(self, x0, y0, x1, y1, color):
+        """Bresenham line in design-grid coordinates."""
+        dx, dy = abs(x1 - x0), -abs(y1 - y0)
+        sx, sy = (1 if x0 < x1 else -1), (1 if y0 < y1 else -1)
+        err = dx + dy
+        while True:
+            self.dot(x0, y0, color)
+            if x0 == x1 and y0 == y1:
+                return
+            e2 = 2 * err
+            if e2 >= dy:
+                err += dy
+                x0 += sx
+            if e2 <= dx:
+                err += dx
+                y0 += sy
+
     def outline(self, color="outline"):
         filled = [[c is not None for c in row] for row in self.px]
         for y in range(self.h):

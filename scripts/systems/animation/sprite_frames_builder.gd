@@ -17,7 +17,7 @@ static func build(def: SpriteSheetDef) -> SpriteFrames:
 			var atlas := AtlasTexture.new()
 			atlas.atlas = def.texture
 			atlas.region = Rect2(
-				Vector2(i * def.frame_size.x, anim.row * def.frame_size.y), Vector2(def.frame_size)
+				Vector2((anim.column + i) * def.frame_size.x, anim.row * def.frame_size.y), Vector2(def.frame_size)
 			)
 			frames.add_frame(anim.name, atlas)
 	_cache[def] = frames

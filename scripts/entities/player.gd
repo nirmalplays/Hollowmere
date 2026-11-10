@@ -1,38 +1,108 @@
 class_name Player
 extends CharacterBody2D
-## M1 player: 8-direction movement with acceleration and friction, 4-direction
-## animation (side frames flip for left), camera on the local player only.
-## Host-authority aware (GAME_PLAN 9): the authority peer applies intent; solo = peer 1.
+## The Unlaid player. Movement + a state machine of committed actions (GAME_PLAN 5).
+## Host-authority aware (GAME_PLAN 9): the authority peer runs the state machine and
+## resolves hits; solo is peer 1 with no other peers, through the same code path.
 
 signal facing_changed(direction: Vector2)
 
+const CHEST_HEIGHT: float = 10.0  ## pixels above the feet where blows land
+const HIT_COLOR := Color(1.0, 0.55, 0.45)
+const BLOCK_COLOR := Color(0.75, 0.8, 0.9)
+
 @export var tuning: MovementTuning
+@export var combat: CombatTuning
 @export var sprite_sheet: SpriteSheetDef
+@export var weapon: WeaponData
+@export var hit_fx: FxDef
+@export var parry_fx: FxDef
 
 var peer_id: int = Const.SOLO_PEER_ID
 var facing: Vector2 = Vector2.DOWN
+var spawn_point: Vector2 = Vector2.ZERO  ## the Hearth this player rises at
 
-@onready var _input: PlayerInput = $Input
-@onready var _sprite: AnimatedSprite2D = $Sprite
+@onready var input: PlayerInput = $Input
+@onready var stats: CombatStats = $Stats
+@onready var states: PlayerStateMachine = $States
+@onready var sprite: AnimatedSprite2D = $Sprite
+@onready var hitbox: Hitbox = $Hitbox
+@onready var hurtbox: Hurtbox = $Hurtbox
 @onready var _camera: Camera2D = $Camera
 
 
 func _ready() -> void:
+	add_to_group(&"players")
 	set_multiplayer_authority(peer_id)
-	_sprite.sprite_frames = SpriteFramesBuilder.build(sprite_sheet)
-	_sprite.offset = sprite_sheet.foot_offset()
-	_camera.enabled = _input.is_local()
+	spawn_point = global_position
+	sprite.sprite_frames = SpriteFramesBuilder.build(sprite_sheet)
+	sprite.offset = sprite_sheet.foot_offset()
+	_camera.enabled = input.is_local()
 	if _camera.enabled:
 		_camera.make_current()
-	_update_animation()
+	stats.tuning = combat
+	stats.reset()
+	hitbox.hit_landed.connect(_on_hit_landed)
+	states.setup(self)
 
 
 func _physics_process(delta: float) -> void:
-	_input.gather(delta)
-	if is_multiplayer_authority():
-		_apply_movement(_input.move, delta)
-	_update_facing()
-	_update_animation()
+	input.gather(delta)
+	if not is_multiplayer_authority():
+		return  # remote replicas are driven by synced state (M11)
+	states.physics_update(delta)
+	var regen := states.current.stamina_regen_mult()
+	if regen > 0.0:
+		stats.regen(delta, regen)
+
+
+# --- movement helpers for states -------------------------------------------
+
+func move_with_input(delta: float, speed_mult: float = 1.0) -> void:
+	var move := input.move
+	if move != Vector2.ZERO:
+		var target := move.limit_length(1.0) * tuning.max_speed * speed_mult
+		velocity = velocity.move_toward(target, tuning.acceleration * delta)
+	else:
+		velocity = velocity.move_toward(Vector2.ZERO, tuning.friction * delta)
+	move_and_slide()
+
+
+func brake(delta: float) -> void:
+	velocity = velocity.move_toward(Vector2.ZERO, tuning.friction * delta)
+	move_and_slide()
+
+
+## Real velocity, not requested: pushing into a wall counts as standing still.
+func is_moving() -> bool:
+	return get_real_velocity().length() > tuning.max_speed * 0.1
+
+
+## Aim wins over movement so the character faces where it will attack.
+func update_facing() -> void:
+	var want := input.aim if input.aim != Vector2.ZERO else input.move
+	if want != Vector2.ZERO:
+		face(want)
+
+
+func face(direction: Vector2) -> void:
+	if direction == Vector2.ZERO:
+		return
+	var n := direction.normalized()
+	if not n.is_equal_approx(facing):
+		facing = n
+		facing_changed.emit(facing)
+
+
+func aim_direction() -> Vector2:
+	if input.aim != Vector2.ZERO:
+		return input.aim
+	if input.move != Vector2.ZERO:
+		return input.move.normalized()
+	return facing
+
+
+func chest_position() -> Vector2:
+	return global_position + Vector2(0.0, -CHEST_HEIGHT)
 
 
 func set_camera_limits(rect: Rect2i) -> void:
@@ -42,33 +112,135 @@ func set_camera_limits(rect: Rect2i) -> void:
 	_camera.limit_bottom = rect.end.y
 
 
-func _apply_movement(move: Vector2, delta: float) -> void:
-	if move != Vector2.ZERO:
-		var target := move.limit_length(1.0) * tuning.max_speed
-		velocity = velocity.move_toward(target, tuning.acceleration * delta)
-	else:
-		velocity = velocity.move_toward(Vector2.ZERO, tuning.friction * delta)
-	move_and_slide()
+# --- actions ------------------------------------------------------------------
+
+## From a free state (Idle/Move): dodge, attack or block, if the input and stamina allow.
+func try_start_action() -> bool:
+	if try_start_attack_or_dodge():
+		return true
+	if input.block_held:
+		states.transition(&"Block")
+		return true
+	return false
 
 
-## Aim wins over movement so the character faces where it will attack (M2).
-func _update_facing() -> void:
-	var want := _input.aim if _input.aim != Vector2.ZERO else _input.move
-	if want != Vector2.ZERO and not want.is_equal_approx(facing):
-		facing = want.normalized()
-		facing_changed.emit(facing)
+func try_start_attack_or_dodge() -> bool:
+	if not stats.can_act():
+		return false
+	if input.consume(&"dodge"):
+		states.transition(&"Dodge")
+		return true
+	if input.consume(&"attack_heavy"):
+		states.transition(&"Attack", {"attack": weapon.heavy})
+		return true
+	if input.consume(&"attack_light"):
+		states.transition(&"Attack", {"attack": weapon.light})
+		return true
+	return false
 
 
-func _update_animation() -> void:
-	var dir_name: StringName
+func make_damage_info(attack: AttackData) -> DamageInfo:
+	var info := DamageInfo.new()
+	info.source = self
+	info.amount = attack_power() * attack.damage_mult
+	info.damage_type = attack.damage_type
+	info.poise_damage = attack.poise_damage
+	info.knockback = attack.knockback
+	info.attack_id = attack.id
+	return info
+
+
+## Base damage before attack multipliers. M3 adds attribute scaling.
+func attack_power() -> float:
+	return weapon.base_damage
+
+
+# --- taking hits --------------------------------------------------------------
+
+## Called by the Hurtbox on the host. Returns a DamageInfo.Result.
+func receive_hit(info: DamageInfo) -> int:
+	var result := states.current.on_hit(info)
+	if result == DamageInfo.Result.IGNORED:
+		return result
+	if result == DamageInfo.Result.PARRIED:
+		_on_parry(info)
+		return result
+	var blocked := result == DamageInfo.Result.BLOCKED
+	var reduction := weapon.block_reduction if blocked else 0.0
+	if blocked:
+		stats.spend_stamina(info.amount * weapon.block_stamina_per_damage)
+	var dmg := DamageCalc.from_info(info, combat.defense, combat.resistances, reduction)
+	stats.take_damage(dmg)
+	EventBus.damage_dealt.emit(info.source, self, dmg, info.damage_type)
+	Fx.text(chest_position() + Vector2(0, -16), str(dmg), BLOCK_COLOR if blocked else HIT_COLOR, self)
+	Flash.hit(sprite, Color.WHITE, 0.15)
+	Fx.spawn(hit_fx, chest_position(), info.direction, self)
+	if stats.is_dead():
+		states.transition(&"Dead")
+		return DamageInfo.Result.HIT
+	if blocked:
+		if stats.exhausted:
+			states.transition(&"Stagger", {"duration": combat.guard_break_duration})
+			HitFeedback.shake(2.0, 0.2)
+		else:
+			velocity = info.direction * info.knockback * 0.4
+		return DamageInfo.Result.BLOCKED
+	states.transition(&"Hurt", {"knockback": info.direction * info.knockback})
+	HitFeedback.hit_stop(0.06)
+	HitFeedback.shake(2.0, 0.15)
+	return DamageInfo.Result.HIT
+
+
+func _on_parry(info: DamageInfo) -> void:
+	states.transition(&"Parry")
+	Fx.spawn(parry_fx, chest_position() - info.direction * 8.0, Vector2.RIGHT, self)
+	HitFeedback.hit_stop(0.12)
+	HitFeedback.shake(3.0, 0.2)
+	if is_instance_valid(info.source) and info.source.has_method(&"on_parried"):
+		info.source.on_parried(self)
+
+
+## Our own attack connected (or was blocked/parried by the target).
+func _on_hit_landed(_target: Node, result: int, _info: DamageInfo) -> void:
+	var attack: AttackData = (states.current as Node).get(&"attack") if states.current_name() == &"Attack" else null
+	match result:
+		DamageInfo.Result.HIT, DamageInfo.Result.BLOCKED:
+			if attack:
+				HitFeedback.hit_stop(attack.hit_stop_ms / 1000.0)
+				HitFeedback.shake(attack.shake, 0.12)
+		DamageInfo.Result.PARRIED:
+			states.transition(&"Stagger", {"duration": combat.parried_stagger_duration})
+
+
+## Rise at the Hearth (STORY_BIBLE 4). Pressure/Scars come with M7.
+func respawn() -> void:
+	global_position = spawn_point
+	velocity = Vector2.ZERO
+	facing = Vector2.DOWN
+	stats.reset()
+	input.clear_buffer()
+	Flash.clear(sprite)
+	states.transition(&"Idle")
+
+
+# --- animation ----------------------------------------------------------------
+
+## Plays "<base>_<down|up|side>" for the current facing; side flips for left.
+func play_directional(base: StringName) -> void:
+	var dir_name: String
 	if absf(facing.x) >= absf(facing.y):
-		dir_name = &"side"
-		_sprite.flip_h = facing.x < 0.0
+		dir_name = "side"
+		sprite.flip_h = facing.x < 0.0
 	else:
-		dir_name = &"up" if facing.y < 0.0 else &"down"
-		_sprite.flip_h = false
-	# Real velocity, not requested: pushing into a wall should play idle, not walk.
-	var moving := get_real_velocity().length() > tuning.max_speed * 0.1
-	var anim := StringName(("walk_" if moving else "idle_") + dir_name)
-	if _sprite.animation != anim:
-		_sprite.play(anim)
+		dir_name = "up" if facing.y < 0.0 else "down"
+		sprite.flip_h = false
+	var anim := StringName("%s_%s" % [base, dir_name])
+	if sprite.animation != anim or not sprite.is_playing():
+		sprite.play(anim)
+
+
+## Plays a non-directional animation from the start (dodge, dead).
+func play_once(anim: StringName, flip: bool) -> void:
+	sprite.flip_h = flip
+	sprite.play(anim)
+	sprite.frame = 0

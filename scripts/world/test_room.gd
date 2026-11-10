@@ -9,10 +9,16 @@ const MAIN_MENU_PATH: String = "res://scenes/ui/main_menu.tscn"
 
 @onready var _tiles: TileMapLayer = $Tiles
 @onready var _entities: Node2D = $Entities
+@onready var _fx_layer: CanvasLayer = $FxLayer
 
 
 func _ready() -> void:
+	_fx_layer.add_to_group(Fx.FX_ROOT_GROUP)
 	var built := RoomBuilder.build(layout, _tiles)
+	for placement in built.placements:
+		var node := (placement["scene"] as PackedScene).instantiate() as Node2D
+		node.position = placement["position"]
+		_entities.add_child(node)
 	if GameState.players.is_empty():
 		GameState.start_solo()  # running the scene directly from the editor
 	var i := 0
@@ -23,6 +29,10 @@ func _ready() -> void:
 		player.position = built.spawns[i % built.spawns.size()] if built.spawns else Vector2.ZERO
 		_entities.add_child(player)
 		player.set_camera_limits(built.bounds)
+		if player.input.is_local():
+			var hud := Hud.new()
+			add_child(hud)
+			hud.bind(player)
 		i += 1
 
 

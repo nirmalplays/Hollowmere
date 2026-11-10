@@ -1,6 +1,5 @@
-extends SceneTree
-## Headless M0 check: godot --headless --path . --script res://tests/m0_smoke.gd
-## Exits non-zero on failure so it can gate commits/CI.
+extends IntegrationTest
+## M0: autoloads, input actions, pixel settings, main menu loads.
 
 const REQUIRED_ACTIONS: Array[StringName] = [
 	&"move_up", &"move_down", &"move_left", &"move_right", &"aim_up", &"aim_down",
@@ -8,24 +7,16 @@ const REQUIRED_ACTIONS: Array[StringName] = [
 	&"sprint", &"spell_1", &"spell_2", &"spell_3", &"spell_4", &"spell_5", &"interact",
 	&"inventory", &"skill_tree", &"map", &"pause", &"ui_debug_overlay",
 ]
-const REQUIRED_AUTOLOADS: Array[String] = ["EventBus", "DataRegistry", "GameState", "NetManager", "SaveManager"]
+const REQUIRED_AUTOLOADS: Array[String] = [
+	"EventBus", "DataRegistry", "GameState", "NetManager", "SaveManager", "HitFeedback", "DebugOverlay",
+]
 
 
-func _initialize() -> void:
-	var failures: Array[String] = []
+func _run() -> void:
 	for action in REQUIRED_ACTIONS:
-		if not InputMap.has_action(action) or InputMap.action_get_events(action).is_empty():
-			failures.append("missing/empty input action: %s" % action)
+		check(InputMap.has_action(action) and not InputMap.action_get_events(action).is_empty(), "input action %s" % action)
 	for autoload_name in REQUIRED_AUTOLOADS:
-		if not ProjectSettings.has_setting("autoload/%s" % autoload_name):
-			failures.append("missing autoload: %s" % autoload_name)
-	if ProjectSettings.get_setting("rendering/textures/canvas_textures/default_texture_filter") != 0:
-		failures.append("default texture filter is not Nearest")
-	if ProjectSettings.get_setting("display/window/size/viewport_width") != 480:
-		failures.append("viewport width is not 480")
-	if load("res://scenes/ui/main_menu.tscn") == null:
-		failures.append("main menu scene failed to load")
-	for f in failures:
-		printerr("FAIL: ", f)
-	print("M0 smoke: %s" % ("FAILED (%d)" % failures.size() if failures else "OK"))
-	quit(1 if failures else 0)
+		check(get_tree().root.has_node(autoload_name), "autoload %s" % autoload_name)
+	check(ProjectSettings.get_setting("rendering/textures/canvas_textures/default_texture_filter") == 0, "Nearest filter")
+	check(ProjectSettings.get_setting("display/window/size/viewport_width") == 480, "viewport 480 wide")
+	check(load("res://scenes/ui/main_menu.tscn") != null, "main menu loads")

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="FxDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/fx/fx_def.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/fx/parry.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+texture = ExtResource("2")
+frame_size = Vector2i(200, 112)
+columns = 5
+frame_count = 31
+fps = 30.0
+anchor = Vector2(100, 66)
+rotates = false
+source_id = "impacts/parry"

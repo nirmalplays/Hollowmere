@@ -11,6 +11,7 @@ const SPAWN := "P"
 class Result:
 	var spawns: Array[Vector2] = []  ## world positions of 'P' cells (tile centers)
 	var bounds: Rect2i  ## room rect in pixels, for camera limits
+	var placements: Array[Dictionary] = []  ## {"scene": PackedScene, "position": Vector2}
 
 
 static func build(layout: RoomLayout, layer: TileMapLayer) -> Result:
@@ -39,6 +40,10 @@ static func build(layout: RoomLayout, layer: TileMapLayer) -> Result:
 				SPAWN:
 					tile_name = "floor_a"
 					result.spawns.append(layer.map_to_local(cell))
+				_:
+					if layout.markers.has(ch):
+						tile_name = "floor_a"
+						result.placements.append({"scene": layout.markers[ch], "position": layer.map_to_local(cell)})
 			if tile_name != "" and tiles.has(tile_name):
 				layer.set_cell(cell, tiles[tile_name].x, tiles[tile_name].y)
 	var ts := layout.tileset.tile_size

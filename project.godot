@@ -18,6 +18,7 @@ DataRegistry="*res://scripts/core/data_registry.gd"
 GameState="*res://scripts/core/game_state.gd"
 NetManager="*res://scripts/core/net_manager.gd"
 SaveManager="*res://scripts/core/save_manager.gd"
+HitFeedback="*res://scripts/core/hit_feedback.gd"
 DebugOverlay="*res://scripts/ui/debug_overlay.gd"
 
 [display]

@@ -1,12 +1,41 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=30 format=3]
 
 [ext_resource type="Script" path="res://scripts/entities/player.gd" id="1"]
 [ext_resource type="Resource" path="res://data/tuning/player_movement.tres" id="2"]
 [ext_resource type="Resource" path="res://data/sprites/unlaid.tres" id="3"]
 [ext_resource type="Script" path="res://scripts/entities/player_input.gd" id="4"]
+[ext_resource type="Resource" path="res://data/combat/player_combat.tres" id="5"]
+[ext_resource type="Resource" path="res://data/items/weapons/rusted_blade.tres" id="6"]
+[ext_resource type="Resource" path="res://data/fx/hit_spark.tres" id="7"]
+[ext_resource type="Resource" path="res://data/fx/parry.tres" id="8"]
+[ext_resource type="Script" path="res://scripts/systems/combat/combat_stats.gd" id="9"]
+[ext_resource type="Script" path="res://scripts/entities/player_states/player_state_machine.gd" id="10"]
+[ext_resource type="Script" path="res://scripts/entities/player_states/idle.gd" id="11"]
+[ext_resource type="Script" path="res://scripts/entities/player_states/move.gd" id="12"]
+[ext_resource type="Script" path="res://scripts/entities/player_states/attack.gd" id="13"]
+[ext_resource type="Script" path="res://scripts/entities/player_states/dodge.gd" id="14"]
+[ext_resource type="Script" path="res://scripts/entities/player_states/block.gd" id="15"]
+[ext_resource type="Script" path="res://scripts/entities/player_states/parry.gd" id="16"]
+[ext_resource type="Script" path="res://scripts/entities/player_states/hurt.gd" id="17"]
+[ext_resource type="Script" path="res://scripts/entities/player_states/stagger.gd" id="18"]
+[ext_resource type="Script" path="res://scripts/entities/player_states/dead.gd" id="19"]
+[ext_resource type="Shader" path="res://assets/shaders/flash.gdshader" id="20"]
+[ext_resource type="Script" path="res://scripts/systems/combat/hitbox.gd" id="21"]
+[ext_resource type="Script" path="res://scripts/systems/combat/hurtbox.gd" id="22"]
+[ext_resource type="Script" path="res://scripts/systems/fx/camera_shake.gd" id="23"]
+
+[sub_resource type="ShaderMaterial" id="flash"]
+resource_local_to_scene = true
+shader = ExtResource("20")
+shader_parameter/flash_color = Color(1, 1, 1, 1)
+shader_parameter/flash_amount = 0.0
 
 [sub_resource type="CircleShape2D" id="feet"]
 radius = 4.0
+
+[sub_resource type="CapsuleShape2D" id="body"]
+radius = 5.0
+height = 18.0
 
 [sub_resource type="Gradient" id="light_gradient"]
 offsets = PackedFloat32Array(0, 0.55, 1)
@@ -22,19 +51,67 @@ fill_to = Vector2(1, 0.5)
 
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 2
-collision_mask = 1
+collision_mask = 5
 motion_mode = 1
 script = ExtResource("1")
 tuning = ExtResource("2")
+combat = ExtResource("5")
 sprite_sheet = ExtResource("3")
+weapon = ExtResource("6")
+hit_fx = ExtResource("7")
+parry_fx = ExtResource("8")
 
 [node name="Input" type="Node" parent="."]
 script = ExtResource("4")
 
+[node name="Stats" type="Node" parent="."]
+script = ExtResource("9")
+
+[node name="States" type="Node" parent="."]
+script = ExtResource("10")
+
+[node name="Idle" type="Node" parent="States"]
+script = ExtResource("11")
+
+[node name="Move" type="Node" parent="States"]
+script = ExtResource("12")
+
+[node name="Attack" type="Node" parent="States"]
+script = ExtResource("13")
+
+[node name="Dodge" type="Node" parent="States"]
+script = ExtResource("14")
+
+[node name="Block" type="Node" parent="States"]
+script = ExtResource("15")
+
+[node name="Parry" type="Node" parent="States"]
+script = ExtResource("16")
+
+[node name="Hurt" type="Node" parent="States"]
+script = ExtResource("17")
+
+[node name="Stagger" type="Node" parent="States"]
+script = ExtResource("18")
+
+[node name="Dead" type="Node" parent="States"]
+script = ExtResource("19")
+
 [node name="Sprite" type="AnimatedSprite2D" parent="."]
+material = SubResource("flash")
 
 [node name="Collision" type="CollisionShape2D" parent="."]
 shape = SubResource("feet")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+script = ExtResource("22")
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(0, -10)
+shape = SubResource("body")
+
+[node name="Hitbox" type="Area2D" parent="."]
+script = ExtResource("21")
 
 [node name="Lantern" type="PointLight2D" parent="."]
 position = Vector2(4, -6)
@@ -45,3 +122,4 @@ texture = SubResource("light_texture")
 [node name="Camera" type="Camera2D" parent="."]
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
+script = ExtResource("23")
