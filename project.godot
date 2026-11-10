@@ -9,7 +9,7 @@ config_version=5
 config/name="Hollowmere"
 config/description="Pixel-art Souls-lite action RPG. TODO_STORY: working title."
 run/main_scene="res://scenes/ui/main_menu.tscn"
-config/features=PackedStringArray("4.3", "GL Compatibility")
+config/features=PackedStringArray("4.3", "Forward Plus")
 
 [autoload]
 
@@ -23,11 +23,11 @@ DebugOverlay="*res://scripts/ui/debug_overlay.gd"
 
 [display]
 
-window/size/viewport_width=480
-window/size/viewport_height=270
-window/size/window_width_override=1440
-window/size/window_height_override=810
-window/stretch/mode="canvas_items"
+window/size/viewport_width=640
+window/size/viewport_height=360
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="viewport"
 window/stretch/aspect="keep"
 window/stretch/scale_mode="integer"
 
@@ -42,8 +42,6 @@ window/stretch/scale_mode="integer"
 
 [rendering]
 
-renderer/rendering_method="gl_compatibility"
-renderer/rendering_method.mobile="gl_compatibility"
 textures/canvas_textures/default_texture_filter=0
 2d/snap/snap_2d_transforms_to_pixel=true
 2d/snap/snap_2d_vertices_to_pixel=true
