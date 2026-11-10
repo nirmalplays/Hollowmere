@@ -15,7 +15,12 @@ func physics_update(delta: float) -> void:
 		player.stats.spend_stamina(player.combat.sprint_stamina_per_sec * delta)
 	player.move_with_input(delta, player.combat.sprint_mult if _sprinting else 1.0)
 	player.update_facing()
-	player.play_directional(&"walk" if player.is_moving() else &"idle")
+	if player.is_moving():
+		# Stride follows real speed, so feet don't slide when slowed or sprinting.
+		var ratio := player.get_real_velocity().length() / player.tuning.max_speed
+		player.play_directional(&"walk", clampf(ratio, 0.6, 1.6))
+	else:
+		player.play_directional(&"idle")
 
 
 func exit() -> void:

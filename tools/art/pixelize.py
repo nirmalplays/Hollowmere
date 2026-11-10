@@ -9,7 +9,7 @@ produce is listed in ASSETS.md with its license.
 """
 import os
 
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageEnhance, ImageFilter
 
 SOURCES = os.environ.get(
     "HOLLOWMERE_SOURCES",
@@ -18,6 +18,25 @@ SOURCES = os.environ.get(
 )
 
 OUTLINE = (26, 20, 32, 255)
+
+
+def remove_shadows(img, alpha_max=240, lum_max=95):
+    """Drop baked drop-shadows from rendered art: they are dark and semi-transparent,
+    while the objects themselves are opaque. The game draws its own soft shadows."""
+    px = img.load()
+    for y in range(img.height):
+        for x in range(img.width):
+            r, g, b, a = px[x, y]
+            if 0 < a < alpha_max and (r * 299 + g * 587 + b * 114) / 1000 < lum_max:
+                px[x, y] = (0, 0, 0, 0)
+    return img
+
+
+def sharpen(img, amount=160):
+    rgb = img.convert("RGB").filter(ImageFilter.UnsharpMask(radius=2, percent=amount, threshold=2))
+    out = rgb.convert("RGBA")
+    out.putalpha(img.getchannel("A"))
+    return out
 
 
 def enhance(img, color=1.3, contrast=1.15, brightness=1.05):
@@ -94,8 +113,10 @@ def outline(img, color=OUTLINE):
     return out
 
 
-def pixelize_one(img, scale, palette=None, with_outline=True, **enhance_args):
-    small = alpha_cut(downscale(enhance(img, **enhance_args), scale))
+def pixelize_one(img, scale, palette=None, with_outline=True, shadows=False, **enhance_args):
+    if not shadows:
+        img = remove_shadows(img.copy())
+    small = alpha_cut(downscale(sharpen(enhance(img, **enhance_args)), scale))
     small = apply_palette(small, palette)
     return outline(small) if with_outline else small
 

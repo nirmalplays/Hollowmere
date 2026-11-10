@@ -9,10 +9,10 @@
 [resource]
 script = ExtResource("1")
 textures = Array[Texture2D]([ExtResource("t0"), ExtResource("t1"), ExtResource("t2"), ExtResource("t3")])
-base_inset = 4
-collision_radius = 6.0
+base_inset = 2
 jitter = 0.0
 flip_randomly = true
+footprints = Array[PackedVector2Array]([PackedVector2Array(18.6, -8.0, 16.1, -4.0, 9.1, -1.1, -0.5, 0.0, -10.1, -1.1, -17.1, -4.0, -19.6, -8.0, -17.1, -12.0, -10.1, -15.0, -0.5, -16.1, 9.1, -15.0, 16.1, -12.0), PackedVector2Array(17.3, -7.5, 15.0, -3.7, 8.4, -1.0, -0.5, 0.0, -9.4, -1.0, -16.0, -3.7, -18.3, -7.5, -16.0, -11.2, -9.4, -14.0, -0.5, -15.0, 8.4, -14.0, 15.0, -11.2), PackedVector2Array(18.6, -8.0, 16.1, -4.0, 9.1, -1.1, -0.5, 0.0, -10.1, -1.1, -17.1, -4.0, -19.6, -8.0, -17.1, -12.0, -10.1, -15.0, -0.5, -16.1, 9.1, -15.0, 16.1, -12.0), PackedVector2Array(17.3, -7.5, 15.0, -3.7, 8.4, -1.0, -0.5, 0.0, -9.4, -1.0, -16.0, -3.7, -18.3, -7.5, -16.0, -11.2, -9.4, -14.0, -0.5, -15.0, 8.4, -14.0, 15.0, -11.2)])
 light_color = Color(1.0, 0.62, 0.3, 1)
 light_energy = 1.6
 light_scale = 1.3

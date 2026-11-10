@@ -42,6 +42,10 @@ static func build(layout: IsoRoomLayout, ground_layer: TileMapLayer, raised_laye
 			elif ch == SPAWN:
 				result.spawns.append(at)
 	result.bounds = Rect2i(Rect2(min_p - Vector2(16, 24), max_p - min_p + Vector2(32, 40)))
+	var width := 0
+	for line in grid:
+		width = maxi(width, line.length())
+	add_boundary(ground_layer, Vector2i(width, grid.size()), props_parent)
 	return result
 
 
@@ -58,25 +62,31 @@ static func _pick(options: Variant, rng: RandomNumberGenerator) -> String:
 static func _place_prop(def: PropDef, at: Vector2, rng: RandomNumberGenerator, parent: Node2D) -> void:
 	if def.textures.is_empty():
 		return
-	var prop := StaticBody2D.new()
-	prop.collision_layer = Const.LAYER_WORLD
+	var prop := Prop.new()
 	prop.position = at + Vector2(rng.randf_range(-def.jitter, def.jitter), rng.randf_range(-def.jitter, def.jitter) * 0.5)
-	var tex: Texture2D = def.textures[rng.randi() % def.textures.size()]
-	var sprite := Sprite2D.new()
-	sprite.texture = tex
-	sprite.centered = false
-	sprite.offset = Vector2(-tex.get_width() / 2.0, -tex.get_height() + def.base_inset)
-	sprite.flip_h = def.flip_randomly and rng.randf() < 0.5
-	prop.add_child(sprite)
-	if def.collision_radius > 0.0:
-		var shape := CollisionShape2D.new()
-		var circle := CircleShape2D.new()
-		circle.radius = def.collision_radius
-		shape.shape = circle
-		prop.add_child(shape)
-	if def.light_color.a > 0.0:
-		prop.add_child(make_light(def.light_color, def.light_energy, def.light_scale, Vector2(0, -def.light_height)))
+	prop.setup(def, rng.randi() % def.textures.size(), def.flip_randomly and rng.randf() < 0.5)
 	parent.add_child(prop)
+
+
+## Invisible walls exactly on the map's outer diamond, so nothing walks off the world.
+static func add_boundary(layer: TileMapLayer, size: Vector2i, parent: Node) -> void:
+	var half := Vector2(layer.tile_set.tile_size) * 0.5
+	var corners: Array[Vector2] = [
+		layer.map_to_local(Vector2i(0, 0)) + Vector2(0, -half.y),
+		layer.map_to_local(Vector2i(size.x - 1, 0)) + Vector2(half.x, 0),
+		layer.map_to_local(Vector2i(size.x - 1, size.y - 1)) + Vector2(0, half.y),
+		layer.map_to_local(Vector2i(0, size.y - 1)) + Vector2(-half.x, 0),
+	]
+	var body := StaticBody2D.new()
+	body.collision_layer = Const.LAYER_WORLD
+	for i in 4:
+		var seg := SegmentShape2D.new()
+		seg.a = corners[i]
+		seg.b = corners[(i + 1) % 4]
+		var shape := CollisionShape2D.new()
+		shape.shape = seg
+		body.add_child(shape)
+	parent.add_child(body)
 
 
 static var _light_texture: Texture2D

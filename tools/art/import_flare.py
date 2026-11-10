@@ -20,7 +20,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pixelize import SOURCES, apply_palette, build_palette, outline  # noqa: E402
-from pixelize import alpha_cut, downscale, enhance  # noqa: E402
+from pixelize import alpha_cut, downscale, enhance, remove_shadows, sharpen  # noqa: E402
 
 PROJECT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 FLARE = os.path.join(SOURCES, "flare-game", "mods", "fantasycore")
@@ -50,18 +50,21 @@ CHARACTERS = {
             "off": "avatar/male/buckler",
         },
         "tints": {"head": (0.55, 0.68, 1.0)},  # slate-blue hood, the Unlaid's colour
-        "scale": 0.32, "colors": 40, "frame": (64, 64), "brightness": 1.3,
+        "scale": 0.34, "colors": 48, "frame": (64, 64),
+        "look": {"brightness": 1.45, "contrast": 1.3, "color": 1.35},
     },
     # A Hollowed husk for the training ground (Flare's weak skeleton).
     "hollow_husk": {
         "layers": {"body": "enemies/skeleton_weak"},
         "tints": {"body": (0.78, 0.84, 0.92)},  # ash-pale: the Hollow drains colour
         "scale": 0.27, "colors": 28, "frame": (64, 64), "feet_margin": 14,
+        "look": {"brightness": 1.2, "contrast": 1.25, "color": 1.1},
     },
     "hollowed_zombie": {
         "layers": {"body": "enemies/zombie"},
         "tints": {"body": (0.62, 0.72, 0.74)},
         "scale": 0.3, "colors": 28, "frame": (64, 64),
+        "look": {"brightness": 1.3, "contrast": 1.25, "color": 1.1},
     },
 }
 
@@ -155,7 +158,8 @@ def build(name, spec, order):
             fd = FLARE_DIRS.index(d_name)
             frames = []
             for i in seq:
-                big = enhance(compose(layers, order, section, i, fd), brightness=spec.get("brightness", 1.1))
+                look = spec.get("look", {})
+                big = sharpen(enhance(remove_shadows(compose(layers, order, section, i, fd)), **look), 200)
                 small = alpha_cut(downscale(big, scale))
                 cell = Image.new("RGBA", (fw, fh))
                 cell.alpha_composite(small, (fw // 2 - feet_s[0], fh - margin - feet_s[1]))

@@ -40,6 +40,7 @@ const WINDUP_FRAMES: int = 2
 
 func _ready() -> void:
 	add_to_group(&"enemies")
+	add_child(Prop.make_shadow(0.55))  # soft ground shadow under the feet
 	sprite.sprite_frames = SpriteFramesBuilder.build(data.sprite_sheet)
 	sprite.offset = data.sprite_sheet.foot_offset()
 	hitbox.hit_landed.connect(_on_hit_landed)

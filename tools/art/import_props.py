@@ -19,12 +19,12 @@ PROJECT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__
 OGA = os.path.join(SOURCES, "oga")
 OUT = os.path.join(PROJECT, "assets", "art")
 
-# (group, sheet, cell w, cell h, scale, colours) -- every non-empty cell becomes a sprite.
+# (group, sheet, cell w, cell h, scale, colours, look) -- every non-empty cell becomes a sprite.
 GRID_SHEETS = [
-    ("trees", "trees_01.png", 384, 768, 0.25, 32),  # Isometric Trees (CC0)
-    ("props_small", "props/props_1x1.png", 128, 128, 0.32, 24),  # Isometric Props and Tents (CC0)
-    ("props_medium", "props/props_2x2.png", 256, 256, 0.32, 24),
-    ("props_large", "props/props_4x4.png", 512, 512, 0.32, 24),
+    ("trees", "trees_01.png", 384, 768, 0.25, 32, {"color": 0.95, "contrast": 1.15, "brightness": 1.0}),  # Isometric Trees (CC0)
+    ("props_small", "props/props_1x1.png", 128, 128, 0.32, 24, {}),  # Isometric Props and Tents (CC0)
+    ("props_medium", "props/props_2x2.png", 256, 256, 0.32, 24, {}),
+    ("props_large", "props/props_4x4.png", 512, 512, 0.32, 24, {}),
 ]
 RUINS_SCALE = 0.4  # Isometric - Dark Ruins (CC0), one piece per file
 
@@ -59,12 +59,12 @@ def cells(sheet, cw, ch):
                 yield r, c, cell
 
 
-def import_grid(group, rel, cw, ch, scale, colours):
+def import_grid(group, rel, cw, ch, scale, colours, look):
     sheet = Image.open(os.path.join(OGA, rel)).convert("RGBA")
     found = list(cells(sheet, cw, ch))
-    palette = build_palette([pixelize_one(cell, scale, None, False) for _, _, cell in found[::4]], colours)
+    palette = build_palette([pixelize_one(cell, scale, None, False, **look) for _, _, cell in found[::4]], colours)
     for r, c, cell in found:
-        save(trim(pixelize_one(cell, scale, palette), 1), f"props/{group}/{group}_r{r:02d}c{c:02d}.png")
+        save(trim(pixelize_one(cell, scale, palette, **look), 1), f"props/{group}/{group}_r{r:02d}c{c:02d}.png")
     print(group, len(found), "sprites")
 
 
@@ -79,6 +79,12 @@ def import_ruins():
 
 
 def main():
+    only = sys.argv[1:]
+    if only:
+        for args in GRID_SHEETS:
+            if args[0] in only:
+                import_grid(*args)
+        return
     for src, dst in COPY:
         path = os.path.join(OUT, dst)
         os.makedirs(os.path.dirname(path), exist_ok=True)

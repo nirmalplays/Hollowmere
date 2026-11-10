@@ -33,6 +33,7 @@ var spawn_point: Vector2 = Vector2.ZERO  ## the Hearth this player rises at
 
 func _ready() -> void:
 	add_to_group(&"players")
+	add_child(Prop.make_shadow(0.55))  # soft ground shadow under the feet
 	set_multiplayer_authority(peer_id)
 	spawn_point = global_position
 	sprite.sprite_frames = SpriteFramesBuilder.build(sprite_sheet)

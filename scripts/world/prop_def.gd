@@ -6,8 +6,10 @@ extends Resource
 @export var textures: Array[Texture2D] = []
 ## Pixels between the texture's bottom edge and where it touches the ground.
 @export var base_inset: int = 2
-## Blocks movement within this radius of its base (0 = walk-through decoration).
-@export var collision_radius: float = 0.0
+## Collision outline per texture (same order as `textures`), in node space where
+## (0, 0) is where the prop meets the ground. Computed from the sprite's pixels by
+## tools/levels/build_*.py. Empty = walk-through decoration.
+@export var footprints: Array[PackedVector2Array] = []
 ## Random offset in pixels so rows of props don't look gridded.
 @export var jitter: float = 5.0
 @export var flip_randomly: bool = true

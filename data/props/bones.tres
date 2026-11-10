@@ -13,6 +13,5 @@
 script = ExtResource("1")
 textures = Array[Texture2D]([ExtResource("t0"), ExtResource("t1"), ExtResource("t2"), ExtResource("t3"), ExtResource("t4"), ExtResource("t5"), ExtResource("t6")])
 base_inset = 1
-collision_radius = 0.0
 jitter = 6.0
 flip_randomly = true

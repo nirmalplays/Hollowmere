@@ -14,25 +14,70 @@ import random
 PROJECT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 N = 40
 
-# Prop defs: name -> (texture paths, base_inset, collision radius, jitter, light (r,g,b,energy,scale,height) or None)
+# Prop defs: name -> (texture paths, base_inset, footprint mode, jitter, light (r,g,b,energy,scale,height) or None)
+# Footprint modes (collision shape computed from the sprite's pixels, see footprint()):
+#   trunk   - a small ellipse round the base (trees, posts)
+#   band    - a strip along the bottom contour (walls, gates, rubble lines)
+#   ellipse - the whole base as an ellipse (shrines, tents, fire pits)
+#   none    - walk-through decoration
 PROP_DIR = "res://assets/art/props/"
 PROPS = {
-    "tree_green": ([f"trees/trees_r{r:02d}c{c:02d}.png" for r in (0, 2, 6) for c in range(10)], 10, 7.0, 6.0, None),
-    "tree_dead": ([f"trees/trees_r{r:02d}c{c:02d}.png" for r in (8, 10) for c in range(10)], 8, 4.0, 6.0, None),
-    "ruin_shrine": (["ruins/ruin_01.png"], 30, 0.0, 0.0, (0.55, 0.8, 1.0, 1.4, 1.6, 20)),
-    "ruin_gate": (["ruins/ruin_06.png", "ruins/ruin_08.png"], 8, 0.0, 0.0, None),
-    "ruin_pillar": (["ruins/ruin_07.png", "ruins/ruin_09.png"], 6, 5.0, 2.0, None),
-    "ruin_rubble": ([f"ruins/ruin_{i:02d}.png" for i in (10, 11, 12, 13)], 4, 6.0, 4.0, None),
-    "ruin_wall": ([f"ruins/ruin_{i:02d}.png" for i in (14, 15, 16)], 6, 0.0, 0.0, None),
-    "campfire": ([f"props_medium/props_medium_r03c{c:02d}.png" for c in (2, 3, 4, 5)], 4, 6.0, 0.0, (1.0, 0.62, 0.3, 1.6, 1.3, 6)),
-    "cauldron": ([f"props_medium/props_medium_r04c{c:02d}.png" for c in range(6)], 4, 6.0, 2.0, None),
-    "tent": ([f"props_medium/props_medium_r00c{c:02d}.png" for c in range(8)], 10, 14.0, 0.0, None),
-    "crates": ([f"props_small/props_small_r05c{c:02d}.png" for c in range(16)], 3, 5.0, 4.0, None),
+    "tree_green": ([f"trees/trees_r{r:02d}c{c:02d}.png" for r in (0, 2, 6) for c in range(10)], 2, "trunk", 6.0, None),
+    "tree_dead": ([f"trees/trees_r{r:02d}c{c:02d}.png" for r in (8, 10) for c in range(10)], 2, "trunk", 6.0, None),
+    "ruin_shrine": (["ruins/ruin_01.png"], 2, "ellipse", 0.0, (0.55, 0.8, 1.0, 1.4, 1.6, 20)),
+    "ruin_gate": (["ruins/ruin_06.png", "ruins/ruin_08.png"], 2, "band", 0.0, None),
+    "ruin_pillar": (["ruins/ruin_07.png", "ruins/ruin_09.png"], 2, "band", 2.0, None),
+    "ruin_rubble": ([f"ruins/ruin_{i:02d}.png" for i in (10, 11, 12, 13)], 2, "band", 4.0, None),
+    "ruin_wall": ([f"ruins/ruin_{i:02d}.png" for i in (14, 15, 16)], 2, "band", 0.0, None),
+    "campfire": ([f"props_medium/props_medium_r03c{c:02d}.png" for c in (2, 3, 4, 5)], 2, "ellipse", 0.0, (1.0, 0.62, 0.3, 1.6, 1.3, 6)),
+    "cauldron": ([f"props_medium/props_medium_r04c{c:02d}.png" for c in range(6)], 2, "trunk", 2.0, None),
+    "tent": ([f"props_medium/props_medium_r00c{c:02d}.png" for c in range(8)], 2, "ellipse", 0.0, None),
+    "crates": ([f"props_small/props_small_r05c{c:02d}.png" for c in range(16)], 2, "ellipse", 4.0, None),
     "stump": (["props_small/props_small_r02c14.png", "props_small/props_small_r02c15.png"]
-              + [f"props_small/props_small_r03c{c:02d}.png" for c in range(12)], 2, 4.0, 5.0, None),
-    "bones": ([f"props_small/props_small_r07c{c:02d}.png" for c in range(7)], 1, 0.0, 6.0, None),
-    "stakes": ([f"props_small/props_small_r01c{c:02d}.png" for c in range(16)], 3, 0.0, 4.0, None),
+              + [f"props_small/props_small_r03c{c:02d}.png" for c in range(12)], 2, "ellipse", 5.0, None),
+    "bones": ([f"props_small/props_small_r07c{c:02d}.png" for c in range(7)], 1, "none", 6.0, None),
+    "stakes": ([f"props_small/props_small_r01c{c:02d}.png" for c in range(16)], 2, "band", 4.0, None),
 }
+
+BAND_THICKNESS = 9  # px of wall "depth" behind the bottom contour
+
+
+def _ellipse(cx, cy, w, h, n=10):
+    import math as m
+    return [(cx + w / 2 * m.cos(2 * m.pi * i / n), cy + h / 2 * m.sin(2 * m.pi * i / n)) for i in range(n)]
+
+
+def footprint(path, mode, inset):
+    """Collision polygon in node space (origin = where the prop meets the ground)."""
+    from PIL import Image
+    img = Image.open(path).convert("RGBA")
+    w, h = img.size
+    a = img.getchannel("A").load()
+    rows = [y for y in range(h) if any(a[x, y] for x in range(w))]
+    if mode == "none" or not rows:
+        return None
+    yb = rows[-1]
+    ox, oy = w / 2.0, h - inset
+    if mode == "trunk":
+        xs = [x for x in range(w) for y in range(max(0, yb - 3), yb + 1) if a[x, y]]
+        cx = (min(xs) + max(xs)) / 2.0
+        tw = max(7.0, min(16.0, max(xs) - min(xs) + 3.0))
+        pts = _ellipse(cx, yb - tw / 4.0, tw, tw / 2.0, 8)
+    elif mode == "ellipse":
+        cols = [x for x in range(w) if any(a[x, y] for y in range(h))]
+        bw = (max(cols) - min(cols)) * 0.85
+        pts = _ellipse((max(cols) + min(cols)) / 2.0, yb - bw * 0.21, bw, bw * 0.42, 12)
+    else:  # band: follow the bottom contour, BAND_THICKNESS deep
+        lower = []
+        for x in range(0, w, 3):
+            ys = [y for y in range(h) if a[x, y]]
+            if ys:
+                lower.append((x, max(ys[-1], yb - 28)))
+        if len(lower) < 2:
+            return None
+        pts = lower + [(x, y - BAND_THICKNESS) for x, y in reversed(lower)]
+    return [(round(x - ox, 1), round(y - oy, 1)) for x, y in pts]
+
 
 LEGEND_PROPS = {"T": "tree_green", "X": "tree_dead", "R": "ruin_shrine", "G": "ruin_gate", "I": "ruin_pillar",
                 "r": "ruin_rubble", "L": "ruin_wall", "F": "campfire", "C": "cauldron", "N": "tent",
@@ -111,16 +156,20 @@ def make_layout():
 def write_prop_defs():
     out_dir = os.path.join(PROJECT, "data", "props")
     os.makedirs(out_dir, exist_ok=True)
-    for name, (textures, inset, radius, jitter, light) in PROPS.items():
+    for name, (textures, inset, mode, jitter, light) in PROPS.items():
         textures = [t for t in textures if os.path.exists(os.path.join(PROJECT, "assets", "art", "props", t))]
+        prints = [footprint(os.path.join(PROJECT, "assets", "art", "props", t), mode, inset) for t in textures]
         lines = [f'[gd_resource type="Resource" script_class="PropDef" load_steps={2 + len(textures)} format=3]', "",
                  '[ext_resource type="Script" path="res://scripts/world/prop_def.gd" id="1"]']
         for i, t in enumerate(textures):
             lines.append(f'[ext_resource type="Texture2D" path="{PROP_DIR}{t}" id="t{i}"]')
         refs = ", ".join(f'ExtResource("t{i}")' for i in range(len(textures)))
         lines += ["", "[resource]", 'script = ExtResource("1")', f"textures = Array[Texture2D]([{refs}])",
-                  f"base_inset = {inset}", f"collision_radius = {radius}", f"jitter = {jitter}",
+                  f"base_inset = {inset}", f"jitter = {jitter}",
                   f"flip_randomly = {'false' if name.startswith('ruin') else 'true'}"]
+        if all(prints):
+            polys = ", ".join("PackedVector2Array(" + ", ".join(f"{x}, {y}" for x, y in p) + ")" for p in prints)
+            lines.append(f"footprints = Array[PackedVector2Array]([{polys}])")
         if light:
             r, g, b, energy, scale, height = light
             lines += [f"light_color = Color({r}, {g}, {b}, 1)", f"light_energy = {energy}",
