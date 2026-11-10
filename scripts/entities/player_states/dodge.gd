@@ -4,7 +4,7 @@ extends PlayerState
 ## The body turns ghostly during i-frames so the safe window is readable.
 
 const IFRAME_ALPHA: float = 0.55
-const ANIM_SPEED: float = 2.2  ## the run cycle, sped up into a dash
+const ANIM_SPEED: float = 1.8  ## the run cycle, sped up into a dash
 
 var _dir: Vector2 = Vector2.DOWN
 
@@ -15,7 +15,7 @@ func enter(_msg: Dictionary) -> void:
 	_dir = move.normalized() if move != Vector2.ZERO else -player.facing
 	if move != Vector2.ZERO:
 		player.face(_dir)
-	player.play_directional(&"walk", ANIM_SPEED, true)
+	player.play_directional(&"run", ANIM_SPEED, true)
 	player.sprite.modulate.a = IFRAME_ALPHA
 
 

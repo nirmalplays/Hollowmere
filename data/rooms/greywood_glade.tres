@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="IsoRoomLayout" load_steps=18 format=3]
+[gd_resource type="Resource" script_class="IsoRoomLayout" load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/iso_room_layout.gd" id="1"]
 [ext_resource type="TileSet" path="res://assets/art/tiles/greywood_iso.tres" id="2"]
@@ -7,6 +7,8 @@
 [ext_resource type="Resource" path="res://data/props/campfire.tres" id="p_campfire"]
 [ext_resource type="Resource" path="res://data/props/cauldron.tres" id="p_cauldron"]
 [ext_resource type="Resource" path="res://data/props/crates.tres" id="p_crates"]
+[ext_resource type="Resource" path="res://data/props/grass_tuft.tres" id="p_grass_tuft"]
+[ext_resource type="Resource" path="res://data/props/rock.tres" id="p_rock"]
 [ext_resource type="Resource" path="res://data/props/ruin_gate.tres" id="p_ruin_gate"]
 [ext_resource type="Resource" path="res://data/props/ruin_pillar.tres" id="p_ruin_pillar"]
 [ext_resource type="Resource" path="res://data/props/ruin_rubble.tres" id="p_ruin_rubble"]
@@ -22,49 +24,49 @@
 script = ExtResource("1")
 rows = "XTTXTTXTTTXXXTTXTTTTXXTTTTTTTTTTTTTTTTTT
 TXXXXXXTTTXTXXTTTTXXXTTTTTTTTTTTTTTTTTTT
-XTTT,TTXTXT,XTTXXXXT..T.T.T.TTTTTTTT.TTT
-TXT.T...X...X,T.TXXTT.T...TTT.,..,....TT
-TT.......###.......,.,........,.......TT
-TXT....#######...b.......,,.,....,..T.TT
-XXX...#########s.......,.............TTT
-TTX..###########,.,.........~~~.,s...TTT
-TTX..###########.....,....~~~~~~~....,TT
-XXX.,###########.........~~~~~~~~~..TTTT
-TX..,.##########,,b......~~~~~~~~~..,TTT
-TXT...,#######...........~~~~~~~~~....TT
-XTT.....,.###,..,.........~~~~~~~...T.TT
-TTX....,.,.....,..,.....r...~~~,...,.TTT
-TXT......,...............,,...,s,,...TTT
-XXTX........,...I.........I..,..,...TTTT
-XTX...b.......................,.....,TTT
-TXT,..X.X...........................TTTT
-TXX..,.,..b,X..,,....R...............TTT
-XT......,.,.X,.L........s.,...,..,....TT
-TX,..X....,..b..,...........,.......TTTT
-XTTT........,X,.........==,.........TTTT
-TTT...,X..,b.b....===..===I=....,....TTT
-TTTT.X..X..X.....r==....,====.......TTTT
-TTTT.....X.,,...===........====.....TTTT
-TT....,....,...===,.........=====.,.TTTT
-TTT....,,.....===.............====...TTT
-TT.T.........===.G....,....,....==..TTTT
-TTT.,.......==D................N....TTTT
-TTT...,....===......,.....,N.....s,..,TT
-TTT....,..===.,,.............F..,....TTT
-TTT......P=.........,...,.......B....TTT
-TTT,....,..,..,...........B...C...,,..TT
-TTT........,..,..........,..k....,..TTTT
-TTT....,......................,.....TTTT
-TTT.,................................TTT
-TTTT,...TT..T......T.TTT.....T,TT.T,.TTT
-TTT.TTT.TTT.TT.TTTTTTTTTTTTTT.TTT..T.TTT
+XTTT,TTXTXT,XTTXXXXT..T.T.TgTTTTTTTT.TTT
+TXT.T.ggX.ggX,T.TXXTT.T...TTTg,..,....TT
+TT.....g.###.......,.,g.......,.......TT
+TXT....#######gg.b.......,,.,...g,..T.TT
+XXXg..#########sg....og,...g..g......TTT
+TTX..###########,.,......g..~~~.,sg.gTTT
+TTX..###########....g,g...~~~~~~~.g..,TT
+XXX.,###########....g.o..~~~~~~~~~..TTTT
+TX..,g##########,,b.gg..g~~~~~~~~~..,TTT
+TXTg..,#######.g....g....~~~~~~~~~....TT
+XTT.....,.###,..,..g.g..g.~~~~~~~..gT.TT
+TTXg...,.,.....,g.,..g..r...~~~,g..,.TTT
+TXT.....g,.....g...g.....,,..g,s,,...TTT
+XXTX.....g.g,g.gIg...gg...Ig.,..,..gTTTT
+XTX...b..g.....g.........g.g.g,....g,TTT
+TXT,g.X.X.g.gg..g...g...g......g.gggTTTT
+TXX.g,g,..b,Xgg,,....R......g.....g..TTT
+XT.o....,.,.X,gL........sg,g..,..,...gTT
+TX,..X....,..b.g,......gg...,.g.....TTTT
+XTTT........,X,g........==,....g....TTTT
+TTT.g.,X.g,b.b....===..===I=g.g.,g...TTT
+TTTTgX..X..X.....r==....,====.......TTTT
+TTTT.....X.,,...===.....g..====..g..TTTT
+TT.g..,..g.,...===,g.g..ggg.=====.,.TTTT
+TTT.g..,,g....===.g.....g...g.====..gTTT
+TT.T.ggg.....===.G.g..,....,....==..TTTT
+TTT.,.......==D.g....gog.g...g.N....TTTT
+TTT.gg,..g.===..g.gg,g....,N.....s,..,TT
+TTTgg..,..===.,,g..g...g.....Fg.,..g.TTT
+TTTggg.ggP=..g.gg.g.,g..,g.o....B....TTT
+TTT,.g..,..,..,....g...g..B.g.C.gg,,g.TT
+TTT.g......,..,g.g...ggg.,..kg..g,g.TTTT
+TTT....,....g...g..........g..,..g.gTTTT
+TTTg,.g..g.g.g..gg..g.........g....ggTTT
+TTTT,...TT.gT......T.TTT.....T,TT.T,.TTT
+TTTgTTTgTTT.TTgTTTTTTTTTTTTTT.TTT..TgTTT
 TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
 TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
 "
 tileset = ExtResource("2")
 tile_seed = 5
 ground = {
-".": ["grass_b", "grass_b", "grass_b", "grass_d", "grass_b", "grass_flowers"],
+".": ["grass_b"],
 ",": ["grass_dark_a", "grass_dark_b", "grass_dark_c"],
 "=": ["grass_dark_a", "grass_dark_b", "grass_dark_a", "grass_d"],
 "~": ["water"]
@@ -86,7 +88,9 @@ props = {
 "B": ExtResource("p_crates"),
 "s": ExtResource("p_stump"),
 "b": ExtResource("p_bones"),
-"k": ExtResource("p_stakes")
+"k": ExtResource("p_stakes"),
+"g": ExtResource("p_grass_tuft"),
+"o": ExtResource("p_rock")
 }
 markers = {
 "D": ExtResource("3")

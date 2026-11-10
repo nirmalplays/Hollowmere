@@ -78,6 +78,18 @@ def import_ruins():
     print("ruins", len(pieces), "sprites")
 
 
+def copy_slices(src_dir, dst_group):
+    """Copy a pack's individual PNG slices (native pixel art) as walk-through decals."""
+    folder = os.path.join(OGA, src_dir)
+    out = 0
+    for f in sorted(os.listdir(folder)):
+        if f.lower().endswith(".png"):
+            img = Image.open(os.path.join(folder, f)).convert("RGBA")
+            save(trim(img), f"props/{dst_group}/{dst_group}_{out:02d}.png")
+            out += 1
+    print(dst_group, out, "slices")
+
+
 def main():
     only = sys.argv[1:]
     if only:
@@ -90,6 +102,8 @@ def main():
         os.makedirs(os.path.dirname(path), exist_ok=True)
         shutil.copy(os.path.join(OGA, src), path)
     print("copied", len(COPY), "native pixel files")
+    copy_slices("forest/Forest Isometric Pack Free/Leaves", "kf_grass")
+    copy_slices("forest/Forest Isometric Pack Free/Rocks", "kf_rocks")
     import_ruins()
     for args in GRID_SHEETS:
         import_grid(*args)

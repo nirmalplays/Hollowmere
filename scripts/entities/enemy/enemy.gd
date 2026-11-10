@@ -33,9 +33,8 @@ var _last_attacker: Node
 @onready var marker: TelegraphMarker = $TelegraphMarker
 @onready var _animator := CharacterAnimator.new($Sprite)
 
-## The swing animation's 4 frames: the first half winds up during the telegraph,
-## the second half lands during active + recovery.
-const WINDUP_FRAMES: int = 2
+## The swing animation's first half winds up during the telegraph, the second
+## half lands during active + recovery.
 
 
 func _ready() -> void:
@@ -126,11 +125,12 @@ func _enter(next: State) -> void:
 		State.IDLE:
 			_animator.play(&"idle", facing)
 		State.TELEGRAPH:
-			_play_attack_part(0, WINDUP_FRAMES, _attack.telegraph_ms)
+			_play_attack_part(0, _attack_frames() / 2, _attack.telegraph_ms)
 			marker.show_marker(_attack.aoe_radius)
 			Flash.pulse(sprite, data.telegraph_color, _attack.telegraph_ms / 1000.0, 3, 0.55)
 		State.ACTIVE:
-			_play_attack_part(WINDUP_FRAMES, WINDUP_FRAMES, _attack.active_ms + _attack.recovery_ms)
+			var half := _attack_frames() / 2
+			_play_attack_part(half, _attack_frames() - half, _attack.active_ms + _attack.recovery_ms)
 			_cooldowns[_attack.id] = _attack.cooldown_ms / 1000.0
 			hitbox.shape_circle(_attack.aoe_radius, BODY_HEIGHT * 0.5)
 			hitbox.activate(_make_damage_info(_attack))
@@ -144,6 +144,11 @@ func _enter(next: State) -> void:
 			hurtbox.enabled = false
 			EventBus.enemy_killed.emit(self, _last_attacker)
 	state_changed.emit(next)
+
+
+func _attack_frames() -> int:
+	var anim := StringName("attack_" + CharacterAnimator.dir_name(facing))
+	return sprite.sprite_frames.get_frame_count(anim) if sprite.sprite_frames.has_animation(anim) else 4
 
 
 ## Plays `count` frames of the attack animation starting at `first`, over `ms`.

@@ -58,7 +58,8 @@ func _hides_a_player() -> bool:
 		if player == null or not player.input.is_local():
 			continue
 		var chest := player.global_position + Vector2(0, -Player.CHEST_HEIGHT)
-		if player.global_position.y < global_position.y and rect.grow(-4).has_point(chest):
+		var inner := rect.grow(-4) if rect.size.x > 12.0 and rect.size.y > 12.0 else rect
+		if player.global_position.y < global_position.y and inner.has_point(chest):
 			return true
 	return false
 

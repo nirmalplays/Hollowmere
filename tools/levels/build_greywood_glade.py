@@ -36,6 +36,8 @@ PROPS = {
     "stump": (["props_small/props_small_r02c14.png", "props_small/props_small_r02c15.png"]
               + [f"props_small/props_small_r03c{c:02d}.png" for c in range(12)], 2, "ellipse", 5.0, None),
     "bones": ([f"props_small/props_small_r07c{c:02d}.png" for c in range(7)], 1, "none", 6.0, None),
+    "grass_tuft": ([f"kf_grass/kf_grass_{i:02d}.png" for i in range(17)], 1, "none", 8.0, None),
+    "rock": ([f"kf_rocks/kf_rocks_{i:02d}.png" for i in range(5)], 2, "ellipse", 6.0, None),
     "stakes": ([f"props_small/props_small_r01c{c:02d}.png" for c in range(16)], 2, "band", 4.0, None),
 }
 
@@ -81,7 +83,7 @@ def footprint(path, mode, inset):
 
 LEGEND_PROPS = {"T": "tree_green", "X": "tree_dead", "R": "ruin_shrine", "G": "ruin_gate", "I": "ruin_pillar",
                 "r": "ruin_rubble", "L": "ruin_wall", "F": "campfire", "C": "cauldron", "N": "tent",
-                "B": "crates", "s": "stump", "b": "bones", "k": "stakes"}
+                "B": "crates", "s": "stump", "b": "bones", "k": "stakes", "g": "grass_tuft", "o": "rock"}
 
 
 def make_layout():
@@ -144,11 +146,21 @@ def make_layout():
         x, y = rnd.randint(5, 34), rnd.randint(5, 34)
         if g[y][x] == ".":
             g[y][x] = rnd.choice(["s", "s", "b"])
+    # Ground detail: tufts of grass and the odd rock, so the floor reads as one painted surface.
+    for y in range(N):
+        for x in range(N):
+            if g[y][x] == "." and rnd.random() < 0.22:
+                g[y][x] = "g"
+            elif g[y][x] == "." and rnd.random() < 0.015:
+                g[y][x] = "o"
     # Spawn and the training husk.
     put(9, 31, "P")
     put(14, 28, "D")
     for (x, y) in [(13, 28), (15, 28), (14, 27), (14, 29), (10, 30), (10, 31), (11, 31), (12, 30)]:
         if g[y][x] not in "P=":
+            g[y][x] = "."
+    for (x, y) in [(13, 28), (15, 28), (14, 27), (14, 29), (10, 30), (10, 31), (11, 31), (12, 30)]:
+        if g[y][x] == "o":
             g[y][x] = "."
     return ["".join(r) for r in g]
 
@@ -190,7 +202,7 @@ def write_room(rows):
     props = ",\n".join(f'"{c}": ExtResource("p_{n}")' for c, n in LEGEND_PROPS.items() if n in used)
     lines += ["", "[resource]", 'script = ExtResource("1")', 'rows = "' + "\n".join(rows) + '\n"',
               'tileset = ExtResource("2")', "tile_seed = 5",
-              'ground = {\n".": ["grass_b", "grass_b", "grass_b", "grass_d", "grass_b", "grass_flowers"],\n'
+              'ground = {\n".": ["grass_b"],\n'
               '",": ["grass_dark_a", "grass_dark_b", "grass_dark_c"],\n'
               '"=": ["grass_dark_a", "grass_dark_b", "grass_dark_a", "grass_d"],\n'
               '"~": ["water"]\n}',
