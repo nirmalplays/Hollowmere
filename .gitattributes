@@ -1,0 +1,5 @@
+* text=auto
+*.png binary
+*.tres text eol=lf
+*.tscn text eol=lf
+*.gd text eol=lf
