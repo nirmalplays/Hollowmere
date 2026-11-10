@@ -1,0 +1,60 @@
+[gd_resource type="Resource" script_class="SpriteSheetDef" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/animation/sprite_sheet_def.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/systems/animation/sprite_anim_row.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/unlaid_16x24.png" id="3"]
+
+[sub_resource type="Resource" id="row_0"]
+script = ExtResource("2")
+name = &"idle_down"
+row = 0
+frame_count = 4
+fps = 5.0
+loop = true
+
+[sub_resource type="Resource" id="row_1"]
+script = ExtResource("2")
+name = &"idle_up"
+row = 1
+frame_count = 4
+fps = 5.0
+loop = true
+
+[sub_resource type="Resource" id="row_2"]
+script = ExtResource("2")
+name = &"idle_side"
+row = 2
+frame_count = 4
+fps = 5.0
+loop = true
+
+[sub_resource type="Resource" id="row_3"]
+script = ExtResource("2")
+name = &"walk_down"
+row = 3
+frame_count = 6
+fps = 10.0
+loop = true
+
+[sub_resource type="Resource" id="row_4"]
+script = ExtResource("2")
+name = &"walk_up"
+row = 4
+frame_count = 6
+fps = 10.0
+loop = true
+
+[sub_resource type="Resource" id="row_5"]
+script = ExtResource("2")
+name = &"walk_side"
+row = 5
+frame_count = 6
+fps = 10.0
+loop = true
+
+[resource]
+script = ExtResource("1")
+texture = ExtResource("3")
+frame_size = Vector2i(16, 24)
+animations = Array[ExtResource("2")]([SubResource("row_0"), SubResource("row_1"), SubResource("row_2"), SubResource("row_3"), SubResource("row_4"), SubResource("row_5")])
+foot_inset = 1

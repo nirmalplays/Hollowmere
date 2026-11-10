@@ -1,6 +1,8 @@
 extends Control
 ## M0 main menu. Solo is the default path and never blocked by co-op (GAME_PLAN 9.0).
-## Solo currently only reports that gameplay arrives in M1.
+## Solo goes to the M1 test room until zones exist (M7).
+
+const SOLO_START_SCENE: String = "res://scenes/world/test_room.tscn"
 
 @onready var _solo_button: Button = $Center/SoloButton
 @onready var _quit_button: Button = $Center/QuitButton
@@ -14,7 +16,8 @@ func _ready() -> void:
 
 
 func _on_solo_pressed() -> void:
-	_status.text = "Test room arrives in milestone M1."
+	GameState.start_solo()
+	get_tree().change_scene_to_file(SOLO_START_SCENE)
 
 
 func _on_quit_pressed() -> void:

@@ -16,3 +16,10 @@ func reset() -> void:
 	world_id = ""
 	flags.clear()
 	players.clear()
+
+
+## Solo is just a host with one player and no peers (GAME_PLAN 9.0).
+func start_solo() -> void:
+	reset()
+	world_id = "solo_test"
+	players[Const.SOLO_PEER_ID] = {}

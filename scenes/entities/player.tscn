@@ -1,0 +1,47 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/player.gd" id="1"]
+[ext_resource type="Resource" path="res://data/tuning/player_movement.tres" id="2"]
+[ext_resource type="Resource" path="res://data/sprites/unlaid.tres" id="3"]
+[ext_resource type="Script" path="res://scripts/entities/player_input.gd" id="4"]
+
+[sub_resource type="CircleShape2D" id="feet"]
+radius = 4.0
+
+[sub_resource type="Gradient" id="light_gradient"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.45, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="light_texture"]
+gradient = SubResource("light_gradient")
+width = 160
+height = 160
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="Player" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 1
+motion_mode = 1
+script = ExtResource("1")
+tuning = ExtResource("2")
+sprite_sheet = ExtResource("3")
+
+[node name="Input" type="Node" parent="."]
+script = ExtResource("4")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+shape = SubResource("feet")
+
+[node name="Lantern" type="PointLight2D" parent="."]
+position = Vector2(4, -6)
+color = Color(1, 0.8, 0.5, 1)
+energy = 1.1
+texture = SubResource("light_texture")
+
+[node name="Camera" type="Camera2D" parent="."]
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0

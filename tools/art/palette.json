@@ -1,0 +1,19 @@
+{
+  "_comment": "Shared 32-color palette for all generated art (GAME_PLAN 11.1b). Edit colors here and re-run the generators.",
+  "outline": "#1a1420",
+  "skin_light": "#e8b796", "skin_mid": "#c98a6b", "skin_dark": "#8f5a4a",
+  "hood_light": "#5b6b85", "hood_mid": "#3d4a63", "hood_dark": "#283247",
+  "cloth_mid": "#8a5a3b", "cloth_dark": "#5e3b29",
+  "ember_light": "#ffe08a", "ember_mid": "#ffb347", "ember_dark": "#e0702c",
+  "stone_light": "#6e6a73", "stone_mid": "#55525b", "stone_dark": "#403d46", "stone_deep": "#2c2a31",
+  "moss_light": "#b7c4a6", "moss_dark": "#8a9a7c",
+  "ash_light": "#cfd2d6", "ash_dark": "#9da1a8",
+  "leaf_light": "#5f8f4e", "leaf_mid": "#3f6b3a", "leaf_dark": "#2a4a2c",
+  "water_black": "#141a22",
+  "blood_light": "#b8433a", "blood_dark": "#7a2a2a",
+  "gold": "#d9a441",
+  "bone_white": "#f4f1ea",
+  "iron_light": "#8c94a3", "iron_dark": "#5a6170",
+  "void": "#6b4c8a",
+  "frost": "#7fb8d8"
+}
