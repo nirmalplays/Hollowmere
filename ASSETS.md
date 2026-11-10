@@ -25,9 +25,7 @@ python -I tools/levels/build_greywood_glade.py
 ## Characters
 | Asset | Source | Licence | Files | Notes |
 |---|---|---|---|---|
-| The Unlaid (player): hood, chain cuirass, leather, short sword, buckler | Flare game avatar layers, https://github.com/flareteam/flare-game | CC-BY-SA 3.0 | `assets/art/characters/unlaid.png`, `data/sprites/unlaid.tres` | composited + pixelized, hood tinted |
-| Hollow Husk (training enemy) | Flare `enemies/skeleton_weak` | CC-BY-SA 3.0 | `assets/art/characters/hollow_husk.png` | pixelized, ash-tinted |
-| Hollowed (zombie) | Flare `enemies/zombie` | CC-BY-SA 3.0 | `assets/art/characters/hollowed_zombie.png` | pixelized, ash-tinted (enemy AI in M4) |
+| The Unlaid, Hollow Husk (skeleton), Hollowed (zombie) | Universal LPC Spritesheet Character Generator, https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator | CC-BY-SA 3.0 / GPL 3.0 (per-layer authors in its CREDITS.csv) | `assets/art/characters/*.png`, `data/sprites/*.tres` | composited by `tools/art/import_lpc.py`; hood/cape tinted |
 
 ## World
 | Asset | Source | Licence | Files | Notes |
@@ -39,14 +37,22 @@ python -I tools/levels/build_greywood_glade.py
 | Isometric - Dark Ruins | https://opengameart.org/content/dark-ruins-tilesets-isometric | CC0 | `assets/art/props/ruins/` | pixelized, brightened |
 | Isometric Props and Tents | https://opengameart.org/content/isometric-props-and-tents | CC0 | `assets/art/props/props_small|medium|large/` | pixelized |
 
+## Audio
+| Asset | Source | Licence | Files |
+|---|---|---|---|
+| Music, ambience, UI/reward/spell sounds | the team's own packs (BGM, Climate sounds, Sound effects, Special effect) incl. Mixkit / Pixabay items | per the pack sources | `assets/audio/` |
+| Swings, interface | RPG Sound Pack (artisticdude), https://opengameart.org/content/rpg-sound-pack | CC0 | `assets/audio/sfx/swing_light_*`, `ui_select`, `ui_back` |
+| Blades, metal, creatures, coins | 80 CC0 RPG SFX (rubberduck), https://opengameart.org/content/80-cc0-rpg-sfx | CC0 | `assets/audio/sfx/` |
+| Footsteps, cloth | 50 RPG Sound Effects (Kenney), https://opengameart.org/content/50-rpg-sound-effects | CC0 | `assets/audio/sfx/footstep_*`, `dodge_*` |
+
 ## Effects, UI, fonts
 | Asset | Source | Licence | Files |
 |---|---|---|---|
 | Slashes, hit spark, parry | pixelfx, https://github.com/patch-gg/pixelfx | MIT | `assets/art/fx/` (+ `LICENSE-pixelfx.txt`) |
+| Cinzel, Alegreya (HUD serif) | Google Fonts | SIL OFL 1.1 | `assets/fonts/` |
 | Press Start 2P font | https://github.com/google/fonts/tree/main/ofl/pressstart2p | SIL OFL 1.1 | `assets/fonts/` |
 | Flash shader, UI bars | original (project) | project | `assets/shaders/`, `scripts/ui/` |
 
 ## Credits (CC-BY-SA attribution)
-Character art adapted from **Flare** (flarerpg.org): avatar and enemy sprites by Clint Bellanger and the
-Flare contributors, see https://github.com/flareteam/flare-game/blob/master/CREDITS.txt. Licensed CC-BY-SA 3.0.
-This credit must appear in the game's credits screen (M12).
+Character art from the **Liberated Pixel Cup** (Universal LPC Spritesheet Character Generator): see its CREDITS.csv
+for every layer's artists. Licensed CC-BY-SA 3.0 / GPL 3.0. This credit must appear in the game's credits screen.

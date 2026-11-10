@@ -18,5 +18,5 @@ func _run() -> void:
 	for autoload_name in REQUIRED_AUTOLOADS:
 		check(get_tree().root.has_node(autoload_name), "autoload %s" % autoload_name)
 	check(ProjectSettings.get_setting("rendering/textures/canvas_textures/default_texture_filter") == 0, "Nearest filter")
-	check(ProjectSettings.get_setting("display/window/size/viewport_width") == 640, "viewport 640 wide")
+	check(ProjectSettings.get_setting("display/window/size/viewport_width") == 960, "viewport 960 wide")
 	check(load("res://scenes/ui/main_menu.tscn") != null, "main menu loads")

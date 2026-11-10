@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/world/iso_room_layout.gd" id="1"]
 [ext_resource type="TileSet" path="res://assets/art/tiles/greywood_iso.tres" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/entities/training_dummy.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/props/shrine_inscription.tscn" id="4"]
 [ext_resource type="Resource" path="res://data/props/bones.tres" id="p_bones"]
 [ext_resource type="Resource" path="res://data/props/campfire.tres" id="p_campfire"]
 [ext_resource type="Resource" path="res://data/props/cauldron.tres" id="p_cauldron"]
@@ -43,23 +44,23 @@ TXT,g.X.X.g.gg..g...g...g......g.gggTTTT
 TXX.g,g,..b,Xgg,,....R......g.....g..TTT
 XT.o....,.,.X,gL........sg,g..,..,...gTT
 TX,..X....,..b.g,......gg...,.g.....TTTT
-XTTT........,X,g........==,....g....TTTT
-TTT.g.,X.g,b.b....===..===I=g.g.,g...TTT
-TTTTgX..X..X.....r==....,====.......TTTT
-TTTT.....X.,,...===.....g..====..g..TTTT
-TT.g..,..g.,...===,g.g..ggg.=====.,.TTTT
-TTT.g..,,g....===.g.....g...g.====..gTTT
-TT.T.ggg.....===.G.g..,....,....==..TTTT
-TTT.,.......==D.g....gog.g...g.N....TTTT
-TTT.gg,..g.===..g.gg,g....,N.....s,..,TT
-TTTgg..,..===.,,g..g...g.....Fg.,..g.TTT
-TTTggg.ggP=..g.gg.g.,g..,g.o....B....TTT
-TTT,.g..,..,..,....g...g..B.g.C.gg,,g.TT
-TTT.g......,..,g.g...ggg.,..kg..g,g.TTTT
-TTT....,....g...g..........g..,..g.gTTTT
-TTTg,.g..g.g.g..gg..g.........g....ggTTT
-TTTT,...TT.gT......T.TTT.....T,TT.T,.TTT
-TTTgTTTgTTT.TTgTTTTTTTTTTTTTT.TTT..TgTTT
+XTTT........,X,g......Q.==,.....g...TTTT
+TTT..g,X..,bgb....===..===I=.g.g,.g..TTT
+TTTT.Xg.X..X.....r==....,====.......TTTT
+TTTT.....X.,,...===......g.====...g.TTTT
+TT..g.,...g,...===,.g.g..ggg=====.,.TTTT
+TTT..g.,,.g...===..g.....g...g====...TTT
+TTgT..ggg....===.G..g.,....,....==..TTTT
+TTT.,.......==D..g....gog.g...gN....TTTT
+TTT..g,g..g===...g.g,gg...,N.....s,..,TT
+TTT.gg.,..===.,,.g..g...g....F.g,...gTTT
+TTT.ggg.gP=...g.gg.g,.g.,.g.o...B....TTT
+TTT,..g.,..,..,.....g...g.B..gC..g,,ggTT
+TTT..g.....,..,.g.g...ggg,..k.g..,ggTTTT
+TTT....,.....g...g..........g.,...g.TTTT
+TTTg,g.g..g.g.g..gg..g.........g....gTTT
+TTTT,g..TT..Tg.....T.TTT.....T,TT.T,.TTT
+TTT.TTTgTTTgTT.TTTTTTTTTTTTTTgTTT..T.TTT
 TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
 TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
 "
@@ -93,6 +94,7 @@ props = {
 "o": ExtResource("p_rock")
 }
 markers = {
-"D": ExtResource("3")
+"D": ExtResource("3"),
+"Q": ExtResource("4")
 }
 prop_ground = "."

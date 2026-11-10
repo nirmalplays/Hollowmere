@@ -14,6 +14,8 @@ const MAIN_MENU_PATH: String = "res://scenes/ui/main_menu.tscn"
 @onready var _fx_layer: CanvasLayer = $FxLayer
 
 
+@export var quest_title: String = ""
+@export var quest_steps: PackedStringArray = []
 @export var music: StringName = &"music_explore"
 @export var ambience: StringName = &"amb_forest"
 
@@ -27,6 +29,11 @@ func _ready() -> void:
 		var node := (placement["scene"] as PackedScene).instantiate() as Node2D
 		node.position = placement["position"]
 		_entities.add_child(node)
+	if quest_title != "":
+		QuestLog.start(quest_title, quest_steps)
+		EventBus.enemy_killed.connect(func(_e: Node, _k: Node) -> void: QuestLog.complete(0))
+		for node in get_tree().get_nodes_in_group(&"quest_inscription"):
+			(node as Inscription).read.connect(func() -> void: QuestLog.complete(1))
 	if GameState.players.is_empty():
 		GameState.start_solo()  # running the scene directly from the editor
 	var i := 0

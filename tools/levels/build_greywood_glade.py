@@ -132,6 +132,7 @@ def make_layout():
     for (x, y, ch) in [(16, 15, "I"), (26, 15, "I"), (17, 23, "r"), (26, 22, "I"), (15, 19, "L"), (24, 13, "r")]:
         put(x, y, ch)
     put(17, 27, "G")
+    put(22, 21, "Q")  # the shrine's keystone inscription, read from the front
     # Hollow-blighted grove west of the shrine: dead trees, bones, ashen dark grass.
     for _ in range(26):
         x, y = rnd.randint(5, 13), rnd.randint(15, 24)
@@ -198,7 +199,8 @@ def write_room(rows):
     lines = [f'[gd_resource type="Resource" script_class="IsoRoomLayout" load_steps={4 + len(used)} format=3]', "",
              '[ext_resource type="Script" path="res://scripts/world/iso_room_layout.gd" id="1"]',
              '[ext_resource type="TileSet" path="res://assets/art/tiles/greywood_iso.tres" id="2"]',
-             '[ext_resource type="PackedScene" path="res://scenes/entities/training_dummy.tscn" id="3"]']
+             '[ext_resource type="PackedScene" path="res://scenes/entities/training_dummy.tscn" id="3"]',
+             '[ext_resource type="PackedScene" path="res://scenes/props/shrine_inscription.tscn" id="4"]']
     for name in used:
         lines.append(f'[ext_resource type="Resource" path="res://data/props/{name}.tres" id="p_{name}"]')
     props = ",\n".join(f'"{c}": ExtResource("p_{n}")' for c, n in LEGEND_PROPS.items() if n in used)
@@ -210,7 +212,7 @@ def write_room(rows):
               '"~": ["water"]\n}',
               'raised = {\n"#": ["cliff_grass_a", "cliff_grass_b", "cliff_grass_c", "cliff_grass_d"]\n}',
               "props = {\n" + props + "\n}",
-              'markers = {\n"D": ExtResource("3")\n}', 'prop_ground = "."', ""]
+              'markers = {\n"D": ExtResource("3"),\n"Q": ExtResource("4")\n}', 'prop_ground = "."', ""]
     with open(os.path.join(PROJECT, "data", "rooms", "greywood_glade.tres"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines))
 

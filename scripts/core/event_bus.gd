@@ -14,3 +14,4 @@ signal quest_updated(quest_id: StringName, state: StringName)
 # Story (M7+; see STORY_BIBLE.md)
 signal hollow_pressure_changed(zone_id: StringName, value: int)
 signal story_flag_changed(flag: StringName, value: Variant)
+signal lore_shown(text: String)  ## an inscription/page was read; the HUD shows it

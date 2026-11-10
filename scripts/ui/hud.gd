@@ -1,36 +1,225 @@
 class_name Hud
 extends CanvasLayer
-## Player HUD (GAME_PLAN 11.5). M2: HP and stamina. Mana, spell bar, buffs come in M3/M5.
-## Event-driven: bars update from the player's stat signals, never by polling.
+## In-game HUD in the reference's layout (docs/ART_DIRECTION.md), our own art:
+##   bottom-left:  diamond quick slots (1-4), XP, slanted stamina + mana bars over a big HP bar
+##   bottom-right: diamond ability bar (spells 1-5 arrive in M5; weapon slot shows now)
+##   right:        quest tracker (serif title, diamond bullets)
+##   top-centre:   lore text box for inscriptions and pages ("A journal page reads...")
+## Event-driven: everything updates from signals, never by polling.
 
-var _hp: ResourceBar
-var _stamina: ResourceBar
+const GOLD := Color(0.85, 0.66, 0.32)
+const GOLD_DARK := Color(0.42, 0.28, 0.12)
+const SLOT_FILL := Color(0.2, 0.13, 0.08, 0.88)
+const HP_A := Color(0.98, 0.42, 0.16)
+const HP_B := Color(0.97, 0.66, 0.24)
+const STAMINA := Color(0.98, 0.86, 0.3)
+const MANA := Color(0.42, 0.78, 0.36)
+const TITLE_FONT: Font = preload("res://assets/fonts/Cinzel.ttf")
+const BODY_FONT: Font = preload("res://assets/fonts/Alegreya.ttf")
+const LORE_SECONDS: float = 6.0
+
 var _player: Player
+var _hp: float = 1.0
+var _hp_max: float = 1.0
+var _hp_chip: float = 1.0
+var _stamina: float = 1.0
+var _stamina_max: float = 1.0
+var _canvas: Control
+var _xp: Label
+var _quest_title: Label
+var _quest_steps: VBoxContainer
+var _lore: Label
+var _lore_box: Control
+var _lore_left: float = 0.0
 
 
 func _ready() -> void:
 	layer = 10
-	var box := VBoxContainer.new()
-	box.position = Vector2(6, 6)
-	box.add_theme_constant_override(&"separation", 2)
-	add_child(box)
-	_hp = ResourceBar.new()
-	_hp.fill_color = Color(0.72, 0.26, 0.23)
-	box.add_child(_hp)
-	_stamina = ResourceBar.new()
-	_stamina.fill_color = Color(0.37, 0.56, 0.31)
-	_stamina.bar_height = 3
-	box.add_child(_stamina)
+	_canvas = Control.new()
+	_canvas.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_canvas.draw.connect(_draw_hud)
+	add_child(_canvas)
+	_xp = _label(TITLE_FONT, 15, Color(0.98, 0.95, 0.88))
+	_xp.text = "XP: 0"
+	_build_quest_tracker()
+	_build_lore_box()
+	QuestLog.quest_changed.connect(_on_quest_changed)
+	EventBus.lore_shown.connect(show_lore)
+	_on_quest_changed(QuestLog.title, QuestLog.steps)
+	get_viewport().size_changed.connect(_layout)
+	_layout()
 
 
 func bind(player: Player) -> void:
 	_player = player
-	player.stats.hp_changed.connect(_hp.set_values)
-	player.stats.stamina_changed.connect(_on_stamina)
-	_hp.set_values(player.stats.hp, player.combat.max_hp)
-	_on_stamina(player.stats.stamina, player.combat.max_stamina)
+	player.stats.hp_changed.connect(func(v: float, m: float) -> void:
+		if v < _hp:
+			_hp_chip = maxf(_hp_chip, _hp)
+		_hp = v
+		_hp_max = m)
+	player.stats.stamina_changed.connect(func(v: float, m: float) -> void:
+		_stamina = v
+		_stamina_max = m)
+	_hp = player.stats.hp
+	_hp_max = player.combat.max_hp
+	_hp_chip = _hp
+	_stamina = player.stats.stamina
+	_stamina_max = player.combat.max_stamina
 
 
-func _on_stamina(value: float, max_value: float) -> void:
-	_stamina.dimmed = _player.stats.exhausted
-	_stamina.set_values(value, max_value)
+func show_lore(text: String) -> void:
+	_lore.text = text
+	_lore_left = LORE_SECONDS
+	_lore_box.modulate.a = 1.0
+	_lore_box.visible = true
+
+
+func _process(delta: float) -> void:
+	_hp_chip = move_toward(_hp_chip, _hp, _hp_max * 0.6 * delta) if _hp_chip > _hp else _hp
+	if _lore_left > 0.0:
+		_lore_left -= delta
+		if _lore_left < 1.0:
+			_lore_box.modulate.a = maxf(_lore_left, 0.0)
+		if _lore_left <= 0.0:
+			_lore_box.visible = false
+	_canvas.queue_redraw()
+
+
+# ---------------------------------------------------------------- layout
+
+func _layout() -> void:
+	var s := _canvas.get_viewport_rect().size
+	_xp.position = Vector2(100, s.y - 92)
+	_quest_title.position = Vector2(s.x - 250, 150)
+	_quest_steps.position = Vector2(s.x - 250, 186)
+	_lore_box.position = Vector2(s.x * 0.5 - 40, 70)
+
+
+func _build_quest_tracker() -> void:
+	_quest_title = _label(TITLE_FONT, 22, Color(0.98, 0.95, 0.88))
+	_quest_title.size = Vector2(240, 30)
+	_quest_steps = VBoxContainer.new()
+	_quest_steps.add_theme_constant_override(&"separation", 6)
+	_quest_steps.size = Vector2(240, 0)
+	_canvas.add_child(_quest_steps)
+
+
+func _on_quest_changed(title: String, steps: Array) -> void:
+	_quest_title.text = title
+	for c in _quest_steps.get_children():
+		c.queue_free()
+	for step in steps:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override(&"separation", 8)
+		var bullet := Control.new()
+		bullet.custom_minimum_size = Vector2(12, 16)
+		bullet.draw.connect(_draw_bullet.bind(bullet, step["done"]))
+		row.add_child(bullet)
+		var text := _label(BODY_FONT, 16, Color(0.55, 0.55, 0.5) if step["done"] else Color(0.96, 0.93, 0.86), false)
+		text.text = step["text"]
+		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		text.custom_minimum_size = Vector2(218, 0)
+		row.add_child(text)
+		_quest_steps.add_child(row)
+
+
+func _draw_bullet(c: Control, done: bool) -> void:
+	var p := Vector2(6, 9)
+	var pts := PackedVector2Array([p + Vector2(0, -5), p + Vector2(5, 0), p + Vector2(0, 5), p + Vector2(-5, 0), p + Vector2(0, -5)])
+	if done:
+		c.draw_colored_polygon(pts, GOLD)
+	c.draw_polyline(pts, GOLD, 1.5, true)
+
+
+func _build_lore_box() -> void:
+	_lore_box = Control.new()
+	_lore_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_lore_box.visible = false
+	_lore_box.draw.connect(func() -> void:
+		var w := 400.0
+		_lore_box.draw_rect(Rect2(-12, -8, w + 24, _lore.size.y + 22), Color(0.04, 0.05, 0.08, 0.72))
+		var y := _lore.size.y + 10
+		_lore_box.draw_line(Vector2(w * 0.35, y), Vector2(w + 6, y), Color(0.45, 0.62, 0.85, 0.8), 1.5)
+		_lore_box.draw_arc(Vector2(w + 6, y - 6), 6, -PI / 2, PI / 2, 10, Color(0.45, 0.62, 0.85, 0.8), 1.5))
+	_canvas.add_child(_lore_box)
+	_lore = _label(BODY_FONT, 17, Color(0.97, 0.95, 0.9), false)
+	_lore.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lore.custom_minimum_size = Vector2(400, 0)
+	_lore.size = Vector2(400, 0)
+	_lore_box.add_child(_lore)
+
+
+func _label(font: Font, font_size: int, color: Color, add: bool = true) -> Label:
+	var l := Label.new()
+	l.add_theme_font_override(&"font", font)
+	l.add_theme_font_size_override(&"font_size", font_size)
+	l.add_theme_color_override(&"font_color", color)
+	l.add_theme_color_override(&"font_shadow_color", Color(0, 0, 0, 0.85))
+	l.add_theme_constant_override(&"shadow_offset_x", 1)
+	l.add_theme_constant_override(&"shadow_offset_y", 2)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if add:
+		_canvas.add_child(l)
+	return l
+
+
+# ---------------------------------------------------------------- drawing
+
+func _draw_hud() -> void:
+	var s := _canvas.get_viewport_rect().size
+	# Quick slots: a diamond cluster bottom-left (1 top, 2 left, 3 right, 4 bottom).
+	var c := Vector2(52, s.y - 52)
+	for i in 4:
+		var off: Vector2 = [Vector2(0, -26), Vector2(-26, 0), Vector2(26, 0), Vector2(0, 26)][i]
+		_diamond(c + off, 18.0, str(i + 1))
+	# Bars: stamina and mana slanted above the long HP bar.
+	var x0 := 100.0
+	var y0 := s.y - 64.0
+	_slant_bar(Vector2(x0, y0), 150.0, 6.0, _stamina / maxf(_stamina_max, 1.0), STAMINA, STAMINA.darkened(0.3), 0.0)
+	_slant_bar(Vector2(x0 - 6, y0 + 10), 156.0, 6.0, 1.0, MANA, MANA.darkened(0.3), 0.0)
+	_cap(Vector2(x0 + 156, y0 + 3))
+	_slant_bar(Vector2(x0 - 22, y0 + 24), 260.0, 18.0, _hp / maxf(_hp_max, 1.0), HP_A, HP_B, _hp_chip / maxf(_hp_max, 1.0))
+	# Ability bar: a diagonal of diamonds bottom-right (weapon, then spell slots).
+	var b := Vector2(s.x - 40, s.y - 186)
+	var keys := ["", "5", "4", "3", "2", "1"]
+	for i in keys.size():
+		var p := b + Vector2(-26, 26) * i
+		_diamond(p, 20.0 if i == 0 else 16.0, keys[i], i == 0)
+
+
+func _diamond(center: Vector2, r: float, key: String, weapon: bool = false) -> void:
+	var pts := PackedVector2Array([center + Vector2(0, -r), center + Vector2(r, 0), center + Vector2(0, r), center + Vector2(-r, 0)])
+	_canvas.draw_colored_polygon(pts, SLOT_FILL)
+	pts.append(pts[0])
+	_canvas.draw_polyline(pts, GOLD_DARK, 4.0)
+	_canvas.draw_polyline(pts, GOLD, 2.0)
+	if weapon:
+		# A short sword icon for the equipped weapon.
+		_canvas.draw_line(center + Vector2(-8, 8), center + Vector2(8, -8), Color(0.88, 0.9, 0.95), 3.0)
+		_canvas.draw_line(center + Vector2(-9, 3), center + Vector2(-3, 9), GOLD, 2.0)
+	if key != "":
+		_canvas.draw_string(TITLE_FONT, center + Vector2(-4, r - 2), key, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.96, 0.9, 0.75))
+
+
+## A parallelogram bar leaning right, filled `k` (0..1), with a pale chip trailing losses.
+func _slant_bar(at: Vector2, w: float, h: float, k: float, a: Color, b: Color, chip: float) -> void:
+	var lean := h * 0.8
+	var frame := PackedVector2Array([at + Vector2(lean, 0), at + Vector2(w + lean, 0), at + Vector2(w, h), at + Vector2(0, h)])
+	_canvas.draw_colored_polygon(frame, Color(0.08, 0.06, 0.06, 0.85))
+	if chip > k:
+		_canvas.draw_colored_polygon(_slant_fill(at, w * chip, h, lean), Color(0.98, 0.9, 0.72, 0.9))
+	if k > 0.0:
+		var fill := _slant_fill(at, w * clampf(k, 0.0, 1.0), h, lean)
+		_canvas.draw_polygon(fill, PackedColorArray([b, a, a, b]))
+		_canvas.draw_line(fill[0], fill[1], a.lightened(0.35), 1.0)
+	frame.append(frame[0])
+	_canvas.draw_polyline(frame, GOLD_DARK, 1.5)
+
+
+func _slant_fill(at: Vector2, w: float, h: float, lean: float) -> PackedVector2Array:
+	return PackedVector2Array([at + Vector2(lean, 0), at + Vector2(w + lean, 0), at + Vector2(w, h), at + Vector2(0, h)])
+
+
+func _cap(at: Vector2) -> void:
+	_canvas.draw_colored_polygon(PackedVector2Array([at + Vector2(0, -6), at + Vector2(14, -6), at + Vector2(6, 6)]), GOLD)

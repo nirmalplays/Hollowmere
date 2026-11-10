@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/inscription.gd" id="1"]
+
+[node name="ShrineInscription" type="Node2D" groups=["quest_inscription"]]
+script = ExtResource("1")
+text = "Carved round the keystone, worn almost smooth:
+\"Eight were bound, that none need die.
+Eight Lanterns lit against the dark.\"
+Below it, scratched in later by another hand: \"We were wrong.\""
+radius = 48.0

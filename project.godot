@@ -20,15 +20,17 @@ NetManager="*res://scripts/core/net_manager.gd"
 SaveManager="*res://scripts/core/save_manager.gd"
 HitFeedback="*res://scripts/core/hit_feedback.gd"
 AudioManager="*res://scripts/core/audio_manager.gd"
+QuestLog="*res://scripts/core/quest_log.gd"
 DebugOverlay="*res://scripts/ui/debug_overlay.gd"
 
 [display]
 
-window/size/viewport_width=640
-window/size/viewport_height=360
-window/size/window_width_override=1280
-window/size/window_height_override=720
-window/stretch/mode="viewport"
+window/size/mode=2
+window/size/viewport_width=960
+window/size/viewport_height=540
+window/size/window_width_override=1920
+window/size/window_height_override=1080
+window/stretch/mode="canvas_items"
 window/stretch/aspect="keep"
 window/stretch/scale_mode="integer"
 
