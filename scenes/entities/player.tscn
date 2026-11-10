@@ -31,11 +31,11 @@ shader_parameter/flash_color = Color(1, 1, 1, 1)
 shader_parameter/flash_amount = 0.0
 
 [sub_resource type="CircleShape2D" id="feet"]
-radius = 4.0
+radius = 5.0
 
 [sub_resource type="CapsuleShape2D" id="body"]
-radius = 5.0
-height = 18.0
+radius = 7.0
+height = 28.0
 
 [sub_resource type="Gradient" id="light_gradient"]
 offsets = PackedFloat32Array(0, 0.55, 1)
@@ -107,7 +107,7 @@ shape = SubResource("feet")
 script = ExtResource("22")
 
 [node name="Shape" type="CollisionShape2D" parent="Hurtbox"]
-position = Vector2(0, -10)
+position = Vector2(0, -18)
 shape = SubResource("body")
 
 [node name="Hitbox" type="Area2D" parent="."]

@@ -14,8 +14,14 @@ const MAIN_MENU_PATH: String = "res://scenes/ui/main_menu.tscn"
 @onready var _fx_layer: CanvasLayer = $FxLayer
 
 
+@export var music: StringName = &"music_explore"
+@export var ambience: StringName = &"amb_forest"
+
+
 func _ready() -> void:
 	_fx_layer.add_to_group(Fx.FX_ROOT_GROUP)
+	AudioManager.music(music)
+	AudioManager.ambient(ambience)
 	var built := IsoRoomBuilder.build(layout, _ground, _raised, _entities)
 	for placement in built.placements:
 		var node := (placement["scene"] as PackedScene).instantiate() as Node2D

@@ -19,6 +19,7 @@ GameState="*res://scripts/core/game_state.gd"
 NetManager="*res://scripts/core/net_manager.gd"
 SaveManager="*res://scripts/core/save_manager.gd"
 HitFeedback="*res://scripts/core/hit_feedback.gd"
+AudioManager="*res://scripts/core/audio_manager.gd"
 DebugOverlay="*res://scripts/ui/debug_overlay.gd"
 
 [display]

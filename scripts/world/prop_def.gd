@@ -13,6 +13,8 @@ extends Resource
 ## Random offset in pixels so rows of props don't look gridded.
 @export var jitter: float = 5.0
 @export var flip_randomly: bool = true
+## Looping positional sound (e.g. &"amb_fire"); empty = silent.
+@export var sound: StringName = &""
 @export_group("Light")
 @export var light_color: Color = Color(0, 0, 0, 0)  ## alpha 0 = no light
 @export var light_energy: float = 1.0

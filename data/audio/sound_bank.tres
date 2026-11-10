@@ -1,0 +1,149 @@
+[gd_resource type="Resource" script_class="SoundBank" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/sound_bank.gd" id="1"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/music_menu.mp3" id="s1"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/music_explore_1.mp3" id="s2"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/music_explore_2.mp3" id="s3"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/music_explore_3.mp3" id="s4"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/music_battle.mp3" id="s5"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/music_miniboss_1.mp3" id="s6"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/music_miniboss_2.mp3" id="s7"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/music_miniboss_3.mp3" id="s8"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/music_cutscene.mp3" id="s9"]
+[ext_resource type="AudioStream" path="res://assets/audio/ambient/amb_forest.mp3" id="s10"]
+[ext_resource type="AudioStream" path="res://assets/audio/ambient/amb_fire.mp3" id="s11"]
+[ext_resource type="AudioStream" path="res://assets/audio/ambient/amb_rain.mp3" id="s12"]
+[ext_resource type="AudioStream" path="res://assets/audio/ambient/thunder.mp3" id="s13"]
+[ext_resource type="AudioStream" path="res://assets/audio/ui/ui_move.wav" id="s14"]
+[ext_resource type="AudioStream" path="res://assets/audio/ui/ui_select.wav" id="s15"]
+[ext_resource type="AudioStream" path="res://assets/audio/ui/ui_back.wav" id="s16"]
+[ext_resource type="AudioStream" path="res://assets/audio/ui/game_start.mp3" id="s17"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/footstep_1.ogg" id="s18"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/footstep_2.ogg" id="s19"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/footstep_3.ogg" id="s20"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/footstep_4.ogg" id="s21"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/footstep_5.ogg" id="s22"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/footstep_6.ogg" id="s23"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/footstep_7.ogg" id="s24"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/footstep_8.ogg" id="s25"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/footstep_9.ogg" id="s26"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/footstep_10.ogg" id="s27"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/swing_light_1.wav" id="s28"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/swing_light_2.wav" id="s29"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/swing_light_3.wav" id="s30"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/swing_heavy_1.ogg" id="s31"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/swing_heavy_2.ogg" id="s32"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/swing_heavy_3.ogg" id="s33"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/dodge_1.ogg" id="s34"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/dodge_2.ogg" id="s35"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/dodge_3.ogg" id="s36"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/dodge_4.ogg" id="s37"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/block_1.ogg" id="s38"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/block_2.ogg" id="s39"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/block_3.ogg" id="s40"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/parry.wav" id="s41"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/player_hurt.wav" id="s42"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/player_death.wav" id="s43"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/respawn.mp3" id="s44"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/hit_flesh_1.wav" id="s45"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/hit_flesh_2.wav" id="s46"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/enemy_hurt_1.ogg" id="s47"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/enemy_hurt_2.ogg" id="s48"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/enemy_die.ogg" id="s49"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/enemy_windup_1.ogg" id="s50"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/enemy_windup_2.ogg" id="s51"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/enemy_windup_3.ogg" id="s52"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/enemy_windup_4.ogg" id="s53"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/pickup.mp3" id="s54"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/coins_1.ogg" id="s55"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/coins_2.ogg" id="s56"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/coins_3.ogg" id="s57"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/coins_4.ogg" id="s58"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/treasure.wav" id="s59"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/quest_complete.wav" id="s60"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/level_up.wav" id="s61"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/game_over.mp3" id="s62"]
+[ext_resource type="AudioStream" path="res://assets/audio/spells/spell_air.mp3" id="s63"]
+[ext_resource type="AudioStream" path="res://assets/audio/spells/spell_earth.mp3" id="s64"]
+[ext_resource type="AudioStream" path="res://assets/audio/spells/spell_fire.mp3" id="s65"]
+[ext_resource type="AudioStream" path="res://assets/audio/spells/spell_water.mp3" id="s66"]
+
+
+[resource]
+script = ExtResource("1")
+sounds = {
+"music_menu": [ExtResource("s1")],
+"music_explore": [ExtResource("s2"), ExtResource("s3"), ExtResource("s4")],
+"music_battle": [ExtResource("s5")],
+"music_miniboss": [ExtResource("s6"), ExtResource("s7"), ExtResource("s8")],
+"music_cutscene": [ExtResource("s9")],
+"amb_forest": [ExtResource("s10")],
+"amb_fire": [ExtResource("s11")],
+"amb_rain": [ExtResource("s12")],
+"thunder": [ExtResource("s13")],
+"ui_move": [ExtResource("s14")],
+"ui_select": [ExtResource("s15")],
+"ui_back": [ExtResource("s16")],
+"game_start": [ExtResource("s17")],
+"footstep": [ExtResource("s18"), ExtResource("s19"), ExtResource("s20"), ExtResource("s21"), ExtResource("s22"), ExtResource("s23"), ExtResource("s24"), ExtResource("s25"), ExtResource("s26"), ExtResource("s27")],
+"swing_light": [ExtResource("s28"), ExtResource("s29"), ExtResource("s30")],
+"swing_heavy": [ExtResource("s31"), ExtResource("s32"), ExtResource("s33")],
+"dodge": [ExtResource("s34"), ExtResource("s35"), ExtResource("s36"), ExtResource("s37")],
+"block": [ExtResource("s38"), ExtResource("s39"), ExtResource("s40")],
+"parry": [ExtResource("s41")],
+"player_hurt": [ExtResource("s42")],
+"player_death": [ExtResource("s43")],
+"respawn": [ExtResource("s44")],
+"hit_flesh": [ExtResource("s45"), ExtResource("s46")],
+"enemy_hurt": [ExtResource("s47"), ExtResource("s48")],
+"enemy_die": [ExtResource("s49")],
+"enemy_windup": [ExtResource("s50"), ExtResource("s51"), ExtResource("s52"), ExtResource("s53")],
+"pickup": [ExtResource("s54")],
+"coins": [ExtResource("s55"), ExtResource("s56"), ExtResource("s57"), ExtResource("s58")],
+"treasure": [ExtResource("s59")],
+"quest_complete": [ExtResource("s60")],
+"level_up": [ExtResource("s61")],
+"game_over": [ExtResource("s62")],
+"spell_air": [ExtResource("s63")],
+"spell_earth": [ExtResource("s64")],
+"spell_fire": [ExtResource("s65")],
+"spell_water": [ExtResource("s66")]
+}
+groups = {
+"music_menu": &"music",
+"music_explore": &"music",
+"music_battle": &"music",
+"music_miniboss": &"music",
+"music_cutscene": &"music",
+"amb_forest": &"ambient",
+"amb_fire": &"ambient",
+"amb_rain": &"ambient",
+"thunder": &"ambient",
+"ui_move": &"ui",
+"ui_select": &"ui",
+"ui_back": &"ui",
+"game_start": &"ui",
+"footstep": &"sfx",
+"swing_light": &"sfx",
+"swing_heavy": &"sfx",
+"dodge": &"sfx",
+"block": &"sfx",
+"parry": &"sfx",
+"player_hurt": &"sfx",
+"player_death": &"sfx",
+"respawn": &"sfx",
+"hit_flesh": &"sfx",
+"enemy_hurt": &"sfx",
+"enemy_die": &"sfx",
+"enemy_windup": &"sfx",
+"pickup": &"sfx",
+"coins": &"sfx",
+"treasure": &"sfx",
+"quest_complete": &"sfx",
+"level_up": &"sfx",
+"game_over": &"sfx",
+"spell_air": &"spells",
+"spell_earth": &"spells",
+"spell_fire": &"spells",
+"spell_water": &"spells"
+}

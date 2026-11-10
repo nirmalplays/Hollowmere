@@ -5,7 +5,7 @@ extends IntegrationTest
 
 const ROOM: String = "res://scenes/world/greywood_glade.tscn"
 const SAFE_OFFSET := Vector2(-90, 0)  ## out of the dummy's trigger range
-const MELEE_OFFSET := Vector2(-20, 0)  ## inside its sweep, facing it
+const MELEE_OFFSET := Vector2(-24, 0)  ## inside its sweep, facing it
 const BLOCK_LEAD_MS: float = 70.0  ## raise the guard this long before the sweep lands
 
 var player: Player

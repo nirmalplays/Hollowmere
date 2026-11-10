@@ -17,6 +17,7 @@ func enter(_msg: Dictionary) -> void:
 		player.face(_dir)
 	player.play_directional(&"run", ANIM_SPEED, true)
 	player.sprite.modulate.a = IFRAME_ALPHA
+	AudioManager.sfx(&"dodge", -4.0, 0.15)
 
 
 func exit() -> void:

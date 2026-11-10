@@ -182,6 +182,8 @@ def write_prop_defs():
         if all(prints):
             polys = ", ".join("PackedVector2Array(" + ", ".join(f"{x}, {y}" for x, y in p) + ")" for p in prints)
             lines.append(f"footprints = Array[PackedVector2Array]([{polys}])")
+        if name == "campfire":
+            lines.append('sound = &"amb_fire"')
         if light:
             r, g, b, energy, scale, height = light
             lines += [f"light_color = Color({r}, {g}, {b}, 1)", f"light_energy = {energy}",

@@ -17,8 +17,8 @@ damage_type = &"physical"
 stamina_cost = 18.0
 knockback = 60.0
 poise_damage = 12.0
-reach = 12.0
-hitbox_size = Vector2(18, 16)
+reach = 16.0
+hitbox_size = Vector2(24, 22)
 lunge_speed = 60.0
 hit_stop_ms = 50
 shake = 1.0
@@ -36,12 +36,13 @@ damage_type = &"physical"
 stamina_cost = 34.0
 knockback = 140.0
 poise_damage = 40.0
-reach = 14.0
-hitbox_size = Vector2(24, 22)
+reach = 19.0
+hitbox_size = Vector2(32, 28)
 lunge_speed = 110.0
 hit_stop_ms = 90
 shake = 2.5
 fx = ExtResource("4")
+sound = &"swing_heavy"
 
 [resource]
 script = ExtResource("1")

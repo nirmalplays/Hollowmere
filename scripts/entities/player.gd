@@ -6,7 +6,7 @@ extends CharacterBody2D
 
 signal facing_changed(direction: Vector2)
 
-const CHEST_HEIGHT: float = 10.0  ## pixels above the feet where blows land
+const CHEST_HEIGHT: float = 18.0  ## pixels above the feet where blows land
 const HIT_COLOR := Color(1.0, 0.55, 0.45)
 const BLOCK_COLOR := Color(0.75, 0.8, 0.9)
 
@@ -171,6 +171,7 @@ func receive_hit(info: DamageInfo) -> int:
 	var reduction := weapon.block_reduction if blocked else 0.0
 	if blocked:
 		stats.spend_stamina(info.amount * weapon.block_stamina_per_damage)
+	AudioManager.sfx(&"block" if blocked else &"player_hurt", -2.0, 0.1)
 	var dmg := DamageCalc.from_info(info, combat.defense, combat.resistances, reduction)
 	stats.take_damage(dmg)
 	EventBus.damage_dealt.emit(info.source, self, dmg, info.damage_type)
@@ -178,6 +179,7 @@ func receive_hit(info: DamageInfo) -> int:
 	Flash.hit(sprite, Color.WHITE, 0.15)
 	Fx.spawn(hit_fx, chest_position(), info.direction, self)
 	if stats.is_dead():
+		AudioManager.sfx(&"player_death")
 		states.transition(&"Dead")
 		return DamageInfo.Result.HIT
 	if blocked:
@@ -195,6 +197,8 @@ func receive_hit(info: DamageInfo) -> int:
 
 func _on_parry(info: DamageInfo) -> void:
 	states.transition(&"Parry")
+	AudioManager.sfx(&"parry")
+	AudioManager.sfx(&"block", -3.0, 0.1, 0)
 	Fx.spawn(parry_fx, chest_position() - info.direction * 8.0, Vector2.RIGHT, self)
 	HitFeedback.hit_stop(0.12)
 	HitFeedback.shake(3.0, 0.2)
@@ -222,6 +226,7 @@ func respawn() -> void:
 	stats.reset()
 	input.clear_buffer()
 	Flash.clear(sprite)
+	AudioManager.sfx(&"respawn", -3.0, 0.0)
 	states.transition(&"Idle")
 
 

@@ -38,6 +38,8 @@ func setup(def: PropDef, index: int, flip: bool) -> void:
 		add_child(poly)
 	if def.light_color.a > 0.0:
 		add_child(IsoRoomBuilder.make_light(def.light_color, def.light_energy, def.light_scale, Vector2(0, -def.light_height)))
+	if def.sound != &"":
+		add_child(AudioManager.make_emitter(def.sound))
 	_fades = tex.get_height() > FADE_MIN_HEIGHT
 	_frame_offset = randi() % CHECK_INTERVAL
 	set_process(_fades)

@@ -10,7 +10,7 @@ signal state_changed(state: int)
 
 enum State { IDLE, TELEGRAPH, ACTIVE, RECOVER, STAGGER, DEAD }
 
-const BODY_HEIGHT: float = 10.0
+const BODY_HEIGHT: float = 18.0
 const CRIT_COLOR := Color(1.0, 0.88, 0.54)
 const HIT_COLOR := Color(0.96, 0.95, 0.92)
 
@@ -126,6 +126,7 @@ func _enter(next: State) -> void:
 			_animator.play(&"idle", facing)
 		State.TELEGRAPH:
 			_play_attack_part(0, _attack_frames() / 2, _attack.telegraph_ms)
+			AudioManager.sfx_at(&"enemy_windup", global_position, -4.0, 0.15)
 			marker.show_marker(_attack.aoe_radius)
 			Flash.pulse(sprite, data.telegraph_color, _attack.telegraph_ms / 1000.0, 3, 0.55)
 		State.ACTIVE:
@@ -192,9 +193,12 @@ func receive_hit(info: DamageInfo) -> int:
 	Fx.text(at + Vector2(0, -14), str(dmg) + ("!" if info.crit else ""), CRIT_COLOR if info.crit else HIT_COLOR, self)
 	Fx.spawn(data.hit_fx, at, info.direction, self)
 	Flash.hit(sprite, Color.WHITE, 0.12)
+	AudioManager.sfx_at(&"hit_flesh", global_position, -2.0, 0.1)
 	if hp <= 0.0:
+		AudioManager.sfx_at(&"enemy_die", global_position)
 		_enter(State.DEAD)
 		return DamageInfo.Result.HIT
+	AudioManager.sfx_at(&"enemy_hurt", global_position, -6.0, 0.15)
 	if not riposte:
 		poise -= info.poise_damage
 		_poise_delay = data.poise_regen_delay
