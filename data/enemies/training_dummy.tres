@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/entities/enemy/enemy_data.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/entities/enemy/enemy_attack_data.gd" id="2"]
-[ext_resource type="Resource" path="res://data/sprites/training_dummy.tres" id="3"]
+[ext_resource type="Resource" path="res://data/sprites/hollow_husk.tres" id="3"]
 [ext_resource type="Resource" path="res://data/fx/hit_spark.tres" id="4"]
 
 [sub_resource type="Resource" id="sweep"]
@@ -23,7 +23,7 @@ weight = 1.0
 [resource]
 script = ExtResource("1")
 id = &"training_dummy"
-display_name = "Hollowed Training Dummy"
+display_name = "Hollow Husk"
 max_hp = 200.0
 defense = 0.0
 resistances = {}

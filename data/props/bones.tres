@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PropDef" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/prop_def.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r07c00.png" id="t0"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r07c01.png" id="t1"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r07c02.png" id="t2"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r07c03.png" id="t3"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r07c04.png" id="t4"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r07c05.png" id="t5"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r07c06.png" id="t6"]
+
+[resource]
+script = ExtResource("1")
+textures = Array[Texture2D]([ExtResource("t0"), ExtResource("t1"), ExtResource("t2"), ExtResource("t3"), ExtResource("t4"), ExtResource("t5"), ExtResource("t6")])
+base_inset = 1
+collision_radius = 0.0
+jitter = 6.0
+flip_randomly = true

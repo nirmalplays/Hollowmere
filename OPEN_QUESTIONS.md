@@ -15,3 +15,9 @@ Questions and defaults chosen while building. The owner answers; Claude Code con
 8. **Art source.** Kenney packs were not downloaded (no stable direct URLs); all M1 art is generated with `tools/art/` and tagged `generated` in ASSETS.md.
 9. **UI font: Press Start 2P** (OFL). Very readable at 8px but wide; a narrower pixel font may suit dialogue better later.
 10. **Mouse aim.** The mouse becomes the aim source for 2s after it moves or clicks; otherwise you face where you walk. Right stick always wins.
+
+## Visual overhaul
+11. **Supersedes 6 and 7:** characters are now about 40 px tall with 8 directions (Flare-based), on a 32x16 isometric grid.
+12. **Dodge has no roll animation** in the Flare set: it's a sped-up run with a ghosted body during i-frames. A custom roll can be drawn later.
+13. **CC-BY-SA art (Flare characters)** needs credit in the game's credits screen (planned for M12); modified sprites stay CC-BY-SA.
+14. **Still missing from free packs:** NPC townsfolk and building interiors for Thornwick. Will look again at M7/M9 or draw them.

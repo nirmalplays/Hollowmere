@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PropDef" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/prop_def.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_medium/props_medium_r03c02.png" id="t0"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_medium/props_medium_r03c03.png" id="t1"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_medium/props_medium_r03c04.png" id="t2"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_medium/props_medium_r03c05.png" id="t3"]
+
+[resource]
+script = ExtResource("1")
+textures = Array[Texture2D]([ExtResource("t0"), ExtResource("t1"), ExtResource("t2"), ExtResource("t3")])
+base_inset = 4
+collision_radius = 6.0
+jitter = 0.0
+flip_randomly = true
+light_color = Color(1.0, 0.62, 0.3, 1)
+light_energy = 1.6
+light_scale = 1.3
+light_height = 6.0

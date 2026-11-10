@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PropDef" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/prop_def.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/props/ruins/ruin_14.png" id="t0"]
+[ext_resource type="Texture2D" path="res://assets/art/props/ruins/ruin_15.png" id="t1"]
+[ext_resource type="Texture2D" path="res://assets/art/props/ruins/ruin_16.png" id="t2"]
+
+[resource]
+script = ExtResource("1")
+textures = Array[Texture2D]([ExtResource("t0"), ExtResource("t1"), ExtResource("t2")])
+base_inset = 6
+collision_radius = 0.0
+jitter = 0.0
+flip_randomly = false

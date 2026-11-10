@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PropDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/prop_def.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/props/ruins/ruin_01.png" id="t0"]
+
+[resource]
+script = ExtResource("1")
+textures = Array[Texture2D]([ExtResource("t0")])
+base_inset = 30
+collision_radius = 0.0
+jitter = 0.0
+flip_randomly = false
+light_color = Color(0.55, 0.8, 1.0, 1)
+light_energy = 1.4
+light_scale = 1.6
+light_height = 20.0

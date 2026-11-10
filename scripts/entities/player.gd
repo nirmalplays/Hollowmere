@@ -28,6 +28,7 @@ var spawn_point: Vector2 = Vector2.ZERO  ## the Hearth this player rises at
 @onready var hitbox: Hitbox = $Hitbox
 @onready var hurtbox: Hurtbox = $Hurtbox
 @onready var _camera: Camera2D = $Camera
+@onready var _animator := CharacterAnimator.new($Sprite)
 
 
 func _ready() -> void:
@@ -225,22 +226,11 @@ func respawn() -> void:
 
 # --- animation ----------------------------------------------------------------
 
-## Plays "<base>_<down|up|side>" for the current facing; side flips for left.
-func play_directional(base: StringName) -> void:
-	var dir_name: String
-	if absf(facing.x) >= absf(facing.y):
-		dir_name = "side"
-		sprite.flip_h = facing.x < 0.0
-	else:
-		dir_name = "up" if facing.y < 0.0 else "down"
-		sprite.flip_h = false
-	var anim := StringName("%s_%s" % [base, dir_name])
-	if sprite.animation != anim or not sprite.is_playing():
-		sprite.play(anim)
+## Plays "<base>_<dir>" for the current facing (8 directions).
+func play_directional(base: StringName, speed: float = 1.0, restart: bool = false) -> void:
+	_animator.play(base, facing, speed, restart)
 
 
-## Plays a non-directional animation from the start (dodge, dead).
-func play_once(anim: StringName, flip: bool) -> void:
-	sprite.flip_h = flip
-	sprite.play(anim)
-	sprite.frame = 0
+## Plays an animation stretched to last `seconds` (attacks timed to their data).
+func play_timed(base: StringName, seconds: float) -> void:
+	_animator.play_timed(base, facing, seconds)

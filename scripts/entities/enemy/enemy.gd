@@ -20,6 +20,7 @@ var hp: float = 0.0
 var poise: float = 0.0
 var state: State = State.IDLE
 var state_time: float = 0.0  ## seconds in the current state
+var facing: Vector2 = Vector2.DOWN
 
 var _attack: EnemyAttackData
 var _cooldowns: Dictionary = {}  # attack id -> seconds left
@@ -30,6 +31,11 @@ var _last_attacker: Node
 @onready var hitbox: Hitbox = $Hitbox
 @onready var hurtbox: Hurtbox = $Hurtbox
 @onready var marker: TelegraphMarker = $TelegraphMarker
+@onready var _animator := CharacterAnimator.new($Sprite)
+
+## The swing animation's 4 frames: the first half winds up during the telegraph,
+## the second half lands during active + recovery.
+const WINDUP_FRAMES: int = 2
 
 
 func _ready() -> void:
@@ -87,6 +93,7 @@ func _choose_attack() -> void:
 	for attack in data.attacks:
 		if _cooldowns.get(attack.id, 0.0) <= 0.0 and dist <= attack.trigger_range:
 			_attack = attack
+			facing = (target.global_position - global_position).normalized()
 			_enter(State.TELEGRAPH)
 			return
 
@@ -116,26 +123,37 @@ func _enter(next: State) -> void:
 	state_time = 0.0
 	match next:
 		State.IDLE:
-			sprite.play(&"idle")
+			_animator.play(&"idle", facing)
 		State.TELEGRAPH:
-			sprite.play(&"windup")
+			_play_attack_part(0, WINDUP_FRAMES, _attack.telegraph_ms)
 			marker.show_marker(_attack.aoe_radius)
 			Flash.pulse(sprite, data.telegraph_color, _attack.telegraph_ms / 1000.0, 3, 0.55)
 		State.ACTIVE:
-			sprite.play(&"swing")
+			_play_attack_part(WINDUP_FRAMES, WINDUP_FRAMES, _attack.active_ms + _attack.recovery_ms)
 			_cooldowns[_attack.id] = _attack.cooldown_ms / 1000.0
 			hitbox.shape_circle(_attack.aoe_radius, BODY_HEIGHT * 0.5)
 			hitbox.activate(_make_damage_info(_attack))
 		State.RECOVER:
 			pass  # hold the swing's last frame
 		State.STAGGER:
-			sprite.play(&"stagger")
+			_animator.play(&"hurt", facing, 0.5, true)
 			Flash.pulse(sprite, Color(1.0, 0.88, 0.54), data.stagger_ms / 1000.0, 3, 0.35)
 		State.DEAD:
-			sprite.play(&"broken")
+			_animator.play(&"dead", facing, 1.0, true)
 			hurtbox.enabled = false
 			EventBus.enemy_killed.emit(self, _last_attacker)
 	state_changed.emit(next)
+
+
+## Plays `count` frames of the attack animation starting at `first`, over `ms`.
+func _play_attack_part(first: int, count: int, ms: int) -> void:
+	var anim := StringName("attack_" + CharacterAnimator.dir_name(facing))
+	if not sprite.sprite_frames.has_animation(anim):
+		return
+	var fps := sprite.sprite_frames.get_animation_speed(anim)
+	sprite.play(anim)
+	sprite.frame = first
+	sprite.speed_scale = (count / maxf(fps, 0.01)) / maxf(ms / 1000.0, 0.01)
 
 
 func _make_damage_info(attack: EnemyAttackData) -> DamageInfo:

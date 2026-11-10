@@ -7,7 +7,7 @@ var _duration: float = 0.5
 
 func enter(msg: Dictionary) -> void:
 	_duration = msg.get("duration", player.combat.guard_break_duration)
-	player.play_directional(&"idle")
+	player.play_directional(&"hurt", 1.0, true)
 	Flash.pulse(player.sprite, Color(1.0, 0.85, 0.4), _duration, 2, 0.5)
 
 

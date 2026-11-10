@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PropDef" load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/prop_def.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r03c00.png" id="t0"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r03c01.png" id="t1"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r03c02.png" id="t2"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r03c03.png" id="t3"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r03c04.png" id="t4"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r03c05.png" id="t5"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r03c06.png" id="t6"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r03c07.png" id="t7"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r03c08.png" id="t8"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r03c09.png" id="t9"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r03c10.png" id="t10"]
+[ext_resource type="Texture2D" path="res://assets/art/props/props_small/props_small_r03c11.png" id="t11"]
+
+[resource]
+script = ExtResource("1")
+textures = Array[Texture2D]([ExtResource("t0"), ExtResource("t1"), ExtResource("t2"), ExtResource("t3"), ExtResource("t4"), ExtResource("t5"), ExtResource("t6"), ExtResource("t7"), ExtResource("t8"), ExtResource("t9"), ExtResource("t10"), ExtResource("t11")])
+base_inset = 2
+collision_radius = 4.0
+jitter = 5.0
+flip_randomly = true

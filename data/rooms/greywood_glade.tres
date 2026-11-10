@@ -1,0 +1,94 @@
+[gd_resource type="Resource" script_class="IsoRoomLayout" load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/iso_room_layout.gd" id="1"]
+[ext_resource type="TileSet" path="res://assets/art/tiles/greywood_iso.tres" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/entities/training_dummy.tscn" id="3"]
+[ext_resource type="Resource" path="res://data/props/bones.tres" id="p_bones"]
+[ext_resource type="Resource" path="res://data/props/campfire.tres" id="p_campfire"]
+[ext_resource type="Resource" path="res://data/props/cauldron.tres" id="p_cauldron"]
+[ext_resource type="Resource" path="res://data/props/crates.tres" id="p_crates"]
+[ext_resource type="Resource" path="res://data/props/ruin_gate.tres" id="p_ruin_gate"]
+[ext_resource type="Resource" path="res://data/props/ruin_pillar.tres" id="p_ruin_pillar"]
+[ext_resource type="Resource" path="res://data/props/ruin_rubble.tres" id="p_ruin_rubble"]
+[ext_resource type="Resource" path="res://data/props/ruin_shrine.tres" id="p_ruin_shrine"]
+[ext_resource type="Resource" path="res://data/props/ruin_wall.tres" id="p_ruin_wall"]
+[ext_resource type="Resource" path="res://data/props/stakes.tres" id="p_stakes"]
+[ext_resource type="Resource" path="res://data/props/stump.tres" id="p_stump"]
+[ext_resource type="Resource" path="res://data/props/tent.tres" id="p_tent"]
+[ext_resource type="Resource" path="res://data/props/tree_dead.tres" id="p_tree_dead"]
+[ext_resource type="Resource" path="res://data/props/tree_green.tres" id="p_tree_green"]
+
+[resource]
+script = ExtResource("1")
+rows = "XTTXTTXTTTXXXTTXTTTTXXTTTTTTTTTTTTTTTTTT
+TXXXXXXTTTXTXXTTTTXXXTTTTTTTTTTTTTTTTTTT
+XTTT,TTXTXT,XTTXXXXT..T.T.T.TTTTTTTT.TTT
+TXT.T...X...X,T.TXXTT.T...TTT.,..,....TT
+TT.......###.......,.,........,.......TT
+TXT....#######...b.......,,.,....,..T.TT
+XXX...#########s.......,.............TTT
+TTX..###########,.,.........~~~.,s...TTT
+TTX..###########.....,....~~~~~~~....,TT
+XXX.,###########.........~~~~~~~~~..TTTT
+TX..,.##########,,b......~~~~~~~~~..,TTT
+TXT...,#######...........~~~~~~~~~....TT
+XTT.....,.###,..,.........~~~~~~~...T.TT
+TTX....,.,.....,..,.....r...~~~,...,.TTT
+TXT......,...............,,...,s,,...TTT
+XXTX........,...I.........I..,..,...TTTT
+XTX...b.......................,.....,TTT
+TXT,..X.X...........................TTTT
+TXX..,.,..b,X..,,....R...............TTT
+XT......,.,.X,.L........s.,...,..,....TT
+TX,..X....,..b..,...........,.......TTTT
+XTTT........,X,.........==,.........TTTT
+TTT...,X..,b.b....===..===I=....,....TTT
+TTTT.X..X..X.....r==....,====.......TTTT
+TTTT.....X.,,...===........====.....TTTT
+TT....,....,...===,.........=====.,.TTTT
+TTT....,,.....===.............====...TTT
+TT.T.........===.G....,....,....==..TTTT
+TTT.,.......==D................N....TTTT
+TTT...,....===......,.....,N.....s,..,TT
+TTT....,..===.,,.............F..,....TTT
+TTT......P=.........,...,.......B....TTT
+TTT,....,..,..,...........B...C...,,..TT
+TTT........,..,..........,..k....,..TTTT
+TTT....,......................,.....TTTT
+TTT.,................................TTT
+TTTT,...TT..T......T.TTT.....T,TT.T,.TTT
+TTT.TTT.TTT.TT.TTTTTTTTTTTTTT.TTT..T.TTT
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+"
+tileset = ExtResource("2")
+tile_seed = 5
+ground = {
+".": ["grass_b", "grass_b", "grass_b", "grass_d", "grass_b", "grass_flowers"],
+",": ["grass_dark_a", "grass_dark_b", "grass_dark_c"],
+"=": ["grass_dark_a", "grass_dark_b", "grass_dark_a", "grass_d"],
+"~": ["water"]
+}
+raised = {
+"#": ["cliff_grass_a", "cliff_grass_b", "cliff_grass_c", "cliff_grass_d"]
+}
+props = {
+"T": ExtResource("p_tree_green"),
+"X": ExtResource("p_tree_dead"),
+"R": ExtResource("p_ruin_shrine"),
+"G": ExtResource("p_ruin_gate"),
+"I": ExtResource("p_ruin_pillar"),
+"r": ExtResource("p_ruin_rubble"),
+"L": ExtResource("p_ruin_wall"),
+"F": ExtResource("p_campfire"),
+"C": ExtResource("p_cauldron"),
+"N": ExtResource("p_tent"),
+"B": ExtResource("p_crates"),
+"s": ExtResource("p_stump"),
+"b": ExtResource("p_bones"),
+"k": ExtResource("p_stakes")
+}
+markers = {
+"D": ExtResource("3")
+}
+prop_ground = "."

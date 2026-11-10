@@ -3,7 +3,7 @@ extends IntegrationTest
 ## a timed block parries the dummy's sweep and staggers it; a riposte on the
 ## staggered dummy crits; an unguarded sweep hurts the player.
 
-const ROOM: String = "res://scenes/world/test_room.tscn"
+const ROOM: String = "res://scenes/world/greywood_glade.tscn"
 const SAFE_OFFSET := Vector2(-90, 0)  ## out of the dummy's trigger range
 const MELEE_OFFSET := Vector2(-20, 0)  ## inside its sweep, facing it
 const BLOCK_LEAD_MS: float = 70.0  ## raise the guard this long before the sweep lands

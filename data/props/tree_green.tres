@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="PropDef" load_steps=32 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/prop_def.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r00c00.png" id="t0"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r00c01.png" id="t1"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r00c02.png" id="t2"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r00c03.png" id="t3"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r00c04.png" id="t4"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r00c05.png" id="t5"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r00c06.png" id="t6"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r00c07.png" id="t7"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r00c08.png" id="t8"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r00c09.png" id="t9"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r02c00.png" id="t10"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r02c01.png" id="t11"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r02c02.png" id="t12"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r02c03.png" id="t13"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r02c04.png" id="t14"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r02c05.png" id="t15"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r02c06.png" id="t16"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r02c07.png" id="t17"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r02c08.png" id="t18"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r02c09.png" id="t19"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r06c00.png" id="t20"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r06c01.png" id="t21"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r06c02.png" id="t22"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r06c03.png" id="t23"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r06c04.png" id="t24"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r06c05.png" id="t25"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r06c06.png" id="t26"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r06c07.png" id="t27"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r06c08.png" id="t28"]
+[ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r06c09.png" id="t29"]
+
+[resource]
+script = ExtResource("1")
+textures = Array[Texture2D]([ExtResource("t0"), ExtResource("t1"), ExtResource("t2"), ExtResource("t3"), ExtResource("t4"), ExtResource("t5"), ExtResource("t6"), ExtResource("t7"), ExtResource("t8"), ExtResource("t9"), ExtResource("t10"), ExtResource("t11"), ExtResource("t12"), ExtResource("t13"), ExtResource("t14"), ExtResource("t15"), ExtResource("t16"), ExtResource("t17"), ExtResource("t18"), ExtResource("t19"), ExtResource("t20"), ExtResource("t21"), ExtResource("t22"), ExtResource("t23"), ExtResource("t24"), ExtResource("t25"), ExtResource("t26"), ExtResource("t27"), ExtResource("t28"), ExtResource("t29")])
+base_inset = 10
+collision_radius = 7.0
+jitter = 6.0
+flip_randomly = true

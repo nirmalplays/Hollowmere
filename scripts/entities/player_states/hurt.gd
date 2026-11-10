@@ -5,7 +5,7 @@ extends PlayerState
 
 func enter(msg: Dictionary) -> void:
 	player.velocity = msg.get("knockback", Vector2.ZERO)
-	player.play_directional(&"idle")
+	player.play_directional(&"hurt", 1.0, true)
 
 
 func physics_update(delta: float) -> void:

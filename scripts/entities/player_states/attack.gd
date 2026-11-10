@@ -17,7 +17,9 @@ func enter(msg: Dictionary) -> void:
 	_dir = player.aim_direction()
 	player.face(_dir)
 	_phase = Phase.WINDUP
-	player.play_directional(&"attack_windup")
+	# One swing animation stretched over wind-up + active + recovery, so the blade
+	# visibly lands when the hitbox turns on.
+	player.play_timed(&"attack", (attack.windup_ms + attack.active_ms + attack.recovery_ms) / 1000.0)
 
 
 func exit() -> void:
@@ -34,7 +36,6 @@ func physics_update(delta: float) -> void:
 	if _phase == Phase.ACTIVE and t >= recover_at:
 		_phase = Phase.RECOVERY
 		player.hitbox.deactivate()
-		player.play_directional(&"attack_recover")
 	if _phase == Phase.RECOVERY:
 		var can_cancel := attack.dodge_cancel_ms >= 0 and t >= recover_at + attack.dodge_cancel_ms
 		if can_cancel and player.stats.can_act() and player.input.consume(&"dodge"):
@@ -49,7 +50,6 @@ func physics_update(delta: float) -> void:
 
 func _begin_active() -> void:
 	_phase = Phase.ACTIVE
-	player.play_directional(&"attack_strike")
 	player.velocity = _dir * attack.lunge_speed
 	player.hitbox.shape_rect(attack.hitbox_size, _dir, attack.reach, Player.CHEST_HEIGHT)
 	player.hitbox.activate(player.make_damage_info(attack))

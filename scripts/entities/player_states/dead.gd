@@ -7,7 +7,7 @@ func enter(_msg: Dictionary) -> void:
 	player.velocity = Vector2.ZERO
 	player.hurtbox.enabled = false
 	player.hitbox.deactivate()
-	player.play_once(&"dead", player.facing.x < 0.0)
+	player.play_directional(&"dead", 1.0, true)
 	EventBus.player_died.emit(player)
 
 
