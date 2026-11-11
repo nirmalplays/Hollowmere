@@ -1,9 +1,9 @@
 extends Control
-## Title screen (docs/AUDIT.md #1), laid out like the team's Bounce Lab menu: a painted
-## pixel forest with a ruined arch and the Unlaid by a stream (MenuBackdrop), the title
-## forged at the centre on first boot then settling left (TitleLogo), and the choices in a
-## right-aligned list: the chosen one gets a gold band and a sword cursor; a rule beneath,
-## then what it does and the keys. Up/Down/W/S, Enter/Space, Esc, or the mouse.
+## Title screen: the Ashen Reach at dusk (MenuBackdrop) with our lantern logotype
+## (TitleLogo). On first boot the lantern is lit in the dark at the centre, then the logo
+## settles top-left and the choices appear beneath it. The chosen line warms from ash to
+## ember with a small flame beside it; what it does is written underneath, keys bottom-left.
+## Up/Down/W/S, Enter/Space, Esc, or the mouse.
 
 const SOLO_START_SCENE: String = "res://scenes/world/underroot_caves.tscn"
 const MENU_FONT: Font = preload("res://assets/fonts/PixelifySans.ttf")
@@ -67,16 +67,16 @@ func _ready() -> void:
 
 func _place_logo_centre() -> void:
 	var s := get_viewport_rect().size
-	_logo.scale = Vector2(1.6, 1.6)
-	_logo.position = Vector2(s.x * 0.5 - _logo.size.x * 0.8, s.y * 0.38 - _logo.size.y * 0.8)
+	_logo.scale = Vector2(1.3, 1.3)
+	_logo.position = Vector2(s.x * 0.5 - _logo.size.x * 0.65, s.y * 0.4 - _logo.size.y * 0.65)
 
 
 ## The title moves to the left and the list comes in.
 func _settle(instant: bool) -> void:
 	intro_played = true
 	var s := get_viewport_rect().size
-	var to_pos := Vector2(s.x * 0.05, s.y * 0.5 - _logo.size.y * 0.7)
-	var to_scale := Vector2(1.4, 1.4)
+	var to_pos := Vector2(s.x * 0.065, s.y * 0.1)
+	var to_scale := Vector2(1.0, 1.0)
 	if instant:
 		_logo.position = to_pos
 		_logo.scale = to_scale
@@ -126,7 +126,7 @@ func _show_screen(screen: String) -> void:
 		row.text = item["label"]
 		row.disabled = item.get("off", false)
 		row.font = MENU_FONT
-		row.custom_minimum_size = Vector2(320, 40)
+		row.custom_minimum_size = Vector2(320, 34)
 		row.mouse_entered.connect(_select.bind(i))
 		row.gui_input.connect(func(e: InputEvent) -> void:
 			if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
@@ -139,9 +139,9 @@ func _show_screen(screen: String) -> void:
 		item["node"] = row
 		_rows.append(item)
 		i += 1
-	_list.position = Vector2(s.x - 360, s.y * 0.5 - _rows.size() * 21)
-	_hint.position = Vector2(s.x - 360, _list.position.y + _rows.size() * 42 + 20)
-	_hint.add_theme_font_size_override(&"font_size", 13)
+	_list.position = Vector2(s.x * 0.065 - 4, s.y * 0.42)
+	_hint.position = Vector2(s.x * 0.065, _list.position.y + _rows.size() * 36 + 14)
+	_hint.add_theme_font_size_override(&"font_size", 15)
 	_sel = 0
 	_select(0)
 
@@ -190,13 +190,12 @@ func _draw_overlay(c: Control) -> void:
 	# The rule under the list, fading to the left like the reference.
 	if _rows.is_empty() or _panel or not _list.visible:
 		return
-	var y := _list.position.y + _rows.size() * 42 + 10
-	var x1 := get_viewport_rect().size.x - 40
-	for i in 30:
-		var k := i / 30.0
-		c.draw_line(Vector2(x1 - 320 * (k + 1.0 / 30.0), y), Vector2(x1 - 320 * k, y), Color(CREAM, 0.85 * (1.0 - k)), 2.0)
-	# Key caps for Enter beside the hint.
-	var at := Vector2(x1 - 96, y + 12)
+	var s := get_viewport_rect().size
+	var x0 := s.x * 0.065
+	var y := _list.position.y + _rows.size() * 36 + 6
+	c.draw_line(Vector2(x0, y), Vector2(x0 + 240, y), Color(CREAM, 0.35), 1.0)
+	# Keys, bottom-left.
+	var at := Vector2(x0, s.y - 40)
 	c.draw_rect(Rect2(at, Vector2(46, 18)), Color(0.96, 0.95, 0.92))
 	c.draw_rect(Rect2(at + Vector2(0, 16), Vector2(46, 2)), Color(0.6, 0.58, 0.55))
 	c.draw_string(MENU_FONT, at + Vector2(7, 14), "Enter", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.2, 0.16, 0.3))
@@ -358,7 +357,7 @@ func _vignette_material() -> ShaderMaterial:
 	sh.code = """shader_type canvas_item;
 void fragment() {
 	// Shade where the words sit (left title, right list) so they read over the forest.
-	float edge = smoothstep(0.38, 0.0, UV.x) * 0.55 + smoothstep(0.58, 1.0, UV.x) * 0.6;
+	float edge = smoothstep(0.5, 0.0, UV.x) * 0.6;
 	float v = smoothstep(0.35, 0.95, distance(UV, vec2(0.5))) * 0.5;
 	COLOR = vec4(0.008, 0.024, 0.016, clamp(edge + v, 0.0, 0.85));
 }"""
@@ -377,32 +376,29 @@ class _MenuRow:
 	var selected: bool = false:
 		set(v):
 			selected = v
+			_warm = 0.0 if v else _warm
 			queue_redraw()
 	var _t: float = 0.0
+	var _warm: float = 0.0
 
 	func _process(delta: float) -> void:
 		_t += delta
-		if selected:
-			queue_redraw()
+		_warm = move_toward(_warm, 1.0 if selected else 0.0, delta * 5.0)
+		queue_redraw()
 
 	func _draw() -> void:
-		var w := size.x
-		if selected:
-			var steps := 24
-			for i in steps:
-				var k := float(i) / steps
-				var a := 0.75 * k
-				draw_rect(Rect2(w * (1.0 - (k + 1.0 / steps)), 2, w / steps + 1, size.y - 4), Color(0.77, 0.58, 0.2, a * (0.4 if disabled else 1.0)))
-			# The sword cursor, nudging.
-			var x := w * 0.08 + sin(_t * 5.0) * 3.0
-			var y := size.y * 0.5
-			draw_line(Vector2(x - 14, y), Vector2(x + 6, y), Color(0.85, 0.88, 0.94), 3.0)
-			draw_line(Vector2(x + 6, y), Vector2(x + 11, y), Color(0.95, 0.97, 1.0), 2.0)
-			draw_line(Vector2(x - 12, y - 5), Vector2(x - 12, y + 5), Color(0.85, 0.65, 0.25), 3.0)
-			draw_line(Vector2(x - 20, y), Vector2(x - 13, y), Color(0.42, 0.26, 0.14), 3.0)
-		var col := Color(0.6, 0.58, 0.55) if disabled else (Color.WHITE if selected else Color(0.9, 0.86, 0.76))
-		var fs := 26
-		var tw := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		var at := Vector2(w - tw - 14, size.y * 0.5 + fs * 0.35)
-		draw_string(font, at + Vector2(0, 2), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(0, 0, 0, 0.8))
-		draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
+		var ash := Color(0.62, 0.6, 0.58) if not disabled else Color(0.4, 0.38, 0.38)
+		var ember := Color(1.0, 0.78, 0.45)
+		var col := ash.lerp(ember, _warm) if not disabled else ash
+		var fs := 24
+		var x := 26.0 + 6.0 * _warm
+		var y := size.y * 0.5 + fs * 0.35
+		if _warm > 0.01:
+			# A small flame beside the chosen line.
+			var f := 0.85 + 0.15 * sin(_t * 12.0) * sin(_t * 7.0)
+			var c := Vector2(10, size.y * 0.5)
+			draw_circle(c, 9.0 * f, Color(1.0, 0.55, 0.2, 0.15 * _warm))
+			draw_colored_polygon(PackedVector2Array([c + Vector2(0, -7 * f), c + Vector2(3, 0), c + Vector2(0, 4), c + Vector2(-3, 0)]), Color(1.0, 0.7, 0.3, _warm))
+			draw_colored_polygon(PackedVector2Array([c + Vector2(0, -3 * f), c + Vector2(1.5, 1), c + Vector2(0, 3), c + Vector2(-1.5, 1)]), Color(1.0, 0.95, 0.75, _warm))
+		draw_string(font, Vector2(x, y + 2), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(0, 0, 0, 0.7))
+		draw_string(font, Vector2(x, y), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
