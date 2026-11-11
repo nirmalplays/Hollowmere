@@ -4,7 +4,7 @@ extends Node
 ## buffered presses. The Player never reads Input directly: in co-op (M11) remote
 ## intents arrive over the network instead and the host applies them the same way.
 
-const BUFFERED: Array[StringName] = [&"attack_light", &"attack_heavy", &"dodge", &"interact", &"heal"]
+const BUFFERED: Array[StringName] = [&"attack_light", &"attack_heavy", &"dodge", &"interact", &"heal", &"spell_1"]
 
 ## Seconds the mouse stays the aim source after it last moved or clicked.
 @export var mouse_aim_timeout: float = 2.0
@@ -44,6 +44,10 @@ func gather(delta: float) -> void:
 	for action in BUFFERED:
 		if Input.is_action_just_pressed(action):
 			_buffer[action] = buffer_time
+	if Input.is_action_pressed(&"attack_light"):
+		_buffer[&"attack_light"] = buffer_time  # holding attack keeps the combo going
+	elif Input.is_action_just_released(&"attack_light"):
+		_buffer[&"attack_light"] = 0.0  # and letting go stops it at once
 	_gather_aim(delta)
 
 

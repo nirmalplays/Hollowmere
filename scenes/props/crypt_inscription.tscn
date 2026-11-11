@@ -7,4 +7,6 @@ script = ExtResource("1")
 text = "Cut deep into the wall, the letters still sharp:
 EIGHT BREATHS TAKEN. EIGHT BREATHS KEPT.
 WHEN THE LAST IS LOST, REMEMBER US."
-radius = 40.0
+radius = 60.0
+marked = true
+prompt = "Read the cracked wall"

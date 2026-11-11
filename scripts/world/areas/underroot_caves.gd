@@ -29,10 +29,10 @@ const TIPS: Array[String] = [
 Take the lantern: [{interact}]",
 	"Follow the corridor north",
 	"Light attack [{attack_light}]   Heavy attack [{attack_heavy}]
-Every swing spends stamina: watch the pale bar",
+Hold attack to chain a combo. Throw an ember from the lantern: [{spell_1}]",
 	"Read the cracked wall: [{interact}]",
-	"Roll with [{dodge}] when the ground flashes red
-The start of a roll can't be hit",
+	"Dash with [{dodge}] when the ground flashes red: it cancels any swing
+The start of a dash can't be hit",
 	"",
 	"Hold [{block}] to block. Tap [{block}] as a blow lands to parry
 Drink from your flask with [{heal}]",

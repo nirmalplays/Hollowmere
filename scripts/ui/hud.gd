@@ -316,6 +316,14 @@ func _draw_vitals() -> void:
 	var st_w := _stamina_max * PX_PER_POINT * 0.85
 	var st_col := Color(0.55, 0.4, 0.3) if _exhausted else BONE
 	_bar(Vector2(x, 36), st_w, 5, _stamina / maxf(_stamina_max, 1.0), st_col, 0.0, false)
+	# The lantern's ember throw: a coal that dims while it rekindles. Only once you carry it.
+	if _player and GameState.flags.get(&"has_cradle_lantern", false):
+		var ready := 1.0 - clampf(_player.ember_cooldown / Player.EMBER_COOLDOWN, 0.0, 1.0)
+		var c := Vector2(x + 6, 53)
+		_canvas.draw_circle(c, 6.0, Color(0, 0, 0, 0.6))
+		_canvas.draw_arc(c, 5.0, -PI / 2, -PI / 2 + TAU * ready, 16, EMBER if ready >= 1.0 else IRON_EDGE, 1.5)
+		_canvas.draw_circle(c, 2.5, EMBER_HOT if ready >= 1.0 else Color(0.4, 0.22, 0.14))
+		_text(PIXEL_FONT, c + Vector2(10, 4), Keys.label(&"spell_1"), 9, ASH_DIM)
 
 
 func _bar(at: Vector2, w: float, h: float, k: float, col: Color, chip: float, flash: bool) -> void:

@@ -17,16 +17,16 @@ def attack(aid, shape, trigger, tele, active, rec, cd, dmg, kb, poise, **extra):
 
 ENEMIES = {
     "hollow_crawler": dict(
-        name="Crawling Hollowed", sheet="hollowed_zombie", hp=30, speed=34, aggro=150, poise=15, xp=8,
+        name="Crawling Hollowed", sheet="hollowed_zombie", hp=30, speed=50, aggro=150, poise=15, xp=8,
         attacks=[attack("claw", 1, 26, 650, 120, 500, 1400, 8, 90, 10, reach=16, box_size=(22, 18))]),
     "hollow_grunt": dict(
-        name="Hollowed Grunt", sheet="hollow_husk", hp=50, speed=48, aggro=170, poise=30, xp=14,
+        name="Hollowed Grunt", sheet="hollow_husk", hp=50, speed=72, aggro=170, poise=30, xp=14,
         attacks=[attack("lunge", 1, 46, 750, 140, 600, 1800, 14, 140, 18, reach=22, box_size=(34, 20), lunge_speed=150)]),
     "hollow_shield": dict(
-        name="Shielded Hollowed", sheet="hollow_shield", hp=60, speed=40, aggro=170, poise=45, xp=18, shielded=True,
+        name="Shielded Hollowed", sheet="hollow_shield", hp=60, speed=58, aggro=170, poise=45, xp=18, shielded=True,
         attacks=[attack("bash", 1, 30, 800, 120, 650, 1700, 12, 170, 25, reach=18, box_size=(26, 22))]),
     "gaunt_sexton": dict(
-        name="The Gaunt Sexton", sheet="gaunt_sexton", hp=320, speed=38, aggro=230, poise=120, xp=120, boss=True,
+        name="The Gaunt Sexton", sheet="gaunt_sexton", hp=320, speed=56, aggro=230, poise=120, xp=120, boss=True,
         scale=1.4, stagger=1800, leash=900,
         attacks=[attack("shovel_sweep", 0, 50, 900, 160, 700, 2200, 18, 160, 30, aoe_radius=46),
                  attack("grave_pit", 2, 220, 1100, 200, 600, 3400, 20, 120, 25, aoe_radius=24, weight=0.8)],

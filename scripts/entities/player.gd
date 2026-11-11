@@ -7,9 +7,13 @@ extends CharacterBody2D
 signal facing_changed(direction: Vector2)
 signal respawned
 signal flasks_changed(charges: int, max_charges: int)
+signal ember_thrown
 
 const CHEST_HEIGHT: float = 18.0
-const REST_RANGE: float = 40.0  ## pixels above the feet where blows land
+const REST_RANGE: float = 40.0
+const EMBER_COOLDOWN: float = 0.9
+const EMBER_DAMAGE: float = 10.0
+const EMBER_STATES: Array[StringName] = [&"Idle", &"Move", &"Attack", &"Block"]  ## pixels above the feet where blows land
 const HIT_COLOR := Color(1.0, 0.55, 0.45)
 const BLOCK_COLOR := Color(0.75, 0.8, 0.9)
 
@@ -24,6 +28,7 @@ var peer_id: int = Const.SOLO_PEER_ID
 var facing: Vector2 = Vector2.DOWN
 var spawn_point: Vector2 = Vector2.ZERO  ## the Hearth this player rises at
 var flasks: int = 3
+var ember_cooldown: float = 0.0  ## seconds until the lantern can throw again
 
 @onready var input: PlayerInput = $Input
 @onready var stats: CombatStats = $Stats
@@ -61,6 +66,9 @@ func _physics_process(delta: float) -> void:
 	input.gather(delta)
 	if not is_multiplayer_authority():
 		return  # remote replicas are driven by synced state (M11)
+	ember_cooldown = maxf(0.0, ember_cooldown - delta)
+	if input.consume(&"spell_1"):
+		_throw_ember()
 	states.physics_update(delta)
 	var regen := states.current.stamina_regen_mult()
 	if regen > 0.0:
@@ -157,7 +165,7 @@ func try_start_attack_or_dodge() -> bool:
 		states.transition(&"Attack", {"attack": weapon.heavy})
 		return true
 	if input.consume(&"attack_light"):
-		states.transition(&"Attack", {"attack": weapon.light})
+		states.transition(&"Attack", {"attack": weapon.combo_attack(0), "step": 0})
 		return true
 	return false
 
@@ -174,6 +182,32 @@ func _try_rest() -> bool:
 			enemy.rest(self)
 			return true
 	return false
+
+
+## The Cradle Lantern spits an ember at the cursor. It never locks you in place: throw
+## while walking, between swings, behind your guard. Needs the lantern.
+func _throw_ember() -> void:
+	if ember_cooldown > 0.0 or not states.current_name() in EMBER_STATES:
+		return
+	if not GameState.flags.get(&"has_cradle_lantern", false):
+		return
+	ember_cooldown = EMBER_COOLDOWN
+	var dir := aim_direction()
+	var bolt := EmberBolt.new()
+	bolt.direction = dir
+	bolt.hit_fx = hit_fx
+	var info := DamageInfo.new()
+	info.source = self
+	info.amount = EMBER_DAMAGE
+	info.damage_type = &"fire"
+	info.poise_damage = 8.0
+	info.knockback = 40.0
+	info.attack_id = &"ember"
+	bolt.info = info
+	get_parent().add_child(bolt)
+	bolt.global_position = chest_position() + dir * 10.0
+	AudioManager.sfx(&"swing_heavy", -6.0, 0.2)
+	ember_thrown.emit()
 
 
 func make_damage_info(attack: AttackData) -> DamageInfo:
