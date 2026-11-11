@@ -89,9 +89,13 @@ func is_moving() -> bool:
 	return get_real_velocity().length() > tuning.max_speed * 0.1
 
 
-## Aim wins over movement so the character faces where it will attack.
-func update_facing() -> void:
-	var want := input.aim if input.aim != Vector2.ZERO else input.move
+## Walking decides where the character looks. The mouse only aims actions (attack,
+## block), never the walk: otherwise brushing the mouse spins the character around
+## mid-stride. A gamepad's right stick still turns the character on purpose.
+func update_facing(aim_too: bool = false) -> void:
+	var want := input.move
+	if input.aim != Vector2.ZERO and (aim_too or input.aim_is_stick):
+		want = input.aim
 	if want != Vector2.ZERO:
 		face(want)
 

@@ -15,7 +15,7 @@ func physics_update(delta: float) -> void:
 	if player.try_start_attack_or_dodge():
 		return
 	player.move_with_input(delta, player.combat.block_move_mult)
-	player.update_facing()
+	player.update_facing(true)
 	player.play_directional(&"block")
 
 

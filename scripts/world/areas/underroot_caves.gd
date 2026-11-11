@@ -1,7 +1,7 @@
 extends AreaScene
 ## ACT1_MQ01 The Waking (QUESTS.md section 2): the tutorial crypt under the shrine.
-## Objectives run strictly in order; each one wakes the next room's Hollowed and
-## shows the matching tutorial prompt (QUESTS.md section 7).
+## Objectives are shown in order with their tutorial prompts (QUESTS.md section 7),
+## but each is a condition that can be met early: nothing in here waits on the quest.
 
 const NEXT_AREA: String = "res://scenes/ui/main_menu.tscn"  # TODO: Thornwick gate (ACT1_MQ02) once built
 const OBJECTIVES: PackedStringArray = [
@@ -55,9 +55,9 @@ Resting is slower than killing, but a rested soul does not come back, and the Ho
 }
 
 var _step: int = 0
+var _done: Dictionary = {}  ## objective index -> true once its condition is met, in any order
 var _crawlers_down: int = 0
 var _grunts_down: int = 0
-var _died_early: bool = false
 var _sexton: Enemy
 var _white: ColorRect
 
@@ -68,7 +68,6 @@ func _start() -> void:
 	EventBus.tip_shown.emit(TIPS[0])
 	GameState.flags[&"has_cradle_lantern"] = false
 	EventBus.story_flag_changed.emit(&"has_cradle_lantern", false)
-	_sleep(["c", "g", "v", "S"], true)
 	for e in enemies_with_char("S"):
 		_sexton = e
 	_name_cradles()
@@ -83,80 +82,84 @@ func _start() -> void:
 	for node in entities.get_children():
 		match node.get_meta(&"marker", ""):
 			"L":
-				(node as Inscription).read.connect(func() -> void: _advance(0))
+				(node as Inscription).read.connect(func() -> void: _mark(0))
 			"I":
-				(node as Inscription).read.connect(func() -> void: _advance(3))
+				(node as Inscription).read.connect(func() -> void: _mark(3))
 			"R", "D", "E":
 				(node as Trigger).triggered.connect(_on_trigger)
 	EventBus.enemy_killed.connect(_on_enemy_down)
 	EventBus.enemy_rested.connect(func(e: Node, _by: Node) -> void: _on_enemy_down(e, null, true))
 	EventBus.player_died.connect(func(_p: Node) -> void:
-		if _step < 5:
-			_died_early = true)
+		if not _done.has(5):
+			_mark(5))  # QUESTS edge case: a natural death already taught resurrection
 
 
-func _advance(index: int) -> void:
-	if index != _step:
+## The Hollowed here are never asleep waiting for the quest: they attack whoever comes
+## near, in whatever order the player finds them. So objectives are conditions, not a
+## script: `_mark` records one as met, and the tracker walks forward through every
+## objective that is already satisfied.
+func _mark(index: int) -> void:
+	if _done.has(index):
 		return
-	QuestLog.complete(index)
-	_step += 1
+	_done[index] = true
+	var moved := false
+	while _step < OBJECTIVES.size() and _done.has(_step):
+		QuestLog.complete(_step)
+		_step += 1
+		moved = true
+	if not moved:
+		return
 	EventBus.tip_shown.emit(TIPS[_step] if _step < TIPS.size() else "")
 	if CARDS.has(_step):
 		EventBus.tutorial_card.emit(StringName("waking_%d" % _step), CARDS[_step][0], CARDS[_step][1])
-	match _step:
-		2:
-			_sleep(["c"], false)
-		4:
-			_sleep(["g"], false)
-		5:
-			if _died_early:  # QUESTS edge case: a natural death already taught resurrection
-				_advance(5)
-		8:
-			_sleep(["S"], false)
-		11:
-			_finish()
+	if _step >= OBJECTIVES.size():
+		_finish()
 
 
 func _on_trigger(id: StringName) -> void:
 	match id:
 		&"R":
-			_advance(1)
+			_mark(1)
+			if not _done.has(0):
+				EventBus.lore_shown.emit("The dark ahead is total. Behind you, beside your cradle, something is still burning.")
 		&"D":
-			if _step == 5:
+			if not _done.has(5):
 				_collapse()
 		&"E":
-			_advance(10)
+			if _done.has(9):
+				_mark(10)
+			else:
+				EventBus.lore_shown.emit("An iron gate, locked. The Sexton kept the key.")
+				for node in entities.get_children():  # let the gate be tried again
+					if node is Trigger and node.get_meta(&"marker", "") == "E":
+						(node as Trigger).rearm()
 
 
 func _on_enemy_down(enemy: Node, _killer: Node, rested: bool = false) -> void:
 	var ch: String = enemy.get_meta(&"marker", "")
-	if ch == "c" and _step == 2:
+	if rested:
+		_mark(7)
+	if ch == "c":
 		_crawlers_down += 1
-		QuestLog.set_step_text(2, "Put down the crawling Hollowed (%d/3)" % _crawlers_down)
+		QuestLog.set_step_text(2, "Put down the crawling Hollowed (%d/3)" % mini(_crawlers_down, 3))
 		if _crawlers_down >= 3:
-			_advance(2)
-	elif ch == "g" and _step == 4:
+			_mark(2)
+	elif ch == "g":
 		_grunts_down += 1
-		QuestLog.set_step_text(4, "Defeat the Hollowed in the old corridor (%d/2)" % _grunts_down)
+		QuestLog.set_step_text(4, "Defeat the Hollowed in the old corridor (%d/2)" % mini(_grunts_down, 2))
 		if _grunts_down >= 2:
-			_advance(4)
-	elif ch == "h" and _step == 6:
-		_advance(6)
-		if rested:
-			_advance(7)
-		else:
-			_sleep(["v"], false)  # two crawlers to practise the Rest on
-	elif rested and _step == 7:
-		_advance(7)
-	elif enemy == _sexton and _step == 8:
+			_mark(4)
+	elif ch == "h":
+		_mark(6)
+	elif enemy == _sexton:
 		var key := Pickup.new()
 		key.position = _sexton.position
-		key.picked.connect(func(_id: StringName) -> void: _advance(9))
+		key.picked.connect(func(_id: StringName) -> void: _mark(9))
 		entities.add_child.call_deferred(key)
 		if rested:
 			EventBus.lore_shown.emit("\"...plot four. Thank you.\"")
 			GameState.flags[&"sexton_rested"] = true
-		_advance(8)
+		_mark(8)
 
 
 ## O6: the ceiling gives way. A white-out, a voice, and you rise at the Hearth.
@@ -171,8 +174,10 @@ func _collapse() -> void:
 		EventBus.lore_shown.emit("A voice that is not a voice: \"Again.\""))
 	tw.tween_property(_white, ^"color:a", 0.0, 1.2)
 	player.respawned.connect(func() -> void:
-		EventBus.tip_shown.emit("You rose at the Hearth. The Unlaid cannot stay dead.\nEvery death feeds the Hollow and may leave a Scar.\nThis one was free.")
-		_advance(5), CONNECT_ONE_SHOT)
+		_mark(5)
+		EventBus.tip_shown.emit("You rose at the Hearth. The Unlaid cannot stay dead.
+Every death feeds the Hollow and may leave a Scar.
+This one was free."), CONNECT_ONE_SHOT)
 
 
 func _finish() -> void:
@@ -184,13 +189,6 @@ func _finish() -> void:
 	tw.tween_interval(2.5)
 	tw.tween_property(_white, ^"color", Color(0, 0, 0, 1), 1.0)
 	tw.tween_callback(func() -> void: get_tree().change_scene_to_file(NEXT_AREA))
-
-
-func _sleep(chars: Array, asleep: bool) -> void:
-	for ch: String in chars:
-		for e in enemies_with_char(ch):
-			e.dormant = asleep
-			e.visible = true
 
 
 func _name_cradles() -> void:

@@ -29,3 +29,8 @@ func _on_body_entered(body: Node) -> void:
 		return
 	_fired = true
 	triggered.emit(id)
+
+
+## Lets a one-shot trigger fire again once the player has stepped out and back in.
+func rearm() -> void:
+	_fired = false

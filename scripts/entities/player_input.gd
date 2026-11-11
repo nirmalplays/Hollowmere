@@ -13,6 +13,7 @@ const BUFFERED: Array[StringName] = [&"attack_light", &"attack_heavy", &"dodge",
 
 var move: Vector2 = Vector2.ZERO
 var aim: Vector2 = Vector2.ZERO  ## normalized, or ZERO when nothing is aiming
+var aim_is_stick: bool = false  ## aim comes from a gamepad stick, not the mouse
 var block_held: bool = false
 var sprint_held: bool = false
 
@@ -61,7 +62,8 @@ func clear_buffer() -> void:
 func _gather_aim(delta: float) -> void:
 	var stick := Input.get_vector(&"aim_left", &"aim_right", &"aim_up", &"aim_down")
 	_mouse_aim_left = maxf(0.0, _mouse_aim_left - delta)
-	if stick != Vector2.ZERO:
+	aim_is_stick = stick != Vector2.ZERO
+	if aim_is_stick:
 		aim = stick.normalized()
 		_mouse_aim_left = 0.0
 	elif _mouse_aim_left > 0.0:
