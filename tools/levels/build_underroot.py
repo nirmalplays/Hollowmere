@@ -10,7 +10,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from build_greywood_glade import footprint  # noqa: E402
+from propgen import footprint  # noqa: E402
 
 PROJECT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 W, H = 48, 36

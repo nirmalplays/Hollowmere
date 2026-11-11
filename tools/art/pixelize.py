@@ -2,7 +2,7 @@
 
 Steps: boost colour/contrast (the source packs are muted; the target look is
 vivid), area-downscale, hard alpha cut, snap to a shared palette (no dithering),
-then add a dark 1px outline. Used by import_flare.py and import_props.py.
+then add a dark 1px outline. Used by import_props.py.
 
 Third-party sources live outside the project (see SOURCES below); everything they
 produce is listed in ASSETS.md with its license.

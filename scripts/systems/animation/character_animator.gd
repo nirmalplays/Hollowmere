@@ -1,6 +1,6 @@
 class_name CharacterAnimator
 extends RefCounted
-## Plays "<base>_<dir>" animations from an 8-direction sheet (see tools/art/import_flare.py).
+## Plays "<base>_<dir>" animations from an 8-direction sheet (see tools/art/import_lpc.py).
 ## Directions are screen compass points: s is toward the camera, n away from it.
 
 ## Index = round(angle / 45 deg), angle measured from +x with y pointing down.

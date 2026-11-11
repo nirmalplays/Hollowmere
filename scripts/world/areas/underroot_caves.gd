@@ -3,7 +3,7 @@ extends AreaScene
 ## Objectives run strictly in order; each one wakes the next room's Hollowed and
 ## shows the matching tutorial prompt (QUESTS.md section 7).
 
-const NEXT_AREA: String = "res://scenes/world/greywood_glade.tscn"
+const NEXT_AREA: String = "res://scenes/ui/main_menu.tscn"  # TODO: Thornwick gate (ACT1_MQ02) once built
 const OBJECTIVES: PackedStringArray = [
 	"Take the lantern from beside your cradle",
 	"Find a way out of the cradle chamber",
