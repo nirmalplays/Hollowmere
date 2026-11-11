@@ -24,6 +24,11 @@ func complete(index: int) -> void:
 		AudioManager.sfx(&"quest_complete", -6.0, 0.0)
 		step_completed.emit(index)
 		quest_changed.emit(title, steps)
+		var all_done := true
+		for s in steps:
+			all_done = all_done and s["done"]
+		if all_done:
+			EventBus.quest_completed.emit(title)
 
 
 ## Rewrites a step's text (e.g. a counter: "Put down the crawlers (2/3)").

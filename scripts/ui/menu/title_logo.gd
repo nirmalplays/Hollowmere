@@ -11,7 +11,9 @@ signal finished
 
 const TEXT: String = "HOLLOWMERE"
 const SUBTITLE: String = "A TALE OF THE UNLAID"
-const FONT_SIZE: int = 32
+const FONT_SIZE: int = 40
+const RELIC_FONT: Font = preload("res://assets/fonts/Cinzel.ttf")
+const SUB_FONT: Font = preload("res://assets/fonts/Alegreya.ttf")
 const INK := Color(0.106, 0.059, 0.031)
 const GOLD := Color(1.0, 0.84, 0.42)
 const T_FALL: float = 0.45
@@ -51,10 +53,11 @@ func _ready() -> void:
 	_sub.add_theme_color_override(&"font_color", Color(0.95, 0.89, 0.75))
 	_sub.add_theme_color_override(&"font_shadow_color", Color.BLACK)
 	_sub.add_theme_constant_override(&"shadow_offset_y", 1)
-	_sub.add_theme_font_size_override(&"font_size", 8)
+	_sub.add_theme_font_override(&"font", SUB_FONT)
+	_sub.add_theme_font_size_override(&"font_size", 11)
 	_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_sub.size = Vector2(size.x, 10)
-	_sub.position = Vector2(0, 92)
+	_sub.position = Vector2(0, 100)
 	add_child(_sub)
 	for i in 30:
 		_embers.append(_new_ember(true))
@@ -151,6 +154,10 @@ func _draw() -> void:
 
 func _make_label(ink: bool) -> Label:
 	var l := Label.new()
+	var heavy := FontVariation.new()
+	heavy.base_font = RELIC_FONT
+	heavy.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): 900}
+	l.add_theme_font_override(&"font", heavy)
 	l.text = TEXT
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.size = Vector2(size.x, 44)

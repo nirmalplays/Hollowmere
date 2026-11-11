@@ -127,7 +127,7 @@ func rest(by: Node) -> void:
 	health_changed.emit(hp, data.max_hp)
 	Fx.text(global_position + Vector2(0, -BODY_HEIGHT - 18), "Rest", REST_FX_COLOR, self)
 	AudioManager.sfx_at(&"pickup", global_position, -4.0, 0.0)
-	var glow := IsoRoomBuilder.make_light(REST_FX_COLOR, 2.0, 0.8, Vector2(0, -BODY_HEIGHT))
+	var glow := Prop.make_light(REST_FX_COLOR, 2.0, 0.8, Vector2(0, -BODY_HEIGHT))
 	add_child(glow)
 	create_tween().tween_property(glow, ^"energy", 0.0, 1.5)
 	create_tween().tween_property(sprite, ^"modulate", Color(1, 0.95, 0.8, 0.0), 1.6)
@@ -203,6 +203,10 @@ func _nearest_player(radius: float) -> Node2D:
 
 
 func _enter(next: State) -> void:
+	var engaged_before := state in [State.CHASE, State.TELEGRAPH, State.ACTIVE, State.RECOVER, State.STAGGER]
+	var engaged_after := next in [State.CHASE, State.TELEGRAPH, State.ACTIVE, State.RECOVER, State.STAGGER]
+	if engaged_before != engaged_after:
+		EventBus.enemy_aggro.emit(self, engaged_after)
 	if state == State.ACTIVE:
 		hitbox.deactivate()
 	if state == State.TELEGRAPH or state == State.STAGGER:

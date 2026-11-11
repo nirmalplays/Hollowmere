@@ -9,6 +9,7 @@ layout = ExtResource("2")
 area_title = "The Underroot Caves"
 music = &"music_cutscene"
 ambient_light = Color(0.2, 0.22, 0.3, 1)
+reverb = true
 
 [node name="Ambient" type="CanvasModulate" parent="."]
 

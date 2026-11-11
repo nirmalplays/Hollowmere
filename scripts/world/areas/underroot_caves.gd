@@ -25,18 +25,35 @@ const CRADLE_NAMES: Array[String] = [
 	"A name was carved here. It has been scratched out, again and again, until the stone is raw.",
 ]
 const TIPS: Array[String] = [
-	"Move with W A S D\nSprint by holding Ctrl\nPress E to take the lantern",
-	"Follow the corridor north. Your lantern lights the way.",
-	"Attack with Left Mouse. Heavy attack with Right Mouse.\nAttacks cost stamina: watch the yellow bar.",
-	"Press E beside the wall to read it.",
-	"When the ground under you flashes red, dodge with Space.\nYou can't be hurt during the first part of a roll.",
+	"Move with [W][A][S][D]
+Sprint by holding [Ctrl]
+Take the lantern with [E]",
+	"Follow the corridor north",
+	"Attack with [LMB]   Heavy attack with [RMB]
+Attacks spend stamina: the yellow bar",
+	"Read the cracked wall with [E]",
+	"Dodge with [Space] when the ground flashes red
+A roll can't be hit at its start",
 	"",
-	"Hold Shift to block. Tap Shift just before a hit to parry:\nparried Hollowed are left wide open.",
-	"Stagger a Hollowed (parry it, or break its guard),\nthen press E beside it to lay it to rest with your lantern.",
-	"",
-	"",
-	"",
+	"Block by holding [Shift]
+Tap [Shift] just before a hit to parry",
+	"Stagger a Hollowed, then press [E] beside it to Rest it",
+	"Use everything you have learned",
+	"Take the Sexton's Key",
+	"Climb the stairwell",
 ]
+## One-time explainers (QUESTS.md 7), shown when the concept first matters.
+const CARDS := {
+	1: ["The Cradle Lantern", "It was lit before you woke, and it has not gone out.
+
+The lantern is your light in the dark, and it lets you lay a Hollowed to rest: when one is staggered, stand beside it and press E. A rested soul passes on, and the Hollow loosens its grip on the land."],
+	2: ["The Hollowed", "Things that should have ended, and didn't. The Hollowed are the dead who could not pass on: hungry, forgetful, still carrying echoes of who they were.
+
+Watch them. Every attack is shown before it lands: a flash, and red on the ground."],
+	7: ["Rest", "Parry an attack or break a Hollowed's guard, and it staggers. Now press E beside it.
+
+Resting is slower than killing, but a rested soul does not come back, and the Hollow Pressure in this place falls."],
+}
 
 var _step: int = 0
 var _crawlers_down: int = 0
@@ -85,6 +102,8 @@ func _advance(index: int) -> void:
 	QuestLog.complete(index)
 	_step += 1
 	EventBus.tip_shown.emit(TIPS[_step] if _step < TIPS.size() else "")
+	if CARDS.has(_step):
+		EventBus.tutorial_card.emit(StringName("waking_%d" % _step), CARDS[_step][0], CARDS[_step][1])
 	match _step:
 		2:
 			_sleep(["c"], false)

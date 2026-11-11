@@ -1,17 +1,17 @@
 extends IntegrationTest
-## M1 (isometric): walking moves the player and plays the matching 8-direction
-## animation; walking into the raised plateau never puts the feet on a cliff cell;
-## friction brings the body to rest.
+## M1: walking moves the player and plays the matching 8-direction animation;
+## walking into a wall stops the feet at the wall's edge; friction brings the body to rest.
 
-const ROOM: String = "res://scenes/world/greywood_glade.tscn"
+const ROOM: String = "res://tests/arena.tscn"
+const NORTH_WALL_EDGE: float = 96.0  ## rows 0-2 of the arena are wall (32 px tiles)
 
 
 func _run() -> void:
-	var room := spawn_scene(ROOM)
+	spawn_scene(ROOM)
 	await wait_frames(2)
 	var player := get_tree().get_first_node_in_group(&"players") as Player
 	if player == null:
-		fail("no player spawned in the glade")
+		fail("no player spawned in the arena")
 		return
 	var start := player.global_position
 
@@ -21,20 +21,10 @@ func _run() -> void:
 	check(player.sprite.animation == &"walk_e", "walk_e not playing (got %s)" % player.sprite.animation)
 	Input.action_release(&"move_right")
 
-	# Stand just below the plateau's lowest cliff cell and push up into it.
-	var raised: TileMapLayer = room.raised_layer()
-	var cliffs := raised.get_used_cells()
-	check(not cliffs.is_empty(), "glade has no raised cells")
-	var lowest := cliffs[0]
-	for c in cliffs:
-		if raised.map_to_local(c).y > raised.map_to_local(lowest).y:
-			lowest = c
-	player.global_position = raised.to_global(raised.map_to_local(lowest)) + Vector2(0, 26)
-	player.velocity = Vector2.ZERO
 	Input.action_press(&"move_up")
-	await wait_frames(120)
-	var feet_cell := raised.local_to_map(raised.to_local(player.global_position))
-	check(not (feet_cell in cliffs), "player walked onto a cliff cell %s" % feet_cell)
+	await wait_frames(150)
+	var y := player.global_position.y
+	check(y >= NORTH_WALL_EDGE and y <= NORTH_WALL_EDGE + 10.0, "north wall did not stop the player (y=%.1f)" % y)
 	Input.action_release(&"move_up")
 
 	await wait_frames(30)

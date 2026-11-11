@@ -12,6 +12,7 @@ const MAIN_MENU_PATH: String = "res://scenes/ui/main_menu.tscn"
 @export var music: StringName = &"music_explore"
 @export var ambience: StringName = &""
 @export var ambient_light: Color = Color(0.32, 0.34, 0.45)
+@export var reverb: bool = false
 
 var player: Player
 var built: AreaBuilder.Result
@@ -49,7 +50,8 @@ func _ready() -> void:
 			hud = Hud.new()
 			add_child(hud)
 			hud.bind(p)
-	AudioManager.music(music)
+	AudioManager.set_area_music(music)
+	AudioManager.set_reverb(reverb)
 	if ambience != &"":
 		AudioManager.ambient(ambience)
 	if area_title != "":

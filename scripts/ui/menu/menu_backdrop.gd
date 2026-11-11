@@ -9,7 +9,7 @@ extends Node2D
 const W: int = 320
 const H: int = 180
 const M: int = 16  ## extra width per layer for parallax
-const SCALE: float = 2.0
+const SCALE: float = 3.0  ## 320x180 painted canvas shown at 960x540
 const BAYER: Array[float] = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5]
 const ARCH_CX: int = 168 + M
 const HERO_SHEET: Texture2D = preload("res://assets/art/characters/unlaid.png")
@@ -62,7 +62,7 @@ func _process(delta: float) -> void:
 	for layer_name in _layers:
 		var d: float = DEPTH[layer_name]
 		(_layers[layer_name] as Sprite2D).position = Vector2(-M - look.x * M * d * 2.0, -look.y * 4.0 * d)
-	_hero.position = Vector2(ARCH_CX - 44 - M - look.x * M * 1.4, 152 - look.y * 4.0 * 0.8)
+	_hero.position = Vector2(ARCH_CX + 44 - M - look.x * M * 1.4, 152 - look.y * 4.0 * 0.8)
 	_hero.frame_coords.x = int(_t * 2.0) % 2
 	for f in _fireflies:
 		f["x"] = wrapf(f["x"] + sin(_t * f["s"] + f["p"]) * 6.0 * delta + 3.0 * delta, -4, W + 4)
@@ -128,6 +128,7 @@ func _add_hero() -> void:
 	_hero.frame_coords = Vector2i(0, 4)  # idle facing away (n): looking toward the arch
 	_hero.centered = true
 	_hero.offset = Vector2(0, -30)  # feet sit 30 px below the 128 px frame's centre
+	_hero.scale = Vector2(0.5, 0.5)  # a small figure against the ruin, like the reference
 	add_child(_hero)
 
 

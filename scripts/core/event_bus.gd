@@ -21,3 +21,6 @@ signal boss_phase_changed(boss: Node, phase: int)
 signal area_entered(title: String)  ## area banner ("THE UNDERROOT CAVES")
 signal boss_engaged(boss: Node)  ## shows the boss bar
 signal toast_shown(kind: String, text: String)  ## top-right toast ("Item", "Cradle Lantern")
+signal tutorial_card(id: StringName, title: String, body: String)  ## one-time explainer (pauses)
+signal quest_completed(title: String)  ## the big "QUEST COMPLETE!" banner
+signal enemy_aggro(enemy: Node, engaged: bool)  ## drives combat music

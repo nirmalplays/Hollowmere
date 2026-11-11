@@ -40,10 +40,15 @@ var _boss_max: float = 1.0
 var _toast_kind: Label
 var _toast_text: Label
 var _toast_left: float = 0.0
+var _tip_text: String = ""
+var _key_regex := RegEx.create_from_string("\\[([^\\]]+)\\]")
+var _card: Control
+var _complete: Control
 
 
 func _ready() -> void:
 	layer = 10
+	process_mode = Node.PROCESS_MODE_ALWAYS  # tutorial cards pause the game
 	_canvas = Control.new()
 	_canvas.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -67,7 +72,13 @@ func _ready() -> void:
 	_toast_text.modulate.a = 0.0
 	QuestLog.quest_changed.connect(_on_quest_changed)
 	EventBus.lore_shown.connect(show_lore)
-	EventBus.tip_shown.connect(func(t: String) -> void: _tips.text = t)
+	_tips.visible = false
+	EventBus.tip_shown.connect(func(t: String) -> void:
+		_tip_text = t
+		if t != "":
+			AudioManager.sfx(&"ui_move", -10.0, 0.0))
+	EventBus.tutorial_card.connect(_show_card)
+	EventBus.quest_completed.connect(_show_quest_complete)
 	EventBus.area_entered.connect(_show_banner)
 	EventBus.boss_engaged.connect(_on_boss)
 	EventBus.toast_shown.connect(_show_toast)
@@ -98,6 +109,125 @@ func show_lore(text: String) -> void:
 	_lore_left = LORE_SECONDS
 	_lore_box.modulate.a = 1.0
 	_lore_box.visible = true
+
+
+## Top-left tutorial prompts in the reference style: a diamond per line and keys drawn
+## as caps. Write keys in brackets: "Move with [W][A][S][D]".
+func _draw_tips() -> void:
+	if _tip_text == "":
+		return
+	var lines := _tip_text.split("\n")
+	_canvas.draw_rect(Rect2(10, 10, 430, lines.size() * 26 + 12), Color(0.02, 0.03, 0.06, 0.62))
+	var y := 34.0
+	for line in lines:
+		var p := Vector2(24, y - 5)
+		var d := PackedVector2Array([p + Vector2(0, -5), p + Vector2(5, 0), p + Vector2(0, 5), p + Vector2(-5, 0), p + Vector2(0, -5)])
+		_canvas.draw_polyline(d, GOLD, 1.5)
+		var x := 38.0
+		var last := 0
+		for m in _key_regex.search_all(line):
+			x = _tip_text_part(line.substr(last, m.get_start() - last), x, y)
+			x = _tip_key(m.get_string(1), x, y)
+			last = m.get_end()
+		_tip_text_part(line.substr(last), x, y)
+		y += 26.0
+
+
+func _tip_text_part(t: String, x: float, y: float) -> float:
+	if t == "":
+		return x
+	_canvas.draw_string(BODY_FONT, Vector2(x, y), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.96, 0.94, 0.88))
+	return x + BODY_FONT.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+
+
+func _tip_key(k: String, x: float, y: float) -> float:
+	var w := maxf(20.0, TITLE_FONT.get_string_size(k, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 10.0)
+	var r := Rect2(x + 2, y - 15, w, 19)
+	_canvas.draw_rect(r, Color(0.95, 0.94, 0.9))
+	_canvas.draw_rect(Rect2(r.position + Vector2(0, 17), Vector2(w, 2)), Color(0.55, 0.52, 0.5))
+	_canvas.draw_string(TITLE_FONT, Vector2(x + 7, y), k, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.15, 0.12, 0.2))
+	return x + w + 6.0
+
+
+## A one-time explainer for a new concept; pauses the game until dismissed.
+func _show_card(id: StringName, title: String, body: String) -> void:
+	var key := StringName("card_" + String(id))
+	if GameState.flags.get(key, false) or _card:
+		return
+	GameState.flags[key] = true
+	get_tree().paused = true
+	AudioManager.sfx(&"pickup", -8.0, 0.0)
+	var panel := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.035, 0.06, 0.1, 0.96)
+	style.border_color = Color(0.45, 0.62, 0.85)
+	style.set_border_width_all(2)
+	style.set_content_margin_all(26)
+	style.shadow_color = Color(0, 0, 0, 0.7)
+	style.shadow_size = 12
+	panel.add_theme_stylebox_override(&"panel", style)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override(&"separation", 14)
+	panel.add_child(v)
+	var head := _label(TITLE_FONT, 26, Color(0.98, 0.95, 0.88), false)
+	head.text = title
+	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(head)
+	var text := _label(BODY_FONT, 18, Color(0.9, 0.9, 0.86), false)
+	text.text = body
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.custom_minimum_size = Vector2(480, 0)
+	v.add_child(text)
+	var foot := _label(TITLE_FONT, 13, GOLD, false)
+	foot.text = "Press  E  or  Enter  to continue"
+	foot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(foot)
+	_canvas.add_child(panel)
+	panel.reset_size()
+	panel.position = (_canvas.get_viewport_rect().size - panel.size) * 0.5
+	_card = panel
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if _card and (event.is_action_pressed(&"interact") or event.is_action_pressed(&"ui_accept") or event.is_action_pressed(&"ui_cancel")):
+		_card.queue_free()
+		_card = null
+		get_tree().paused = false
+		AudioManager.sfx(&"ui_select", -6.0, 0.0)
+		get_viewport().set_input_as_handled()
+
+
+func _show_quest_complete(title: String) -> void:
+	if _complete:
+		_complete.queue_free()
+	var s := _canvas.get_viewport_rect().size
+	var box := Control.new()
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.position = Vector2(0, s.y * 0.2)
+	box.size = Vector2(s.x, 90)
+	box.draw.connect(func() -> void:
+		for i in 40:
+			var k := absf(i / 20.0 - 1.0)
+			box.draw_rect(Rect2(s.x * 0.5 - 300 + i * 15, 6, 15, 70), Color(0.2, 0.38, 0.75, 0.45 * (1.0 - k))))
+	var head := _label(TITLE_FONT, 40, Color(0.99, 0.96, 0.88), false)
+	head.text = "QUEST COMPLETE!"
+	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	head.size = Vector2(s.x, 50)
+	box.add_child(head)
+	var sub := _label(BODY_FONT, 16, Color(0.8, 0.85, 0.95), false)
+	sub.text = title.to_upper()
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sub.size = Vector2(s.x, 20)
+	sub.position = Vector2(0, 50)
+	box.add_child(sub)
+	_canvas.add_child(box)
+	_complete = box
+	box.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(box, ^"modulate:a", 1.0, 0.4)
+	tw.tween_interval(3.0)
+	tw.tween_property(box, ^"modulate:a", 0.0, 0.8)
+	tw.tween_callback(box.queue_free)
 
 
 func _show_banner(title: String) -> void:
@@ -154,7 +284,7 @@ func _layout() -> void:
 	_xp.position = Vector2(100, s.y - 92)
 	_quest_title.position = Vector2(s.x - 250, 150)
 	_quest_steps.position = Vector2(s.x - 250, 186)
-	_lore_box.position = Vector2(s.x * 0.5 - 60, 170)
+	_lore_box.position = Vector2(s.x * 0.5 - 200, s.y - 190)  # lower centre, clear of the tracker
 	_tips.position = Vector2(22, 18)
 	_banner.size = Vector2(s.x, 44)
 	_banner.position = Vector2(0, 92)
@@ -250,9 +380,7 @@ func _draw_hud() -> void:
 		_canvas.draw_rect(Rect2(at, Vector2(w, 8)), Color(0.08, 0.05, 0.05))
 		_canvas.draw_rect(Rect2(at, Vector2(w * clampf(_boss_hp / maxf(_boss_max, 1.0), 0.0, 1.0), 8)), Color(0.78, 0.16, 0.12))
 		_canvas.draw_line(at, at + Vector2(w * clampf(_boss_hp / maxf(_boss_max, 1.0), 0.0, 1.0), 0), Color(1.0, 0.45, 0.35), 1.0)
-	# Tutorial prompts: a soft dark panel behind them, top-left.
-	if _tips.text != "":
-		_canvas.draw_rect(Rect2(_tips.position - Vector2(10, 6), _tips.size + Vector2(20, 12)), Color(0.02, 0.03, 0.06, 0.6))
+	_draw_tips()
 	if _toast_left > 0.0:
 		_canvas.draw_rect(Rect2(_toast_kind.position - Vector2(10, 6), Vector2(220, 42)), Color(0.04, 0.05, 0.08, 0.7 * _toast_kind.modulate.a))
 	# Quick slots: a diamond cluster bottom-left (1 top, 2 left, 3 right, 4 bottom).

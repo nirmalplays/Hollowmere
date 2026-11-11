@@ -19,7 +19,6 @@ from PIL import Image, ImageOps
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pixelize import SOURCES  # noqa: E402
-from import_flare import write_sheet_def  # noqa: E402
 
 PROJECT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 LPC = os.path.join(SOURCES, "lpc", "spritesheets")
@@ -191,6 +190,26 @@ def build(name, layers):
     sheet.save(out)
     write_sheet_def(name, (FRAME, FRAME), meta, foot_inset=FRAME - feet + 1)
     print("character", name, sheet.size, len(meta), "animations, feet at", feet)
+
+
+def write_sheet_def(name, frame, meta, foot_inset):
+    """SpriteSheetDef .tres: one animation per sheet row."""
+    out = [f'[gd_resource type="Resource" script_class="SpriteSheetDef" load_steps={3 + len(meta)} format=3]', "",
+           '[ext_resource type="Script" path="res://scripts/systems/animation/sprite_sheet_def.gd" id="1"]',
+           '[ext_resource type="Script" path="res://scripts/systems/animation/sprite_anim_row.gd" id="2"]',
+           f'[ext_resource type="Texture2D" path="res://assets/art/characters/{name}.png" id="3"]', ""]
+    for i, (anim, count, fps, loop) in enumerate(meta):
+        out += [f'[sub_resource type="Resource" id="a{i}"]', 'script = ExtResource("2")', f'name = &"{anim}"',
+                f"row = {i}", "column = 0", f"frame_count = {count}", f"fps = {fps:.2f}",
+                f"loop = {'true' if loop else 'false'}", ""]
+    refs = ", ".join(f'SubResource("a{i}")' for i in range(len(meta)))
+    out += ["[resource]", 'script = ExtResource("1")', 'texture = ExtResource("3")',
+            f"frame_size = Vector2i({frame[0]}, {frame[1]})", f'animations = Array[ExtResource("2")]([{refs}])',
+            f"foot_inset = {foot_inset}", ""]
+    with open(os.path.join(PROJECT, "data", "sprites", name + ".tres"), "w", encoding="utf-8", newline="
+") as f:
+        f.write("
+".join(out))
 
 
 def main():

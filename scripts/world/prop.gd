@@ -10,6 +10,7 @@ const FADE_MIN_HEIGHT: int = 36  ## only props taller than this fade
 const CHECK_INTERVAL: int = 4  ## frames between occlusion checks
 
 static var _shadow_texture: Texture2D
+static var _light_texture: Texture2D
 
 var sprite: Sprite2D
 
@@ -37,7 +38,7 @@ func setup(def: PropDef, index: int, flip: bool) -> void:
 		poly.polygon = footprint
 		add_child(poly)
 	if def.light_color.a > 0.0:
-		add_child(IsoRoomBuilder.make_light(def.light_color, def.light_energy, def.light_scale, Vector2(0, -def.light_height)))
+		add_child(Prop.make_light(def.light_color, def.light_energy, def.light_scale, Vector2(0, -def.light_height)))
 	if def.sound != &"":
 		add_child(AudioManager.make_emitter(def.sound))
 	_fades = tex.get_height() > FADE_MIN_HEIGHT
@@ -113,3 +114,26 @@ static func _mirrored(points: PackedVector2Array) -> PackedVector2Array:
 	for i in range(points.size() - 1, -1, -1):
 		out.append(Vector2(-points[i].x, points[i].y))
 	return out
+
+
+## A soft round 2D light (shared texture): braziers, lanterns, glowing cradles, Rests.
+static func make_light(color: Color, energy: float, scale: float, offset: Vector2) -> PointLight2D:
+	if _light_texture == null:
+		var gradient := Gradient.new()
+		gradient.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
+		gradient.colors = PackedColorArray([Color(1, 1, 1, 1), Color(1, 1, 1, 0.4), Color(1, 1, 1, 0)])
+		var tex := GradientTexture2D.new()
+		tex.gradient = gradient
+		tex.width = 192
+		tex.height = 192
+		tex.fill = GradientTexture2D.FILL_RADIAL
+		tex.fill_from = Vector2(0.5, 0.5)
+		tex.fill_to = Vector2(1.0, 0.5)
+		_light_texture = tex
+	var light := PointLight2D.new()
+	light.texture = _light_texture
+	light.color = color
+	light.energy = energy
+	light.texture_scale = scale
+	light.position = offset
+	return light

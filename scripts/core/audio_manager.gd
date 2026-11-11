@@ -22,6 +22,11 @@ var _ambient_name: StringName = &""
 var _voices: Array[AudioStreamPlayer] = []
 var _next_voice: int = 0
 var _last_played: Dictionary = {}  # sound -> msec, to stop machine-gun stacking
+## Music states (docs/AUDIT.md #4): the area's track, battle when Hollowed engage,
+## the mini-boss theme when a boss is among them; back to the area after a calm beat.
+var area_music: StringName = &""
+var _engaged: Dictionary = {}  # enemy -> is_boss
+var _calm_timer: SceneTreeTimer
 
 
 func _ready() -> void:
@@ -32,6 +37,50 @@ func _ready() -> void:
 	_ambient = _make_player(&"Ambient")
 	for i in SFX_VOICES:
 		_voices.append(_make_player(&"SFX"))
+	EventBus.enemy_aggro.connect(_on_enemy_aggro)
+
+
+## Areas call this instead of music(): it becomes the calm state to return to.
+func set_area_music(sound: StringName) -> void:
+	area_music = sound
+	_engaged.clear()
+	music(sound)
+
+
+## Caves and crypts echo: a reverb on effects and ambience.
+func set_reverb(on: bool) -> void:
+	for bus in [&"SFX", &"Ambient"]:
+		var idx := AudioServer.get_bus_index(bus)
+		if idx < 0:
+			continue
+		while AudioServer.get_bus_effect_count(idx) > 0:
+			AudioServer.remove_bus_effect(idx, 0)
+		if on:
+			var rev := AudioEffectReverb.new()
+			rev.room_size = 0.7
+			rev.damping = 0.6
+			rev.wet = 0.18
+			rev.dry = 1.0
+			AudioServer.add_bus_effect(idx, rev)
+
+
+func _on_enemy_aggro(enemy: Node, engaged: bool) -> void:
+	if area_music == &"":
+		return
+	if engaged:
+		_engaged[enemy] = enemy.get(&"data") != null and enemy.data.is_boss
+	else:
+		_engaged.erase(enemy)
+	for e in _engaged.keys():
+		if not is_instance_valid(e):
+			_engaged.erase(e)
+	if _engaged.is_empty():
+		_calm_timer = get_tree().create_timer(4.0)
+		_calm_timer.timeout.connect(func() -> void:
+			if _engaged.is_empty():
+				music(area_music, 2.5))
+		return
+	music(&"music_miniboss" if true in _engaged.values() else &"music_battle", 0.8)
 
 
 ## Crossfades to a looping track (a random variation if the name has several).

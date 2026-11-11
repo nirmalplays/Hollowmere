@@ -20,7 +20,7 @@ func _ready() -> void:
 	_sprite.offset = Vector2(0, -LIT.get_height() / 2.0 + 2)
 	add_child(_sprite)
 	add_child(Prop.make_shadow(0.4))
-	_light = IsoRoomBuilder.make_light(Color(1.0, 0.72, 0.4), 1.6, 0.9, Vector2(0, -16))
+	_light = Prop.make_light(Color(1.0, 0.72, 0.4), 1.6, 0.9, Vector2(0, -16))
 	add_child(_light)
 	read.connect(_on_taken)
 
