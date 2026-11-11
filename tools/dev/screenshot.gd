@@ -25,10 +25,12 @@ func _initialize() -> void:
 func _physics_process(_delta: float) -> bool:
 	_frame += 1
 	for input in _inputs:
-		if _frame == input["from"]:
-			Input.action_press(input["action"])
-		elif _frame == input["to"]:
-			Input.action_release(input["action"])
+		if _frame == input["from"] or _frame == input["to"]:
+			# A real event, so _input/_unhandled_input handlers see it too.
+			var ev := InputEventAction.new()
+			ev.action = input["action"]
+			ev.pressed = _frame == input["from"]
+			Input.parse_input_event(ev)
 	if _frame == _capture_at:
 		var img := root.get_texture().get_image()
 		img.save_png(_out)

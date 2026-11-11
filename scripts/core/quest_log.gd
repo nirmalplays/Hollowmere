@@ -18,16 +18,17 @@ func start(quest_title: String, step_texts: PackedStringArray) -> void:
 	quest_changed.emit(title, steps)
 
 
-func complete(index: int) -> void:
+func complete(index: int, silent: bool = false) -> void:
 	if index >= 0 and index < steps.size() and not steps[index]["done"]:
 		steps[index]["done"] = true
-		AudioManager.sfx(&"quest_complete", -6.0, 0.0)
+		if not silent:
+			AudioManager.sfx(&"quest_complete", -6.0, 0.0)
 		step_completed.emit(index)
 		quest_changed.emit(title, steps)
 		var all_done := true
 		for s in steps:
 			all_done = all_done and s["done"]
-		if all_done:
+		if all_done and not silent:
 			EventBus.quest_completed.emit(title)
 
 

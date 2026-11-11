@@ -22,10 +22,16 @@ func _ready() -> void:
 	add_child(Prop.make_shadow(0.4))
 	_flame = Prop.make_light(Color(1.0, 0.72, 0.4), 1.6, 0.9, Vector2(0, -16))
 	add_child(_flame)
-	read.connect(_on_taken)
+	read.connect(func() -> void: _on_taken())
 
 
-func _on_taken() -> void:
+## From a save: already carried, no fanfare.
+func restore_taken() -> void:
+	_was_read = true
+	_on_taken(true)
+
+
+func _on_taken(silent: bool = false) -> void:
 	_sprite.texture = EMPTY
 	_flame.queue_free()
 	_near = false
@@ -34,4 +40,5 @@ func _on_taken() -> void:
 	set_process_unhandled_input(false)
 	GameState.flags[&"has_cradle_lantern"] = true
 	EventBus.story_flag_changed.emit(&"has_cradle_lantern", true)
-	EventBus.toast_shown.emit("Item", "Cradle Lantern")
+	if not silent:
+		EventBus.toast_shown.emit("Item", "Cradle Lantern")

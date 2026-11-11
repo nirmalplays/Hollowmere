@@ -109,11 +109,41 @@ func _mark(index: int) -> void:
 		moved = true
 	if not moved:
 		return
+	SaveManager.save_game.call_deferred()  # every finished objective is kept
 	EventBus.tip_shown.emit(TIPS[_step] if _step < TIPS.size() else "")
 	if CARDS.has(_step):
 		EventBus.tutorial_card.emit(StringName("waking_%d" % _step), CARDS[_step][0], CARDS[_step][1])
 	if _step >= OBJECTIVES.size():
 		_finish()
+
+
+func _capture_quest() -> Dictionary:
+	return {"done": _done.keys(), "crawlers": _crawlers_down, "grunts": _grunts_down}
+
+
+func _restore_quest(state: Dictionary) -> void:
+	for i: Variant in state.get("done", []):
+		_done[int(i)] = true
+	_crawlers_down = int(state.get("crawlers", 0))
+	_grunts_down = int(state.get("grunts", 0))
+	QuestLog.set_step_text(2, "Put down the crawling Hollowed (%d/3)" % mini(_crawlers_down, 3))
+	QuestLog.set_step_text(4, "Defeat the Hollowed in the old corridor (%d/2)" % mini(_grunts_down, 2))
+	while _step < OBJECTIVES.size() and _done.has(_step):
+		QuestLog.complete(_step, true)
+		_step += 1
+	if _done.has(0):
+		GameState.flags[&"has_cradle_lantern"] = true
+		EventBus.story_flag_changed.emit(&"has_cradle_lantern", true)
+		for node in entities.get_children():
+			if node is LanternPedestal:
+				(node as LanternPedestal).restore_taken()
+	if _done.has(8) and not _done.has(9) and _sexton:  # the key still lies where he fell
+		var key := Pickup.new()
+		key.position = _sexton.position
+		key.picked.connect(func(_id: StringName) -> void: _mark(9))
+		entities.add_child.call_deferred(key)
+	EventBus.lore_shown.emit("The lantern is warm. You have been here before.")
+	EventBus.tip_shown.emit(TIPS[_step] if _step < TIPS.size() else "")
 
 
 func _on_trigger(id: StringName) -> void:

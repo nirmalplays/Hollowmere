@@ -25,6 +25,7 @@ var _panel: Control
 var _shade: ColorRect
 var _ready_for_input: bool = false
 var _overlay: Control
+var _armed_slot: int = -1  ## a filled slot picked for a new journey, waiting for the second press
 
 
 func _ready() -> void:
@@ -94,14 +95,27 @@ func _settle(instant: bool) -> void:
 func _items(screen: String) -> Array[Dictionary]:
 	match screen:
 		"title":
+			var latest := SaveManager.latest_slot()
 			return [
-				{"label": "New Journey", "hint": "Wake in the Underroot. Act I: The Waking", "act": _start_game},
-				{"label": "Continue", "hint": "Saving arrives with the next build", "act": func() -> void: pass, "off": true},
+				{"label": "Continue", "hint": SaveManager.describe(latest) if latest >= 0 else "No journey has been begun yet", "act": func() -> void: _begin(latest, false), "off": latest < 0},
+				{"label": "New Journey", "hint": "Wake in the Underroot. Act I: The Waking", "act": func() -> void: _show_screen("new")},
+				{"label": "Journeys", "hint": "Three cradles, three journeys: pick one up again", "act": func() -> void: _show_screen("load"), "off": latest < 0},
 				{"label": "Co-op", "hint": "Fight beside up to 7 friends (coming later)", "act": func() -> void: pass, "off": true},
 				{"label": "Settings", "hint": "Sound, screen and feel", "act": func() -> void: _open_panel(_settings_panel())},
 				{"label": "Credits", "hint": "The people whose work made this", "act": func() -> void: _open_panel(_credits_panel())},
 				{"label": "Quit", "hint": "Leave Orsolen for now", "act": func() -> void: get_tree().quit()},
 			]
+		"new", "load":
+			var rows: Array[Dictionary] = []
+			for i in SaveManager.SLOTS:
+				var filled := SaveManager.has(i)
+				var hint := SaveManager.describe(i)
+				if screen == "new":
+					hint = ("Begin here.  " if not filled else "Begin anew here, erasing:  ") + (hint if filled else "")
+				rows.append({"label": "Journey %s%s" % [SaveManager.NUMERALS[i], "" if filled else "   (empty)"], "hint": hint,
+					"act": _pick_slot.bind(i, screen == "new"), "off": screen == "load" and not filled})
+			rows.append({"label": "Back", "hint": "", "act": func() -> void: _show_screen("title")})
+			return rows
 	return [{"label": "Back", "hint": "", "act": _close_panel}]
 
 
@@ -139,11 +153,14 @@ func _show_screen(screen: String) -> void:
 		item["node"] = row
 		_rows.append(item)
 		i += 1
-	_list.position = Vector2(s.x * 0.065 - 4, s.y * 0.42)
+	_list.position = Vector2(s.x * 0.065 - 4, s.y * 0.37)
 	_hint.position = Vector2(s.x * 0.065, _list.position.y + _rows.size() * 36 + 14)
 	_hint.add_theme_font_size_override(&"font_size", 15)
 	_sel = 0
-	_select(0)
+	_armed_slot = -1
+	while _sel < _rows.size() - 1 and _rows[_sel].get("off", false):
+		_sel += 1
+	_select(_sel)
 
 
 func _select(i: int) -> void:
@@ -175,6 +192,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if _panel and event.is_action_pressed(&"ui_cancel"):
 		_close_panel()
+	elif _screen != "title" and event.is_action_pressed(&"ui_cancel"):
+		AudioManager.sfx(&"ui_back", -6.0, 0.0)
+		_show_screen("title")
 	elif event.is_action_pressed(&"ui_down") or event.is_action_pressed(&"move_down"):
 		_select((_sel + 1) % _rows.size())
 	elif event.is_action_pressed(&"ui_up") or event.is_action_pressed(&"move_up"):
@@ -204,14 +224,24 @@ func _draw_overlay(c: Control) -> void:
 
 # ---------------------------------------------------------------- actions and panels
 
-func _start_game() -> void:
+## A slot was chosen. Starting over a kept journey takes a second press.
+func _pick_slot(slot: int, fresh: bool) -> void:
+	if fresh and SaveManager.has(slot) and _armed_slot != slot:
+		_armed_slot = slot
+		_hint.text = "This journey will be erased. Press again to begin anew."
+		return
+	_begin(slot, fresh)
+
+
+func _begin(slot: int, fresh: bool) -> void:
 	_ready_for_input = false
 	AudioManager.sfx(&"game_start", -4.0, 0.0)
 	AudioManager.stop_music(1.0)
-	GameState.start_solo()
 	var tw := create_tween()
 	tw.tween_property(_shade, ^"color:a", 1.0, 0.9)
-	tw.tween_callback(func() -> void: get_tree().change_scene_to_file(SOLO_START_SCENE))
+	tw.tween_callback(func() -> void:
+		if fresh or not SaveManager.load_game(slot):
+			SaveManager.new_game(slot))
 
 
 func _open_panel(panel: Control) -> void:
