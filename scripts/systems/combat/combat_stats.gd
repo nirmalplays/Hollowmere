@@ -51,6 +51,13 @@ func regen(delta: float, mult: float = 1.0) -> void:
 	stamina_changed.emit(stamina, tuning.max_stamina)
 
 
+func heal(amount: float) -> void:
+	if hp <= 0.0:
+		return
+	hp = minf(tuning.max_hp, hp + amount)
+	hp_changed.emit(hp, tuning.max_hp)
+
+
 func take_damage(amount: int) -> void:
 	if amount <= 0 or hp <= 0.0:
 		return

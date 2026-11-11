@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/music_zone.gd" id="1"]
+
+[node name="WakingMusic" type="Area2D"]
+script = ExtResource("1")
+sound = &"music_cutscene"
+radius = 230.0

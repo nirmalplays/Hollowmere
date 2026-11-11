@@ -26,6 +26,9 @@ extends Resource
 @export var parry_window: float = 0.15  ## block pressed this long before a hit = parry
 @export var parry_recover: float = 0.35
 @export var riposte_open: float = 0.08  ## after a parry, attacks can start this soon
+@export_group("Flask")
+@export var flask_charges: int = 3
+@export var flask_heal_fraction: float = 0.4  ## of max HP per sip
 @export_group("Reactions")
 @export var hurt_duration: float = 0.28
 @export var guard_break_duration: float = 0.9

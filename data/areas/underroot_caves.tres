@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="AreaLayout" load_steps=24 format=3]
+[gd_resource type="Resource" script_class="AreaLayout" load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/area_layout.gd" id="1"]
 [ext_resource type="TileSet" path="res://assets/art/tiles/lpc/crypt.tres" id="2"]
@@ -22,7 +22,8 @@
 [ext_resource type="PackedScene" path="res://scenes/props/cradle_name.tscn" id="m4"]
 [ext_resource type="PackedScene" path="res://scenes/props/crypt_inscription.tscn" id="m5"]
 [ext_resource type="PackedScene" path="res://scenes/props/lantern_pedestal.tscn" id="m6"]
-[ext_resource type="PackedScene" path="res://scenes/world/trigger.tscn" id="m7"]
+[ext_resource type="PackedScene" path="res://scenes/world/music_zone_waking.tscn" id="m7"]
+[ext_resource type="PackedScene" path="res://scenes/world/trigger.tscn" id="m8"]
 
 [resource]
 script = ExtResource("1")
@@ -55,7 +56,7 @@ rows = "################################################
 #####..n.n....n.n..#####T...............T#######
 #####w......L......#####..O..u....B......#######
 #####......P.......#####.................#######
-#####..X.C....C....#####.......h.........#######
+#####..X.C..Z.C....#####.......h.........#######
 #####..n.n....n....#####...v.......v.....#######
 #####Tb..........kT#####.b...........k...#######
 ########################T................#######
@@ -87,12 +88,13 @@ props = {
 "u": ExtResource("p_cauldron")
 }
 markers = {
-"D": ExtResource("m7"),
-"E": ExtResource("m7"),
+"D": ExtResource("m8"),
+"E": ExtResource("m8"),
 "I": ExtResource("m5"),
 "L": ExtResource("m6"),
-"R": ExtResource("m7"),
+"R": ExtResource("m8"),
 "S": ExtResource("m0"),
+"Z": ExtResource("m7"),
 "c": ExtResource("m1"),
 "g": ExtResource("m2"),
 "h": ExtResource("m3"),

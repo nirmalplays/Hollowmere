@@ -7,7 +7,8 @@
 script = ExtResource("1")
 layout = ExtResource("2")
 area_title = "The Underroot Caves"
-music = &"music_cutscene"
+music = &""
+ambience = &"amb_cave"
 ambient_light = Color(0.2, 0.22, 0.3, 1)
 reverb = true
 

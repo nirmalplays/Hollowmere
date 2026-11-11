@@ -74,7 +74,7 @@ func _ready() -> void:
 	EventBus.lore_shown.connect(show_lore)
 	_tips.visible = false
 	EventBus.tip_shown.connect(func(t: String) -> void:
-		_tip_text = t
+		_tip_text = Keys.fmt(t)
 		if t != "":
 			AudioManager.sfx(&"ui_move", -10.0, 0.0))
 	EventBus.tutorial_card.connect(_show_card)
@@ -174,12 +174,12 @@ func _show_card(id: StringName, title: String, body: String) -> void:
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(head)
 	var text := _label(BODY_FONT, 18, Color(0.9, 0.9, 0.86), false)
-	text.text = body
+	text.text = Keys.fmt(body)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.custom_minimum_size = Vector2(480, 0)
 	v.add_child(text)
 	var foot := _label(TITLE_FONT, 13, GOLD, false)
-	foot.text = "Press  E  or  Enter  to continue"
+	foot.text = Keys.fmt("Press  {interact}  to continue")
 	foot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(foot)
 	_canvas.add_child(panel)

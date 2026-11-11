@@ -17,7 +17,7 @@ var _was_read: bool = false
 
 func _ready() -> void:
 	_prompt = Label.new()
-	_prompt.text = "[E] " + prompt
+	_prompt.text = Keys.fmt("[{interact}] ") + prompt
 	_prompt.add_theme_font_override(&"font", load("res://assets/fonts/Alegreya.ttf"))
 	_prompt.add_theme_font_size_override(&"font_size", 9)
 	_prompt.add_theme_color_override(&"font_shadow_color", Color.BLACK)

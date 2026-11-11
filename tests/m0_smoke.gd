@@ -5,7 +5,7 @@ const REQUIRED_ACTIONS: Array[StringName] = [
 	&"move_up", &"move_down", &"move_left", &"move_right", &"aim_up", &"aim_down",
 	&"aim_left", &"aim_right", &"attack_light", &"attack_heavy", &"dodge", &"block",
 	&"sprint", &"spell_1", &"spell_2", &"spell_3", &"spell_4", &"spell_5", &"interact",
-	&"inventory", &"skill_tree", &"map", &"pause", &"ui_debug_overlay",
+	&"inventory", &"skill_tree", &"map", &"pause", &"ui_debug_overlay", &"heal", &"journal",
 ]
 const REQUIRED_AUTOLOADS: Array[String] = [
 	"EventBus", "DataRegistry", "GameState", "NetManager", "SaveManager", "HitFeedback", "DebugOverlay",

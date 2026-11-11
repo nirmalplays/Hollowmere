@@ -22,11 +22,11 @@ var _ambient_name: StringName = &""
 var _voices: Array[AudioStreamPlayer] = []
 var _next_voice: int = 0
 var _last_played: Dictionary = {}  # sound -> msec, to stop machine-gun stacking
-## Music states (docs/AUDIT.md #4): the area's track, battle when Hollowed engage,
-## the mini-boss theme when a boss is among them; back to the area after a calm beat.
-var area_music: StringName = &""
-var _engaged: Dictionary = {}  # enemy -> is_boss
-var _calm_timer: SceneTreeTimer
+## Music is placed, not constant (docs/DESIGN_SPEC.md 5): exploration is ambience only;
+## music plays in music zones (towns, shrines, story beats) and in boss fights.
+var area_music: StringName = &""  ## an area's own track, if it has one (towns); usually empty
+var _zone_music: StringName = &""
+var _boss: Node
 
 
 func _ready() -> void:
@@ -43,8 +43,23 @@ func _ready() -> void:
 ## Areas call this instead of music(): it becomes the calm state to return to.
 func set_area_music(sound: StringName) -> void:
 	area_music = sound
-	_engaged.clear()
-	music(sound)
+	_zone_music = &""
+	_boss = null
+	_refresh_music()
+
+
+## Music zones call this on enter (a track) and exit (&"").
+func zone_music(sound: StringName) -> void:
+	_zone_music = sound
+	_refresh_music()
+
+
+func _refresh_music() -> void:
+	var want := &"music_miniboss" if is_instance_valid(_boss) else (_zone_music if _zone_music != &"" else area_music)
+	if want == &"":
+		stop_music(2.5)
+	else:
+		music(want, 1.5)
 
 
 ## Caves and crypts echo: a reverb on effects and ambience.
@@ -64,26 +79,14 @@ func set_reverb(on: bool) -> void:
 			AudioServer.add_bus_effect(idx, rev)
 
 
+## Only bosses bring in combat music; ordinary fights stay with the area's sound.
 func _on_enemy_aggro(enemy: Node, engaged: bool) -> void:
-	if area_music == &"":
+	if enemy.get(&"data") == null or not enemy.data.is_boss:
 		return
-	if engaged:
-		_engaged[enemy] = enemy.get(&"data") != null and enemy.data.is_boss
-	else:
-		_engaged.erase(enemy)
-	for e in _engaged.keys():
-		if not is_instance_valid(e):
-			_engaged.erase(e)
-	if _engaged.is_empty():
-		_calm_timer = get_tree().create_timer(4.0)
-		_calm_timer.timeout.connect(func() -> void:
-			if _engaged.is_empty():
-				music(area_music, 2.5))
-		return
-	music(&"music_miniboss" if true in _engaged.values() else &"music_battle", 0.8)
+	_boss = enemy if engaged and not enemy.is_dead() else null
+	_refresh_music()
 
 
-## Crossfades to a looping track (a random variation if the name has several).
 func music(sound: StringName, fade: float = FADE_TIME) -> void:
 	if sound == _music_name or bank == null:
 		return

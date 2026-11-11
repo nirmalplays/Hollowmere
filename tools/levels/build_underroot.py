@@ -34,7 +34,7 @@ PLACES = [
     (11, 25, "M"), (7, 25, "C"), (9, 25, "K"), (14, 25, "C"), (16, 25, "G"),
     (7, 29, "X"), (9, 29, "C"), (14, 29, "C"),
     (7, 26, "n"), (9, 26, "n"), (14, 26, "n"), (16, 26, "n"), (7, 30, "n"), (9, 30, "n"), (14, 30, "n"),
-    (12, 27, "L"), (11, 28, "P"),
+    (12, 27, "L"), (11, 28, "P"), (12, 29, "Z"),
     (5, 23, "T"), (18, 23, "T"), (5, 31, "T"), (18, 31, "T"), (6, 31, "b"), (17, 31, "k"), (5, 27, "w"),
     # B: the crypt hall.
     (11, 14, "R"), (15, 5, "I"), (8, 10, "c"), (16, 9, "c"), (22, 11, "c"),
@@ -80,6 +80,7 @@ MARKERS = {
     "L": "res://scenes/props/lantern_pedestal.tscn",
     "I": "res://scenes/props/crypt_inscription.tscn",
     "n": "res://scenes/props/cradle_name.tscn",
+    "Z": "res://scenes/world/music_zone_waking.tscn",
     "R": "res://scenes/world/trigger.tscn",
     "D": "res://scenes/world/trigger.tscn",
     "E": "res://scenes/world/trigger.tscn",

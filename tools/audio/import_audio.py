@@ -33,6 +33,7 @@ BANK = {
     "amb_forest": ("ambient", [f"{OWN}/Climate sounds/Breeze and birds.mp3"]),
     "amb_fire": ("ambient", [f"{OWN}/Climate sounds/Fire burn.mp3"]),
     "amb_rain": ("ambient", [f"{OWN}/Climate sounds/Rain.mp3"]),
+    "amb_cave": ("ambient", [f"{A}/dungeon_ambient_1.ogg"]),  # Loopable Dungeon Ambience (CC0, OpenGameArt)
     "thunder": ("ambient", [f"{OWN}/Climate sounds/Thunder.mp3"]),
     # interface
     "ui_move": ("ui", [f"{OWN}/Sound effects/mixkit-game-ball-tap-2073.wav"]),

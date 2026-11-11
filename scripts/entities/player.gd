@@ -6,6 +6,7 @@ extends CharacterBody2D
 
 signal facing_changed(direction: Vector2)
 signal respawned
+signal flasks_changed(charges: int, max_charges: int)
 
 const CHEST_HEIGHT: float = 18.0
 const REST_RANGE: float = 40.0  ## pixels above the feet where blows land
@@ -22,6 +23,7 @@ const BLOCK_COLOR := Color(0.75, 0.8, 0.9)
 var peer_id: int = Const.SOLO_PEER_ID
 var facing: Vector2 = Vector2.DOWN
 var spawn_point: Vector2 = Vector2.ZERO  ## the Hearth this player rises at
+var flasks: int = 3
 
 @onready var input: PlayerInput = $Input
 @onready var stats: CombatStats = $Stats
@@ -45,6 +47,7 @@ func _ready() -> void:
 		_camera.make_current()
 	stats.tuning = combat
 	stats.reset()
+	flasks = combat.flask_charges
 	hitbox.hit_landed.connect(_on_hit_landed)
 	states.setup(self)
 	# The lantern only lights once it is carried (ACT1_MQ01 O1; the glade assumes it is).
@@ -136,6 +139,11 @@ func try_start_action() -> bool:
 func try_start_attack_or_dodge() -> bool:
 	if input.consume(&"interact") and _try_rest():
 		return true
+	if input.consume(&"heal"):
+		if flasks > 0:
+			states.transition(&"Heal")
+			return true
+		Fx.text(chest_position() + Vector2(0, -20), "Flask empty", Color(0.7, 0.7, 0.7), self)
 	if not stats.can_act():
 		return false
 	if input.consume(&"dodge"):
@@ -247,6 +255,8 @@ func respawn() -> void:
 	velocity = Vector2.ZERO
 	facing = Vector2.DOWN
 	stats.reset()
+	flasks = combat.flask_charges  # the Hearth refills the flask
+	flasks_changed.emit(flasks, combat.flask_charges)
 	input.clear_buffer()
 	Flash.clear(sprite)
 	AudioManager.sfx(&"respawn", -3.0, 0.0)

@@ -19,6 +19,7 @@
 [ext_resource type="Script" path="res://scripts/entities/player_states/hurt.gd" id="17"]
 [ext_resource type="Script" path="res://scripts/entities/player_states/stagger.gd" id="18"]
 [ext_resource type="Script" path="res://scripts/entities/player_states/dead.gd" id="19"]
+[ext_resource type="Script" path="res://scripts/entities/player_states/heal.gd" id="24"]
 [ext_resource type="Shader" path="res://assets/shaders/flash.gdshader" id="20"]
 [ext_resource type="Script" path="res://scripts/systems/combat/hitbox.gd" id="21"]
 [ext_resource type="Script" path="res://scripts/systems/combat/hurtbox.gd" id="22"]
@@ -96,6 +97,9 @@ script = ExtResource("18")
 
 [node name="Dead" type="Node" parent="States"]
 script = ExtResource("19")
+
+[node name="Heal" type="Node" parent="States"]
+script = ExtResource("24")
 
 [node name="Sprite" type="AnimatedSprite2D" parent="."]
 material = SubResource("flash")

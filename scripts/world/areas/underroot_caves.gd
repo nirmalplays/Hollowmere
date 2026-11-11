@@ -25,20 +25,19 @@ const CRADLE_NAMES: Array[String] = [
 	"A name was carved here. It has been scratched out, again and again, until the stone is raw.",
 ]
 const TIPS: Array[String] = [
-	"Move with [W][A][S][D]
-Sprint by holding [Ctrl]
-Take the lantern with [E]",
+	"Move with [{move_up}][{move_left}][{move_down}][{move_right}]   Sprint: hold [{sprint}]
+Take the lantern: [{interact}]",
 	"Follow the corridor north",
-	"Attack with [LMB]   Heavy attack with [RMB]
-Attacks spend stamina: the yellow bar",
-	"Read the cracked wall with [E]",
-	"Dodge with [Space] when the ground flashes red
-A roll can't be hit at its start",
+	"Light attack [{attack_light}]   Heavy attack [{attack_heavy}]
+Every swing spends stamina: watch the pale bar",
+	"Read the cracked wall: [{interact}]",
+	"Roll with [{dodge}] when the ground flashes red
+The start of a roll can't be hit",
 	"",
-	"Block by holding [Shift]
-Tap [Shift] just before a hit to parry",
-	"Stagger a Hollowed, then press [E] beside it to Rest it",
-	"Use everything you have learned",
+	"Hold [{block}] to block. Tap [{block}] as a blow lands to parry
+Drink from your flask with [{heal}]",
+	"Stagger a Hollowed, then [{interact}] beside it to lay it to rest",
+	"",
 	"Take the Sexton's Key",
 	"Climb the stairwell",
 ]
@@ -46,11 +45,11 @@ Tap [Shift] just before a hit to parry",
 const CARDS := {
 	1: ["The Cradle Lantern", "It was lit before you woke, and it has not gone out.
 
-The lantern is your light in the dark, and it lets you lay a Hollowed to rest: when one is staggered, stand beside it and press E. A rested soul passes on, and the Hollow loosens its grip on the land."],
+The lantern is your light in the dark, and it lets you lay a Hollowed to rest: when one is staggered, stand beside it and press {interact}. A rested soul passes on, and the Hollow loosens its grip on the land."],
 	2: ["The Hollowed", "Things that should have ended, and didn't. The Hollowed are the dead who could not pass on: hungry, forgetful, still carrying echoes of who they were.
 
 Watch them. Every attack is shown before it lands: a flash, and red on the ground."],
-	7: ["Rest", "Parry an attack or break a Hollowed's guard, and it staggers. Now press E beside it.
+	7: ["Rest", "Parry an attack or break a Hollowed's guard, and it staggers. Now press {interact} beside it.
 
 Resting is slower than killing, but a rested soul does not come back, and the Hollow Pressure in this place falls."],
 }
