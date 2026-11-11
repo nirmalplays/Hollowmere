@@ -68,6 +68,8 @@ PROPS = {
     "table_long": (["table_long.png"], 2, "box", 0.0, None, False),
     "cauldron": (["cauldron.png"], 2, "ellipse", 0.0, (0.4, 0.9, 0.5, 0.6, 0.5, 10), False),
 }
+# name -> (pixels of sway, hanging): the cave breathes, webs and the hanged stir.
+SWAY = {"cobweb": (1.2, True), "hanging_skeleton": (1.0, True)}
 LEGEND = {"M": "cradle_mine", "C": "cradle_empty", "K": "cradle_shattered", "G": "cradle_glowing",
           "X": "cradle_shattered", "T": "brazier", "b": "bone_pile", "k": "skull_pile", "x": "skull",
           "w": "cobweb", "H": "hanging_skeleton", "B": "blood", "O": "table_long", "u": "cauldron"}
@@ -95,14 +97,66 @@ def box_footprint(path, inset):
 
 
 def layout_rows():
+    """Carve the rooms, then roughen them into caves: corners are cut, edges bulge and
+    bite at random (seeded), so no room reads as a rectangle. Anything hand-placed keeps
+    its floor, and a flood fill rejects any bite that would cut the path."""
+    import random
+    rng = random.Random(41)
     g = [["#"] * W for _ in range(H)]
-    for x0, y0, x1, y1 in ROOMS:
+    owner = {}
+    for i, (x0, y0, x1, y1) in enumerate(ROOMS):
         for y in range(y0, y1 + 1):
             for x in range(x0, x1 + 1):
                 g[y][x] = "."
+                owner[(x, y)] = i
+    placed = {(x, y) for x, y, _ in PLACES}
+    keep = set(placed)
+    for x, y in placed:  # room to stand next to anything placed
+        keep |= {(x + dx, y + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
+
+    def connected():
+        floor = {(x, y) for y in range(H) for x in range(W) if g[y][x] != "#"}
+        start = next(iter(floor))
+        seen, todo = {start}, [start]
+        while todo:
+            x, y = todo.pop()
+            for n in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+                if n in floor and n not in seen:
+                    seen.add(n)
+                    todo.append(n)
+        return len(seen) == len(floor)
+
+    def bite(x, y):
+        if (x, y) in keep or g[y][x] == "#":
+            return
+        g[y][x] = "#"
+        if not connected():
+            g[y][x] = "."
+
+    for i, (x0, y0, x1, y1) in enumerate(ROOMS):
+        if min(x1 - x0, y1 - y0) < 5:
+            continue  # corridors keep their width
+        for cx, cy, sx, sy in ((x0, y0, 1, 1), (x1, y0, -1, 1), (x0, y1, 1, -1), (x1, y1, -1, -1)):
+            for dx, dy in ((0, 0), (1, 0), (0, 1)) + (((2, 0),) if rng.random() < 0.5 else ((0, 2),)):
+                bite(cx + sx * dx, cy + sy * dy)
+        # Bulges: push the wall out a tile here and there, never toward another room.
+        for y in range(max(1, y0 - 1), min(H - 2, y1 + 1) + 1):
+            for x in range(max(1, x0 - 1), min(W - 2, x1 + 1) + 1):
+                if g[y][x] != "#" or rng.random() > 0.3:
+                    continue
+                near = {owner.get((x + dx, y + dy)) for dx in range(-3, 4) for dy in range(-3, 4)} - {None}
+                touches = any(owner.get(n) == i and g[n[1]][n[0]] != "#" for n in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
+                if near == {i} and touches:
+                    g[y][x] = "."
+        # Bites: nibble the edge inward.
+        for y in range(y0, y1 + 1):
+            for x in range(x0, x1 + 1):
+                edge = x in (x0, x1) or y in (y0, y1)
+                if edge and rng.random() < 0.22:
+                    bite(x, y)
     for x, y, ch in PLACES:
-        assert g[y][x] != "#" or ch in "HTw", (x, y, ch)
         g[y][x] = ch
+    assert connected()
     return ["".join(r) for r in g]
 
 
@@ -128,6 +182,8 @@ def write_props():
             r, g, b, energy, scale, height = light
             lines += [f"light_color = Color({r}, {g}, {b}, 1)", f"light_energy = {energy}",
                       f"light_scale = {scale}", f"light_height = {height}.0"]
+        if name in SWAY:
+            lines += [f"sway = {SWAY[name][0]}", f"hanging = {'true' if SWAY[name][1] else 'false'}"]
         if name == "brazier":
             lines.append('sound = &"amb_fire"')
         lines.append("")

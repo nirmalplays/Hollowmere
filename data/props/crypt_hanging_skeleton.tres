@@ -9,3 +9,5 @@ textures = Array[Texture2D]([ExtResource("t0")])
 base_inset = 0
 jitter = 0.0
 flip_randomly = false
+sway = 1.0
+hanging = true

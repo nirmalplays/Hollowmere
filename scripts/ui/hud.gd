@@ -1,49 +1,72 @@
 class_name Hud
 extends CanvasLayer
-## In-game HUD in the reference's layout (docs/ART_DIRECTION.md), our own art:
-##   bottom-left:  diamond quick slots (1-4), XP, slanted stamina + mana bars over a big HP bar
-##   bottom-right: diamond ability bar (spells 1-5 arrive in M5; weapon slot shows now)
-##   right:        quest tracker (serif title, diamond bullets)
-##   top-centre:   lore text box for inscriptions and pages ("A journal page reads...")
-## Event-driven: everything updates from signals, never by polling.
+## In-game HUD, "ember and iron": the HUD is the Unlaid's lantern and little else.
+##   top-left:     the lantern emblem (its glow is your Ember Flask; the number is sips
+##                 left) beside straight iron-banded HP and stamina bars whose length
+##                 grows with their maximum
+##   top-right:    the current objective, right-aligned, no box; flares when it changes
+##   lower centre: prompts (keys drawn as iron caps) and the lore whisper above them
+##   bottom:       boss name and bar, souls-style
+## Nothing is drawn for systems the player doesn't have yet (no empty spell slots).
+## Event-driven: values arrive by signal, the canvas only redraws them.
 
-const GOLD := Color(0.85, 0.66, 0.32)
-const GOLD_DARK := Color(0.42, 0.28, 0.12)
-const SLOT_FILL := Color(0.2, 0.13, 0.08, 0.88)
-const HP_A := Color(0.98, 0.42, 0.16)
-const HP_B := Color(0.97, 0.66, 0.24)
-const STAMINA := Color(0.98, 0.86, 0.3)
-const MANA := Color(0.42, 0.78, 0.36)
+const ASH := Color(0.91, 0.88, 0.82)
+const ASH_DIM := Color(0.62, 0.58, 0.54)
+const EMBER := Color(1.0, 0.62, 0.25)
+const EMBER_HOT := Color(1.0, 0.86, 0.55)
+const IRON := Color(0.09, 0.08, 0.09, 0.9)
+const IRON_EDGE := Color(0.36, 0.32, 0.31)
+const BLOOD := Color(0.72, 0.15, 0.13)
+const BLOOD_HI := Color(0.93, 0.33, 0.24)
+const BONE := Color(0.84, 0.79, 0.62)
 const TITLE_FONT: Font = preload("res://assets/fonts/Cinzel.ttf")
 const BODY_FONT: Font = preload("res://assets/fonts/Alegreya.ttf")
+const PIXEL_FONT: Font = preload("res://assets/fonts/PixelifySans.ttf")
 const LORE_SECONDS: float = 6.0
+const PX_PER_POINT: float = 1.5  ## bar length per point of max HP / stamina
+const EMBLEM := Vector2(30, 36)
 
 var _player: Player
 var _hp: float = 1.0
 var _hp_max: float = 1.0
 var _hp_chip: float = 1.0
+var _hp_flash: float = 0.0
 var _stamina: float = 1.0
 var _stamina_max: float = 1.0
+var _exhausted: bool = false
+var _flasks: int = 0
+var _flasks_max: int = 0
+var _flask_flash: float = 0.0
+var _t: float = 0.0
 var _canvas: Control
-var _xp: Label
-var _quest_title: Label
-var _quest_steps: VBoxContainer
+
+var _quest_title: String = ""
+var _quest_step: String = ""
+var _quest_flare: float = 0.0
+
 var _lore: Label
-var _lore_box: Control
 var _lore_left: float = 0.0
-var _tips: Label
-var _banner: Label
+var _tip_text: String = ""
+var _tip_alpha: float = 0.0
+var _key_regex := RegEx.create_from_string("\\[([^\\]]+)\\]")
+
+var _banner_text: String = ""
+var _banner_t: float = -1.0
+var _complete_text: String = ""
+var _complete_t: float = -1.0
+const BANNER_SECONDS: float = 4.0
+
 var _boss: Enemy
-var _boss_name: Label
+var _boss_label: String = ""
 var _boss_hp: float = 1.0
 var _boss_max: float = 1.0
-var _toast_kind: Label
-var _toast_text: Label
+var _boss_chip: float = 1.0
+
+var _toast_kind: String = ""
+var _toast_text: String = ""
 var _toast_left: float = 0.0
-var _tip_text: String = ""
-var _key_regex := RegEx.create_from_string("\\[([^\\]]+)\\]")
+
 var _card: Control
-var _complete: Control
 
 
 func _ready() -> void:
@@ -54,34 +77,29 @@ func _ready() -> void:
 	_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_canvas.draw.connect(_draw_hud)
 	add_child(_canvas)
-	_xp = _label(TITLE_FONT, 15, Color(0.98, 0.95, 0.88))
-	_xp.text = "XP: 0"
-	_build_quest_tracker()
-	_build_lore_box()
-	_tips = _label(BODY_FONT, 15, Color(0.95, 0.93, 0.86))
-	_tips.custom_minimum_size = Vector2(360, 0)
-	_banner = _label(TITLE_FONT, 34, Color(0.98, 0.95, 0.88))
-	_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_banner.modulate.a = 0.0
-	_boss_name = _label(TITLE_FONT, 18, Color(0.98, 0.95, 0.88))
-	_boss_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_boss_name.visible = false
-	_toast_kind = _label(TITLE_FONT, 13, GOLD)
-	_toast_text = _label(BODY_FONT, 14, Color(0.9, 0.9, 0.86))
-	_toast_kind.modulate.a = 0.0
-	_toast_text.modulate.a = 0.0
+	_lore = _label(BODY_FONT, 17, ASH)
+	_lore.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lore.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_lore.modulate.a = 0.0
 	QuestLog.quest_changed.connect(_on_quest_changed)
 	EventBus.lore_shown.connect(show_lore)
-	_tips.visible = false
 	EventBus.tip_shown.connect(func(t: String) -> void:
 		_tip_text = Keys.fmt(t)
 		if t != "":
+			_tip_alpha = 0.0
 			AudioManager.sfx(&"ui_move", -10.0, 0.0))
 	EventBus.tutorial_card.connect(_show_card)
-	EventBus.quest_completed.connect(_show_quest_complete)
-	EventBus.area_entered.connect(_show_banner)
+	EventBus.quest_completed.connect(func(title: String) -> void:
+		_complete_text = title
+		_complete_t = 0.0)
+	EventBus.area_entered.connect(func(title: String) -> void:
+		_banner_text = title
+		_banner_t = 0.0)
 	EventBus.boss_engaged.connect(_on_boss)
-	EventBus.toast_shown.connect(_show_toast)
+	EventBus.toast_shown.connect(func(kind: String, text: String) -> void:
+		_toast_kind = kind.to_upper()
+		_toast_text = text
+		_toast_left = 3.5)
 	_on_quest_changed(QuestLog.title, QuestLog.steps)
 	get_viewport().size_changed.connect(_layout)
 	_layout()
@@ -92,64 +110,112 @@ func bind(player: Player) -> void:
 	player.stats.hp_changed.connect(func(v: float, m: float) -> void:
 		if v < _hp:
 			_hp_chip = maxf(_hp_chip, _hp)
+			_hp_flash = 0.35
 		_hp = v
 		_hp_max = m)
 	player.stats.stamina_changed.connect(func(v: float, m: float) -> void:
 		_stamina = v
 		_stamina_max = m)
+	player.flasks_changed.connect(func(n: int, m: int) -> void:
+		if n != _flasks:
+			_flask_flash = 0.6
+		_flasks = n
+		_flasks_max = m)
 	_hp = player.stats.hp
 	_hp_max = player.combat.max_hp
 	_hp_chip = _hp
 	_stamina = player.stats.stamina
 	_stamina_max = player.combat.max_stamina
+	_flasks = player.flasks
+	_flasks_max = player.combat.flask_charges
 
 
 func show_lore(text: String) -> void:
 	_lore.text = text
 	_lore_left = LORE_SECONDS
-	_lore_box.modulate.a = 1.0
-	_lore_box.visible = true
+	_lore.reset_size()
+	_layout()
 
 
-## Top-left tutorial prompts in the reference style: a diamond per line and keys drawn
-## as caps. Write keys in brackets: "Move with [W][A][S][D]".
-func _draw_tips() -> void:
-	if _tip_text == "":
+func _on_quest_changed(title: String, steps: Array) -> void:
+	var step := ""
+	for s in steps:  # only the objective you're on; finished ones drop off
+		if not s["done"]:
+			step = s["text"]
+			break
+	if step != _quest_step and step != "":
+		_quest_flare = 1.0
+	_quest_title = title
+	_quest_step = step
+
+
+func _on_boss(boss: Node) -> void:
+	_boss = boss as Enemy
+	if _boss == null:
 		return
-	var lines := _tip_text.split("\n")
-	_canvas.draw_rect(Rect2(10, 10, 430, lines.size() * 26 + 12), Color(0.02, 0.03, 0.06, 0.62))
-	var y := 34.0
-	for line in lines:
-		var p := Vector2(24, y - 5)
-		var d := PackedVector2Array([p + Vector2(0, -5), p + Vector2(5, 0), p + Vector2(0, 5), p + Vector2(-5, 0), p + Vector2(0, -5)])
-		_canvas.draw_polyline(d, GOLD, 1.5)
-		var x := 38.0
-		var last := 0
-		for m in _key_regex.search_all(line):
-			x = _tip_text_part(line.substr(last, m.get_start() - last), x, y)
-			x = _tip_key(m.get_string(1), x, y)
-			last = m.get_end()
-		_tip_text_part(line.substr(last), x, y)
-		y += 26.0
+	_boss_label = _boss.data.display_name
+	_boss_max = _boss.data.max_hp
+	_boss_hp = _boss.hp
+	_boss_chip = _boss_hp
+	_boss.health_changed.connect(func(v: float, m: float) -> void:
+		_boss_chip = maxf(_boss_chip, _boss_hp)
+		_boss_hp = v
+		_boss_max = m
+		if v <= 0.0:
+			_boss = null)
 
 
-func _tip_text_part(t: String, x: float, y: float) -> float:
-	if t == "":
-		return x
-	_canvas.draw_string(BODY_FONT, Vector2(x, y), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.96, 0.94, 0.88))
-	return x + BODY_FONT.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+func _process(delta: float) -> void:
+	_t += delta
+	_toast_left = maxf(0.0, _toast_left - delta)
+	_hp_flash = maxf(0.0, _hp_flash - delta)
+	_flask_flash = maxf(0.0, _flask_flash - delta)
+	_quest_flare = maxf(0.0, _quest_flare - delta * 0.7)
+	_tip_alpha = move_toward(_tip_alpha, 1.0 if _tip_text != "" else 0.0, delta * 4.0)
+	_hp_chip = move_toward(_hp_chip, _hp, _hp_max * 0.5 * delta) if _hp_chip > _hp else _hp
+	_boss_chip = move_toward(_boss_chip, _boss_hp, _boss_max * 0.3 * delta) if _boss_chip > _boss_hp else _boss_hp
+	if _player:
+		_exhausted = _player.stats.exhausted
+	if _banner_t >= 0.0:
+		_banner_t += delta
+		if _banner_t > BANNER_SECONDS:
+			_banner_t = -1.0
+	if _complete_t >= 0.0:
+		_complete_t += delta
+		if _complete_t > BANNER_SECONDS:
+			_complete_t = -1.0
+	if _lore_left > 0.0:
+		_lore_left -= delta
+	_lore.modulate.a = clampf(minf(_lore_left, (LORE_SECONDS - _lore_left) * 3.0), 0.0, 1.0)
+	_canvas.queue_redraw()
 
 
-func _tip_key(k: String, x: float, y: float) -> float:
-	var w := maxf(20.0, TITLE_FONT.get_string_size(k, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 10.0)
-	var r := Rect2(x + 2, y - 15, w, 19)
-	_canvas.draw_rect(r, Color(0.95, 0.94, 0.9))
-	_canvas.draw_rect(Rect2(r.position + Vector2(0, 17), Vector2(w, 2)), Color(0.55, 0.52, 0.5))
-	_canvas.draw_string(TITLE_FONT, Vector2(x + 7, y), k, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.15, 0.12, 0.2))
-	return x + w + 6.0
+func _layout() -> void:
+	var s := _canvas.get_viewport_rect().size
+	_lore.size = Vector2(440, 0)
+	_lore.reset_size()
+	_lore.size.x = 440
+	_lore.position = Vector2(s.x * 0.5 - 220, s.y - 150 - _lore.size.y)
 
+
+func _label(font: Font, font_size: int, color: Color, add: bool = true) -> Label:
+	var l := Label.new()
+	l.add_theme_font_override(&"font", font)
+	l.add_theme_font_size_override(&"font_size", font_size)
+	l.add_theme_color_override(&"font_color", color)
+	l.add_theme_color_override(&"font_shadow_color", Color(0, 0, 0, 0.9))
+	l.add_theme_constant_override(&"shadow_offset_x", 1)
+	l.add_theme_constant_override(&"shadow_offset_y", 1)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if add:
+		_canvas.add_child(l)
+	return l
+
+
+# ---------------------------------------------------------------- tutorial card
 
 ## A one-time explainer for a new concept; pauses the game until dismissed.
+## Styled as a page nailed to iron: dark warm panel, ember rule under the title.
 func _show_card(id: StringName, title: String, body: String) -> void:
 	var key := StringName("card_" + String(id))
 	if GameState.flags.get(key, false) or _card:
@@ -159,32 +225,45 @@ func _show_card(id: StringName, title: String, body: String) -> void:
 	AudioManager.sfx(&"pickup", -8.0, 0.0)
 	var panel := PanelContainer.new()
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.035, 0.06, 0.1, 0.96)
-	style.border_color = Color(0.45, 0.62, 0.85)
-	style.set_border_width_all(2)
-	style.set_content_margin_all(26)
-	style.shadow_color = Color(0, 0, 0, 0.7)
-	style.shadow_size = 12
+	style.bg_color = Color(0.075, 0.06, 0.06, 0.97)
+	style.border_color = IRON_EDGE
+	style.set_border_width_all(1)
+	style.border_width_top = 3
+	style.set_content_margin_all(24)
+	style.content_margin_top = 20
+	style.shadow_color = Color(0, 0, 0, 0.75)
+	style.shadow_size = 16
 	panel.add_theme_stylebox_override(&"panel", style)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override(&"separation", 14)
+	v.add_theme_constant_override(&"separation", 12)
 	panel.add_child(v)
-	var head := _label(TITLE_FONT, 26, Color(0.98, 0.95, 0.88), false)
-	head.text = title
-	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var head := _label(TITLE_FONT, 22, EMBER_HOT, false)
+	head.text = title.to_upper()
 	v.add_child(head)
-	var text := _label(BODY_FONT, 18, Color(0.9, 0.9, 0.86), false)
+	var rule := Control.new()
+	rule.custom_minimum_size = Vector2(0, 2)
+	rule.draw.connect(func() -> void:
+		rule.draw_rect(Rect2(0, 0, 90, 1), EMBER)
+		rule.draw_rect(Rect2(94, 0, rule.size.x - 94, 1), Color(IRON_EDGE, 0.6)))
+	v.add_child(rule)
+	var text := _label(BODY_FONT, 17, ASH, false)
 	text.text = Keys.fmt(body)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	text.custom_minimum_size = Vector2(480, 0)
+	text.custom_minimum_size = Vector2(440, 0)
 	v.add_child(text)
-	var foot := _label(TITLE_FONT, 13, GOLD, false)
-	foot.text = Keys.fmt("Press  {interact}  to continue")
-	foot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var foot := _label(PIXEL_FONT, 12, ASH_DIM, false)
+	foot.text = Keys.fmt("{interact}  continue")
+	foot.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	v.add_child(foot)
 	_canvas.add_child(panel)
 	panel.reset_size()
-	panel.position = (_canvas.get_viewport_rect().size - panel.size) * 0.5
+	panel.position = ((_canvas.get_viewport_rect().size - panel.size) * 0.5).round()
+	panel.modulate.a = 0.0
+	panel.create_tween().tween_property(panel, ^"modulate:a", 1.0, 0.18)
+	# The iron corner of the page: a lit ember stud top-left.
+	panel.draw.connect(func() -> void:
+		panel.draw_rect(Rect2(-3, -3, 7, 7), IRON_EDGE)
+		panel.draw_rect(Rect2(-1, -1, 3, 3), EMBER))
 	_card = panel
 
 
@@ -197,244 +276,232 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-func _show_quest_complete(title: String) -> void:
-	if _complete:
-		_complete.queue_free()
-	var s := _canvas.get_viewport_rect().size
-	var box := Control.new()
-	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.position = Vector2(0, s.y * 0.2)
-	box.size = Vector2(s.x, 90)
-	box.draw.connect(func() -> void:
-		for i in 40:
-			var k := absf(i / 20.0 - 1.0)
-			box.draw_rect(Rect2(s.x * 0.5 - 300 + i * 15, 6, 15, 70), Color(0.2, 0.38, 0.75, 0.45 * (1.0 - k))))
-	var head := _label(TITLE_FONT, 40, Color(0.99, 0.96, 0.88), false)
-	head.text = "QUEST COMPLETE!"
-	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	head.size = Vector2(s.x, 50)
-	box.add_child(head)
-	var sub := _label(BODY_FONT, 16, Color(0.8, 0.85, 0.95), false)
-	sub.text = title.to_upper()
-	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub.size = Vector2(s.x, 20)
-	sub.position = Vector2(0, 50)
-	box.add_child(sub)
-	_canvas.add_child(box)
-	_complete = box
-	box.modulate.a = 0.0
-	var tw := create_tween()
-	tw.tween_property(box, ^"modulate:a", 1.0, 0.4)
-	tw.tween_interval(3.0)
-	tw.tween_property(box, ^"modulate:a", 0.0, 0.8)
-	tw.tween_callback(box.queue_free)
-
-
-func _show_banner(title: String) -> void:
-	_banner.text = title.to_upper()
-	var tw := create_tween()
-	tw.tween_property(_banner, ^"modulate:a", 1.0, 0.6)
-	tw.tween_interval(2.4)
-	tw.tween_property(_banner, ^"modulate:a", 0.0, 1.0)
-
-
-func _show_toast(kind: String, text: String) -> void:
-	_toast_kind.text = kind.to_upper()
-	_toast_text.text = text
-	_toast_left = 3.5
-	_toast_kind.modulate.a = 1.0
-	_toast_text.modulate.a = 1.0
-
-
-func _on_boss(boss: Node) -> void:
-	_boss = boss as Enemy
-	if _boss == null:
-		return
-	_boss_name.text = _boss.data.display_name.to_upper()
-	_boss_name.visible = true
-	_boss_max = _boss.data.max_hp
-	_boss_hp = _boss.hp
-	_boss.health_changed.connect(func(v: float, m: float) -> void:
-		_boss_hp = v
-		_boss_max = m
-		if v <= 0.0:
-			_boss_name.visible = false)
-
-
-func _process(delta: float) -> void:
-	if _toast_left > 0.0:
-		_toast_left -= delta
-		if _toast_left < 0.6:
-			_toast_kind.modulate.a = maxf(_toast_left / 0.6, 0.0)
-			_toast_text.modulate.a = _toast_kind.modulate.a
-	_hp_chip = move_toward(_hp_chip, _hp, _hp_max * 0.6 * delta) if _hp_chip > _hp else _hp
-	if _lore_left > 0.0:
-		_lore_left -= delta
-		if _lore_left < 1.0:
-			_lore_box.modulate.a = maxf(_lore_left, 0.0)
-		if _lore_left <= 0.0:
-			_lore_box.visible = false
-	_canvas.queue_redraw()
-
-
-# ---------------------------------------------------------------- layout
-
-func _layout() -> void:
-	var s := _canvas.get_viewport_rect().size
-	_xp.position = Vector2(100, s.y - 92)
-	_quest_title.position = Vector2(s.x - 250, 150)
-	_quest_steps.position = Vector2(s.x - 250, 186)
-	_lore_box.position = Vector2(s.x * 0.5 - 200, s.y - 190)  # lower centre, clear of the tracker
-	_tips.position = Vector2(22, 18)
-	_banner.size = Vector2(s.x, 44)
-	_banner.position = Vector2(0, 92)
-	_boss_name.size = Vector2(s.x, 24)
-	_boss_name.position = Vector2(0, 14)
-	_toast_kind.position = Vector2(s.x - 230, 108)
-	_toast_text.position = Vector2(s.x - 230, 126)
-
-
-func _build_quest_tracker() -> void:
-	_quest_title = _label(TITLE_FONT, 22, Color(0.98, 0.95, 0.88))
-	_quest_title.size = Vector2(240, 30)
-	_quest_steps = VBoxContainer.new()
-	_quest_steps.add_theme_constant_override(&"separation", 6)
-	_quest_steps.size = Vector2(240, 0)
-	_canvas.add_child(_quest_steps)
-
-
-func _on_quest_changed(title: String, steps: Array) -> void:
-	_quest_title.text = title
-	for c in _quest_steps.get_children():
-		c.queue_free()
-	# Like the reference: only the objective you're on (finished ones drop off).
-	var shown: Array = []
-	for step in steps:
-		if not step["done"]:
-			shown.append(step)
-			break
-	for step in shown:
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override(&"separation", 8)
-		var bullet := Control.new()
-		bullet.custom_minimum_size = Vector2(12, 16)
-		bullet.draw.connect(_draw_bullet.bind(bullet, step["done"]))
-		row.add_child(bullet)
-		var text := _label(BODY_FONT, 16, Color(0.55, 0.55, 0.5) if step["done"] else Color(0.96, 0.93, 0.86), false)
-		text.text = step["text"]
-		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		text.custom_minimum_size = Vector2(218, 0)
-		row.add_child(text)
-		_quest_steps.add_child(row)
-
-
-func _draw_bullet(c: Control, done: bool) -> void:
-	var p := Vector2(6, 9)
-	var pts := PackedVector2Array([p + Vector2(0, -5), p + Vector2(5, 0), p + Vector2(0, 5), p + Vector2(-5, 0), p + Vector2(0, -5)])
-	if done:
-		c.draw_colored_polygon(pts, GOLD)
-	c.draw_polyline(pts, GOLD, 1.5, true)
-
-
-func _build_lore_box() -> void:
-	_lore_box = Control.new()
-	_lore_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_lore_box.visible = false
-	_lore_box.draw.connect(func() -> void:
-		var w := 400.0
-		_lore_box.draw_rect(Rect2(-12, -8, w + 24, _lore.size.y + 22), Color(0.04, 0.05, 0.08, 0.72))
-		var y := _lore.size.y + 10
-		_lore_box.draw_line(Vector2(w * 0.35, y), Vector2(w + 6, y), Color(0.45, 0.62, 0.85, 0.8), 1.5)
-		_lore_box.draw_arc(Vector2(w + 6, y - 6), 6, -PI / 2, PI / 2, 10, Color(0.45, 0.62, 0.85, 0.8), 1.5))
-	_canvas.add_child(_lore_box)
-	_lore = _label(BODY_FONT, 17, Color(0.97, 0.95, 0.9), false)
-	_lore.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_lore.custom_minimum_size = Vector2(400, 0)
-	_lore.size = Vector2(400, 0)
-	_lore_box.add_child(_lore)
-
-
-func _label(font: Font, font_size: int, color: Color, add: bool = true) -> Label:
-	var l := Label.new()
-	l.add_theme_font_override(&"font", font)
-	l.add_theme_font_size_override(&"font_size", font_size)
-	l.add_theme_color_override(&"font_color", color)
-	l.add_theme_color_override(&"font_shadow_color", Color(0, 0, 0, 0.85))
-	l.add_theme_constant_override(&"shadow_offset_x", 1)
-	l.add_theme_constant_override(&"shadow_offset_y", 2)
-	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	if add:
-		_canvas.add_child(l)
-	return l
-
-
 # ---------------------------------------------------------------- drawing
 
 func _draw_hud() -> void:
 	var s := _canvas.get_viewport_rect().size
-	# Boss bar: a long bar under the boss's name at the top of the screen.
-	if _boss_name.visible:
-		var w := 420.0
-		var at := Vector2(s.x * 0.5 - w * 0.5, 42)
-		_canvas.draw_rect(Rect2(at - Vector2(2, 2), Vector2(w + 4, 12)), GOLD_DARK)
-		_canvas.draw_rect(Rect2(at, Vector2(w, 8)), Color(0.08, 0.05, 0.05))
-		_canvas.draw_rect(Rect2(at, Vector2(w * clampf(_boss_hp / maxf(_boss_max, 1.0), 0.0, 1.0), 8)), Color(0.78, 0.16, 0.12))
-		_canvas.draw_line(at, at + Vector2(w * clampf(_boss_hp / maxf(_boss_max, 1.0), 0.0, 1.0), 0), Color(1.0, 0.45, 0.35), 1.0)
-	_draw_tips()
-	if _toast_left > 0.0:
-		_canvas.draw_rect(Rect2(_toast_kind.position - Vector2(10, 6), Vector2(220, 42)), Color(0.04, 0.05, 0.08, 0.7 * _toast_kind.modulate.a))
-	# Quick slots: a diamond cluster bottom-left (1 top, 2 left, 3 right, 4 bottom).
-	var c := Vector2(52, s.y - 52)
-	for i in 4:
-		var off: Vector2 = [Vector2(0, -26), Vector2(-26, 0), Vector2(26, 0), Vector2(0, 26)][i]
-		_diamond(c + off, 18.0, str(i + 1))
-	# Bars: stamina and mana slanted above the long HP bar.
-	var x0 := 100.0
-	var y0 := s.y - 64.0
-	_slant_bar(Vector2(x0, y0), 150.0, 6.0, _stamina / maxf(_stamina_max, 1.0), STAMINA, STAMINA.darkened(0.3), 0.0)
-	_slant_bar(Vector2(x0 - 6, y0 + 10), 156.0, 6.0, 1.0, MANA, MANA.darkened(0.3), 0.0)
-	_cap(Vector2(x0 + 156, y0 + 3))
-	_slant_bar(Vector2(x0 - 22, y0 + 24), 260.0, 18.0, _hp / maxf(_hp_max, 1.0), HP_A, HP_B, _hp_chip / maxf(_hp_max, 1.0))
-	# Ability bar: a diagonal of diamonds bottom-right (weapon, then spell slots).
-	var b := Vector2(s.x - 40, s.y - 186)
-	var keys := ["", "5", "4", "3", "2", "1"]
-	for i in keys.size():
-		var p := b + Vector2(-26, 26) * i
-		_diamond(p, 20.0 if i == 0 else 16.0, keys[i], i == 0)
+	_draw_vitals()
+	_draw_objective(s)
+	_draw_tip(s)
+	_draw_toast()
+	_draw_boss(s)
+	_draw_banner(s)
+	_draw_complete(s)
+	if _lore.modulate.a > 0.0:
+		var a := _lore.modulate.a
+		var y := _lore.position.y - 8
+		var cx := s.x * 0.5
+		for i in 20:  # soft dark band so the whisper reads over lit floor
+			var k := 1.0 - absf(i / 9.5 - 1.0)
+			_canvas.draw_rect(Rect2(cx - 250 + i * 25, y + 4, 25, _lore.size.y + 8), Color(0.02, 0.02, 0.03, 0.6 * k * a))
+		_canvas.draw_rect(Rect2(cx - 40, y, 32, 1), Color(EMBER, 0.7 * a))
+		_canvas.draw_rect(Rect2(cx + 8, y, 32, 1), Color(EMBER, 0.7 * a))
+		_canvas.draw_rect(Rect2(cx - 2, y - 2, 4, 4), Color(EMBER_HOT, a))
 
 
-func _diamond(center: Vector2, r: float, key: String, weapon: bool = false) -> void:
-	var pts := PackedVector2Array([center + Vector2(0, -r), center + Vector2(r, 0), center + Vector2(0, r), center + Vector2(-r, 0)])
-	_canvas.draw_colored_polygon(pts, SLOT_FILL)
-	pts.append(pts[0])
-	_canvas.draw_polyline(pts, GOLD_DARK, 4.0)
-	_canvas.draw_polyline(pts, GOLD, 2.0)
-	if weapon:
-		# A short sword icon for the equipped weapon.
-		_canvas.draw_line(center + Vector2(-8, 8), center + Vector2(8, -8), Color(0.88, 0.9, 0.95), 3.0)
-		_canvas.draw_line(center + Vector2(-9, 3), center + Vector2(-3, 9), GOLD, 2.0)
-	if key != "":
-		_canvas.draw_string(TITLE_FONT, center + Vector2(-4, r - 2), key, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.96, 0.9, 0.75))
+func _text(font: Font, at: Vector2, t: String, sz: int, col: Color, align := HORIZONTAL_ALIGNMENT_LEFT, w := -1.0) -> void:
+	_canvas.draw_string(font, at + Vector2(1, 1), t, align, w, sz, Color(0, 0, 0, 0.85 * col.a))
+	_canvas.draw_string(font, at, t, align, w, sz, col)
 
 
-## A parallelogram bar leaning right, filled `k` (0..1), with a pale chip trailing losses.
-func _slant_bar(at: Vector2, w: float, h: float, k: float, a: Color, b: Color, chip: float) -> void:
-	var lean := h * 0.8
-	var frame := PackedVector2Array([at + Vector2(lean, 0), at + Vector2(w + lean, 0), at + Vector2(w, h), at + Vector2(0, h)])
-	_canvas.draw_colored_polygon(frame, Color(0.08, 0.06, 0.06, 0.85))
+## The lantern emblem, then HP over stamina. Bars are straight and banded in iron,
+## and their length tracks the maximum, so growing stronger is visible.
+func _draw_vitals() -> void:
+	var low := _hp > 0.0 and _hp / maxf(_hp_max, 1.0) < 0.25
+	_draw_lantern(EMBLEM, low)
+	var x := EMBLEM.x + 22.0
+	var hp_w := _hp_max * PX_PER_POINT
+	var hp_col := BLOOD.lerp(BLOOD_HI, 0.5 + 0.5 * sin(_t * 8.0)) if low else BLOOD
+	_bar(Vector2(x, 22), hp_w, 9, _hp / maxf(_hp_max, 1.0), hp_col, _hp_chip / maxf(_hp_max, 1.0), _hp_flash > 0.0)
+	var st_w := _stamina_max * PX_PER_POINT * 0.85
+	var st_col := Color(0.55, 0.4, 0.3) if _exhausted else BONE
+	_bar(Vector2(x, 36), st_w, 5, _stamina / maxf(_stamina_max, 1.0), st_col, 0.0, false)
+
+
+func _bar(at: Vector2, w: float, h: float, k: float, col: Color, chip: float, flash: bool) -> void:
+	at = at.round()
+	_canvas.draw_rect(Rect2(at - Vector2(2, 2), Vector2(w + 4, h + 4)), Color(0, 0, 0, 0.6))
+	_canvas.draw_rect(Rect2(at - Vector2(1, 1), Vector2(w + 2, h + 2)), IRON_EDGE)
+	_canvas.draw_rect(Rect2(at, Vector2(w, h)), IRON)
 	if chip > k:
-		_canvas.draw_colored_polygon(_slant_fill(at, w * chip, h, lean), Color(0.98, 0.9, 0.72, 0.9))
+		_canvas.draw_rect(Rect2(at + Vector2(w * k, 0), Vector2(w * (chip - k), h)), Color(EMBER_HOT, 0.85))
 	if k > 0.0:
-		var fill := _slant_fill(at, w * clampf(k, 0.0, 1.0), h, lean)
-		_canvas.draw_polygon(fill, PackedColorArray([b, a, a, b]))
-		_canvas.draw_line(fill[0], fill[1], a.lightened(0.35), 1.0)
-	frame.append(frame[0])
-	_canvas.draw_polyline(frame, GOLD_DARK, 1.5)
+		var fw := w * clampf(k, 0.0, 1.0)
+		_canvas.draw_rect(Rect2(at, Vector2(fw, h)), ASH if flash else col)
+		_canvas.draw_rect(Rect2(at, Vector2(fw, 1)), col.lightened(0.35))
+		_canvas.draw_rect(Rect2(at + Vector2(0, h - 1), Vector2(fw, 1)), col.darkened(0.35))
+	# Iron bands every 50 points: a reading aid, like ruler ticks.
+	var step := 50.0 * PX_PER_POINT * (w / maxf(w, 1.0))
+	var bx := step
+	while bx < w - 2.0:
+		_canvas.draw_rect(Rect2(at + Vector2(bx, 0), Vector2(1, h)), Color(0, 0, 0, 0.45))
+		bx += step
+	# End rivet.
+	_canvas.draw_rect(Rect2(at + Vector2(w + 1, h * 0.5 - 2), Vector2(3, 4)), IRON_EDGE)
 
 
-func _slant_fill(at: Vector2, w: float, h: float, lean: float) -> PackedVector2Array:
-	return PackedVector2Array([at + Vector2(lean, 0), at + Vector2(w + lean, 0), at + Vector2(w, h), at + Vector2(0, h)])
+## A small iron lantern. Its flame is the Ember Flask: bright when full, guttering as
+## sips are spent, dark when empty. Low HP makes the glass beat red.
+func _draw_lantern(c: Vector2, low: bool) -> void:
+	var k := float(_flasks) / maxf(_flasks_max, 1.0)
+	var flick := 0.88 + 0.12 * sin(_t * 11.0) * sin(_t * 6.7)
+	var glow := k * flick + _flask_flash
+	if glow > 0.0:
+		_canvas.draw_circle(c, 24.0, Color(1.0, 0.55, 0.2, 0.07 * glow))
+		_canvas.draw_circle(c, 14.0, Color(1.0, 0.6, 0.25, 0.12 * glow))
+	var iron := Color(0.3, 0.27, 0.27)
+	_canvas.draw_line(c + Vector2(0, -21), c + Vector2(0, -16), iron, 2.0)
+	_canvas.draw_arc(c + Vector2(0, -14), 4, PI, TAU, 8, iron, 2.0)
+	var body := Rect2(c + Vector2(-9, -12), Vector2(18, 24))
+	_canvas.draw_rect(body.grow(2), Color(0.04, 0.03, 0.04))
+	var glass := Color(0.1, 0.07, 0.06).lerp(Color(1.0, 0.68, 0.3), clampf(glow, 0.0, 1.0))
+	if low:
+		glass = glass.lerp(BLOOD_HI, 0.35 + 0.35 * sin(_t * 8.0))
+	_canvas.draw_rect(body, Color(0.2, 0.15, 0.11))
+	_canvas.draw_rect(Rect2(body.position + Vector2(3, 3), body.size - Vector2(6, 6)), glass)
+	if _flasks > 0:
+		var fh := 3.0 + 5.0 * k
+		_canvas.draw_rect(Rect2(c + Vector2(-2, 6 - fh) , Vector2(4, fh) * Vector2(1, flick)), EMBER_HOT)
+	for dx in [0, 16]:
+		_canvas.draw_rect(Rect2(body.position + Vector2(dx, 0), Vector2(2, body.size.y)), iron)
+	_canvas.draw_rect(Rect2(body.position + Vector2(-2, -3), Vector2(body.size.x + 4, 3)), iron)
+	_canvas.draw_rect(Rect2(body.position + Vector2(-2, body.size.y), Vector2(body.size.x + 4, 3)), iron)
+	# Sips left, stamped on the base plate.
+	var n := str(_flasks)
+	_text(PIXEL_FONT, c + Vector2(6, 25), n, 12, EMBER_HOT if _flasks > 0 else ASH_DIM)
+	if _player:
+		_text(PIXEL_FONT, c + Vector2(-13, 25), Keys.label(&"heal"), 9, ASH_DIM)
 
 
-func _cap(at: Vector2) -> void:
-	_canvas.draw_colored_polygon(PackedVector2Array([at + Vector2(0, -6), at + Vector2(14, -6), at + Vector2(6, 6)]), GOLD)
+## The current objective, right-aligned under a quiet quest title. When it changes it
+## arrives ember-hot and cools.
+func _draw_objective(s: Vector2) -> void:
+	if _quest_step == "":
+		return
+	var right := s.x - 20.0
+	var w := 260.0
+	_text(TITLE_FONT, Vector2(right - w, 26), _quest_title.to_upper(), 11, Color(ASH_DIM, 0.95), HORIZONTAL_ALIGNMENT_RIGHT, w)
+	var lines := _wrap(_quest_step, BODY_FONT, 16, w - 14.0)
+	var y := 46.0
+	var col := ASH.lerp(EMBER_HOT, _quest_flare)
+	for line in lines:
+		_text(BODY_FONT, Vector2(right - w - 12, y), line, 16, col, HORIZONTAL_ALIGNMENT_RIGHT, w)
+		y += 19.0
+	# A thin ember rule on the right edge, flame-tipped.
+	_canvas.draw_rect(Rect2(right + 2, 16, 1, y - 26), Color(EMBER, 0.55 + 0.45 * _quest_flare))
+	_canvas.draw_rect(Rect2(right + 1, 13, 3, 3), EMBER_HOT)
+
+
+func _wrap(t: String, font: Font, sz: int, w: float) -> PackedStringArray:
+	var out := PackedStringArray()
+	var line := ""
+	for word in t.split(" "):
+		var trial := word if line == "" else line + " " + word
+		if line != "" and font.get_string_size(trial, HORIZONTAL_ALIGNMENT_LEFT, -1, sz).x > w:
+			out.append(line)
+			line = word
+		else:
+			line = trial
+	if line != "":
+		out.append(line)
+	return out
+
+
+## Prompts sit low and centred on a soft dark band; [Key] tokens become iron key caps.
+func _draw_tip(s: Vector2) -> void:
+	if _tip_alpha <= 0.0 or _tip_text == "":
+		return
+	var lines := _tip_text.split("\n")
+	var y := s.y - 96.0 - (lines.size() - 1) * 24.0
+	var band_h := lines.size() * 24.0 + 12.0
+	for i in 24:  # band fading out to both sides
+		var k := 1.0 - absf(i / 11.5 - 1.0)
+		_canvas.draw_rect(Rect2(s.x * 0.5 - 300 + i * 25, y - 18, 25, band_h), Color(0.02, 0.02, 0.03, 0.55 * k * _tip_alpha))
+	for line in lines:
+		var w := _line_width(line)
+		var x := s.x * 0.5 - w * 0.5
+		var last := 0
+		for m in _key_regex.search_all(line):
+			x = _tip_text_part(line.substr(last, m.get_start() - last), x, y)
+			x = _tip_key(m.get_string(1), x, y)
+			last = m.get_end()
+		_tip_text_part(line.substr(last), x, y)
+		y += 24.0
+
+
+func _line_width(line: String) -> float:
+	var w := 0.0
+	var last := 0
+	for m in _key_regex.search_all(line):
+		w += BODY_FONT.get_string_size(line.substr(last, m.get_start() - last), HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+		w += _key_w(m.get_string(1)) + 6.0
+		last = m.get_end()
+	return w + BODY_FONT.get_string_size(line.substr(last), HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+
+
+func _tip_text_part(t: String, x: float, y: float) -> float:
+	if t == "":
+		return x
+	_text(BODY_FONT, Vector2(x, y), t, 16, Color(ASH, _tip_alpha))
+	return x + BODY_FONT.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+
+
+func _key_w(k: String) -> float:
+	return maxf(18.0, PIXEL_FONT.get_string_size(k, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 10.0)
+
+
+func _tip_key(k: String, x: float, y: float) -> float:
+	var w := _key_w(k)
+	var r := Rect2(round(x + 3), y - 14, w, 18)
+	_canvas.draw_rect(r.grow(1), Color(IRON_EDGE, _tip_alpha))
+	_canvas.draw_rect(r, Color(0.14, 0.12, 0.12, _tip_alpha))
+	_canvas.draw_rect(Rect2(r.position, Vector2(w, 1)), Color(EMBER, 0.8 * _tip_alpha))
+	_canvas.draw_string(PIXEL_FONT, Vector2(r.position.x, y), k, HORIZONTAL_ALIGNMENT_CENTER, w, 12, Color(EMBER_HOT, _tip_alpha))
+	return x + w + 9.0
+
+
+func _draw_toast() -> void:
+	if _toast_left <= 0.0:
+		return
+	var a := clampf(_toast_left / 0.6, 0.0, 1.0) * clampf((3.5 - _toast_left) * 6.0, 0.0, 1.0)
+	var at := Vector2(20, 72)
+	_canvas.draw_rect(Rect2(at + Vector2(0, -2), Vector2(2, 30)), Color(EMBER, a))
+	_text(TITLE_FONT, at + Vector2(10, 9), _toast_kind, 10, Color(EMBER, a))
+	_text(BODY_FONT, at + Vector2(10, 25), _toast_text, 15, Color(ASH, a))
+
+
+## Souls convention: the boss's name and a long bar along the bottom of the screen.
+func _draw_boss(s: Vector2) -> void:
+	if _boss == null or not is_instance_valid(_boss):
+		return
+	var w := minf(560.0, s.x - 120.0)
+	var at := Vector2(s.x * 0.5 - w * 0.5, s.y - 34)
+	_text(TITLE_FONT, at + Vector2(0, -8), _boss_label, 15, ASH)
+	_bar(at, w, 7, _boss_hp / maxf(_boss_max, 1.0), Color(0.62, 0.12, 0.11), _boss_chip / maxf(_boss_max, 1.0), false)
+
+
+## Area title: name in relic capitals, ember rules drawing outward from the middle.
+func _draw_banner(s: Vector2) -> void:
+	if _banner_t < 0.0:
+		return
+	var a := clampf(minf(_banner_t * 1.5, (BANNER_SECONDS - _banner_t) * 1.0), 0.0, 1.0)
+	var y := s.y * 0.26
+	var t := _banner_text.to_upper()
+	_text(TITLE_FONT, Vector2(0, y), t, 28, Color(ASH, a), HORIZONTAL_ALIGNMENT_CENTER, s.x)
+	var half := TITLE_FONT.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 28).x * 0.5 * clampf(_banner_t * 1.2, 0.0, 1.0)
+	_canvas.draw_rect(Rect2(s.x * 0.5 - half, y + 10, half * 2.0, 1), Color(EMBER, 0.8 * a))
+
+
+func _draw_complete(s: Vector2) -> void:
+	if _complete_t < 0.0:
+		return
+	var a := clampf(minf(_complete_t * 2.0, (BANNER_SECONDS - _complete_t) * 1.2), 0.0, 1.0)
+	var y := s.y * 0.3
+	var cx := s.x * 0.5
+	var flick := 0.85 + 0.15 * sin(_t * 12.0)
+	_canvas.draw_circle(Vector2(cx, y - 34), 18 * flick, Color(1.0, 0.6, 0.25, 0.12 * a))
+	_canvas.draw_rect(Rect2(cx - 2, y - 40, 4, 8 * flick), Color(EMBER_HOT, a))
+	_text(TITLE_FONT, Vector2(0, y), "QUEST COMPLETE", 30, Color(EMBER_HOT.lerp(ASH, clampf(_complete_t, 0.0, 1.0)), a), HORIZONTAL_ALIGNMENT_CENTER, s.x)
+	var half := 150.0 * clampf(_complete_t * 1.5, 0.0, 1.0)
+	_canvas.draw_rect(Rect2(cx - half, y + 10, half * 2.0, 1), Color(EMBER, 0.8 * a))
+	_text(BODY_FONT, Vector2(0, y + 30), _complete_text, 16, Color(ASH_DIM, a), HORIZONTAL_ALIGNMENT_CENTER, s.x)

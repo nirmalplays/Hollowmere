@@ -15,6 +15,10 @@ extends Resource
 @export var flip_randomly: bool = true
 ## Looping positional sound (e.g. &"amb_fire"); empty = silent.
 @export var sound: StringName = &""
+## Wind sway in pixels at the free edge (0 = rigid). Trees and grass sway from the
+## root; set `hanging` for webs, chains and banners that are fixed at the top.
+@export var sway: float = 0.0
+@export var hanging: bool = false
 @export_group("Light")
 @export var light_color: Color = Color(0, 0, 0, 0)  ## alpha 0 = no light
 @export var light_energy: float = 1.0

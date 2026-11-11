@@ -33,6 +33,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/props/trees/trees_r06c09.png" id="t29"]
 
 [resource]
+sway = 2.5
 script = ExtResource("1")
 textures = Array[Texture2D]([ExtResource("t0"), ExtResource("t1"), ExtResource("t2"), ExtResource("t3"), ExtResource("t4"), ExtResource("t5"), ExtResource("t6"), ExtResource("t7"), ExtResource("t8"), ExtResource("t9"), ExtResource("t10"), ExtResource("t11"), ExtResource("t12"), ExtResource("t13"), ExtResource("t14"), ExtResource("t15"), ExtResource("t16"), ExtResource("t17"), ExtResource("t18"), ExtResource("t19"), ExtResource("t20"), ExtResource("t21"), ExtResource("t22"), ExtResource("t23"), ExtResource("t24"), ExtResource("t25"), ExtResource("t26"), ExtResource("t27"), ExtResource("t28"), ExtResource("t29")])
 base_inset = 2

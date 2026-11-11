@@ -20,6 +20,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/props/kf_grass/kf_grass_16.png" id="t16"]
 
 [resource]
+sway = 2.0
 script = ExtResource("1")
 textures = Array[Texture2D]([ExtResource("t0"), ExtResource("t1"), ExtResource("t2"), ExtResource("t3"), ExtResource("t4"), ExtResource("t5"), ExtResource("t6"), ExtResource("t7"), ExtResource("t8"), ExtResource("t9"), ExtResource("t10"), ExtResource("t11"), ExtResource("t12"), ExtResource("t13"), ExtResource("t14"), ExtResource("t15"), ExtResource("t16")])
 base_inset = 1

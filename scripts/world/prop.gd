@@ -7,6 +7,7 @@ extends StaticBody2D
 const FADE_ALPHA: float = 0.38
 const FADE_SPEED: float = 8.0
 const FADE_MIN_HEIGHT: int = 36  ## only props taller than this fade
+const SWAY_SHADER: Shader = preload("res://assets/shaders/sway.gdshader")
 const CHECK_INTERVAL: int = 4  ## frames between occlusion checks
 
 static var _shadow_texture: Texture2D
@@ -32,6 +33,12 @@ func setup(def: PropDef, index: int, flip: bool) -> void:
 	sprite.centered = false
 	sprite.offset = Vector2(-tex.get_width() / 2.0, -tex.get_height() + def.base_inset)
 	sprite.flip_h = flip
+	if def.sway > 0.0:
+		var mat := ShaderMaterial.new()
+		mat.shader = SWAY_SHADER
+		mat.set_shader_parameter(&"amount", def.sway)
+		mat.set_shader_parameter(&"hanging", def.hanging)
+		sprite.material = mat
 	add_child(sprite)
 	if footprint.size() >= 3:
 		var poly := CollisionPolygon2D.new()
