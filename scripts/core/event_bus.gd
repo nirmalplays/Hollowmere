@@ -15,3 +15,9 @@ signal quest_updated(quest_id: StringName, state: StringName)
 signal hollow_pressure_changed(zone_id: StringName, value: int)
 signal story_flag_changed(flag: StringName, value: Variant)
 signal lore_shown(text: String)  ## an inscription/page was read; the HUD shows it
+signal tip_shown(text: String)  ## a tutorial prompt (QUESTS 7); empty text hides it
+signal enemy_rested(enemy: Node, by: Node)  ## a Hollowed was laid to rest (Pressure falls)
+signal boss_phase_changed(boss: Node, phase: int)
+signal area_entered(title: String)  ## area banner ("THE UNDERROOT CAVES")
+signal boss_engaged(boss: Node)  ## shows the boss bar
+signal toast_shown(kind: String, text: String)  ## top-right toast ("Item", "Cradle Lantern")

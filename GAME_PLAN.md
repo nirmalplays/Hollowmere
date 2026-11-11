@@ -286,7 +286,7 @@ Home routers and many ISPs block direct inbound connections, so a plain "host an
 2. **Public release (later):** add a connection layer behind a `NetTransport` interface so the game code never depends on the method. Options: **Noray** (open-source relay + NAT punch-through for Godot, players join by room code), or **Steam / Epic Online Services** networking if releasing on those stores.
 3. Keep all connection logic inside `NetManager` and one transport class so swapping methods does not touch gameplay code.
 
-See also `STORY_BIBLE.md` for story, lore, endings, and the Hollow Pressure / Scar mechanics that tie into combat and saving.
+See also `STORY_BIBLE.md` for story, lore, endings, and the Hollow Pressure / Scar mechanics that tie into combat and saving, and `QUESTS.md` for every quest, objective, reward, flag and the Notice Board (Act I fully detailed, Acts II-IV outlined).
 
 ### 9.3 What travels vs. what stays (critical rule)
 | Travels with the **character** (to any world they join) | Stays with the **world** (host's save) |

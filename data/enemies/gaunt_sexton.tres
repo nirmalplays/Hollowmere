@@ -1,0 +1,87 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/enemy/enemy_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/entities/enemy/enemy_attack_data.gd" id="2"]
+[ext_resource type="Resource" path="res://data/sprites/gaunt_sexton.tres" id="3"]
+[ext_resource type="Resource" path="res://data/fx/hit_spark.tres" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/entities/enemies/hollow_crawler.tscn" id="5"]
+
+[sub_resource type="Resource" id="a0"]
+script = ExtResource("2")
+id = &"shovel_sweep"
+shape = 0
+trigger_range = 50.0
+telegraph_ms = 900
+active_ms = 160
+recovery_ms = 700
+cooldown_ms = 2200
+damage = 18.0
+knockback = 160.0
+poise_damage = 30.0
+aoe_radius = 46.0
+
+[sub_resource type="Resource" id="a1"]
+script = ExtResource("2")
+id = &"grave_pit"
+shape = 2
+trigger_range = 220.0
+telegraph_ms = 1100
+active_ms = 200
+recovery_ms = 600
+cooldown_ms = 3400
+damage = 20.0
+knockback = 120.0
+poise_damage = 25.0
+aoe_radius = 24.0
+weight = 0.8
+
+[sub_resource type="Resource" id="p0"]
+script = ExtResource("2")
+id = &"shovel_sweep"
+shape = 0
+trigger_range = 50.0
+telegraph_ms = 800
+active_ms = 160
+recovery_ms = 600
+cooldown_ms = 2000
+damage = 20.0
+knockback = 170.0
+poise_damage = 30.0
+aoe_radius = 50.0
+
+[sub_resource type="Resource" id="p1"]
+script = ExtResource("2")
+id = &"grave_pits"
+shape = 2
+trigger_range = 240.0
+telegraph_ms = 1000
+active_ms = 200
+recovery_ms = 600
+cooldown_ms = 3000
+damage = 20.0
+knockback = 120.0
+poise_damage = 25.0
+aoe_radius = 24.0
+pits = 3
+pit_spread = 48.0
+
+[resource]
+script = ExtResource("1")
+id = &"gaunt_sexton"
+display_name = "The Gaunt Sexton"
+max_hp = 320.0
+xp = 120
+move_speed = 38.0
+aggro_radius = 230.0
+leash_radius = 900.0
+max_poise = 120.0
+stagger_ms = 1800
+shielded = false
+is_boss = true
+attacks = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1")])
+sprite_sheet = ExtResource("3")
+hit_fx = ExtResource("4")
+phase2_at = 0.5
+phase2_attacks = Array[ExtResource("2")]([SubResource("p0"), SubResource("p1")])
+phase2_summon = ExtResource("5")
+phase2_summon_count = 3

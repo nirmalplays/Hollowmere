@@ -31,6 +31,15 @@ var _quest_steps: VBoxContainer
 var _lore: Label
 var _lore_box: Control
 var _lore_left: float = 0.0
+var _tips: Label
+var _banner: Label
+var _boss: Enemy
+var _boss_name: Label
+var _boss_hp: float = 1.0
+var _boss_max: float = 1.0
+var _toast_kind: Label
+var _toast_text: Label
+var _toast_left: float = 0.0
 
 
 func _ready() -> void:
@@ -44,8 +53,24 @@ func _ready() -> void:
 	_xp.text = "XP: 0"
 	_build_quest_tracker()
 	_build_lore_box()
+	_tips = _label(BODY_FONT, 15, Color(0.95, 0.93, 0.86))
+	_tips.custom_minimum_size = Vector2(360, 0)
+	_banner = _label(TITLE_FONT, 34, Color(0.98, 0.95, 0.88))
+	_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_banner.modulate.a = 0.0
+	_boss_name = _label(TITLE_FONT, 18, Color(0.98, 0.95, 0.88))
+	_boss_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_boss_name.visible = false
+	_toast_kind = _label(TITLE_FONT, 13, GOLD)
+	_toast_text = _label(BODY_FONT, 14, Color(0.9, 0.9, 0.86))
+	_toast_kind.modulate.a = 0.0
+	_toast_text.modulate.a = 0.0
 	QuestLog.quest_changed.connect(_on_quest_changed)
 	EventBus.lore_shown.connect(show_lore)
+	EventBus.tip_shown.connect(func(t: String) -> void: _tips.text = t)
+	EventBus.area_entered.connect(_show_banner)
+	EventBus.boss_engaged.connect(_on_boss)
+	EventBus.toast_shown.connect(_show_toast)
 	_on_quest_changed(QuestLog.title, QuestLog.steps)
 	get_viewport().size_changed.connect(_layout)
 	_layout()
@@ -75,7 +100,43 @@ func show_lore(text: String) -> void:
 	_lore_box.visible = true
 
 
+func _show_banner(title: String) -> void:
+	_banner.text = title.to_upper()
+	var tw := create_tween()
+	tw.tween_property(_banner, ^"modulate:a", 1.0, 0.6)
+	tw.tween_interval(2.4)
+	tw.tween_property(_banner, ^"modulate:a", 0.0, 1.0)
+
+
+func _show_toast(kind: String, text: String) -> void:
+	_toast_kind.text = kind.to_upper()
+	_toast_text.text = text
+	_toast_left = 3.5
+	_toast_kind.modulate.a = 1.0
+	_toast_text.modulate.a = 1.0
+
+
+func _on_boss(boss: Node) -> void:
+	_boss = boss as Enemy
+	if _boss == null:
+		return
+	_boss_name.text = _boss.data.display_name.to_upper()
+	_boss_name.visible = true
+	_boss_max = _boss.data.max_hp
+	_boss_hp = _boss.hp
+	_boss.health_changed.connect(func(v: float, m: float) -> void:
+		_boss_hp = v
+		_boss_max = m
+		if v <= 0.0:
+			_boss_name.visible = false)
+
+
 func _process(delta: float) -> void:
+	if _toast_left > 0.0:
+		_toast_left -= delta
+		if _toast_left < 0.6:
+			_toast_kind.modulate.a = maxf(_toast_left / 0.6, 0.0)
+			_toast_text.modulate.a = _toast_kind.modulate.a
 	_hp_chip = move_toward(_hp_chip, _hp, _hp_max * 0.6 * delta) if _hp_chip > _hp else _hp
 	if _lore_left > 0.0:
 		_lore_left -= delta
@@ -93,7 +154,14 @@ func _layout() -> void:
 	_xp.position = Vector2(100, s.y - 92)
 	_quest_title.position = Vector2(s.x - 250, 150)
 	_quest_steps.position = Vector2(s.x - 250, 186)
-	_lore_box.position = Vector2(s.x * 0.5 - 40, 70)
+	_lore_box.position = Vector2(s.x * 0.5 - 60, 170)
+	_tips.position = Vector2(22, 18)
+	_banner.size = Vector2(s.x, 44)
+	_banner.position = Vector2(0, 92)
+	_boss_name.size = Vector2(s.x, 24)
+	_boss_name.position = Vector2(0, 14)
+	_toast_kind.position = Vector2(s.x - 230, 108)
+	_toast_text.position = Vector2(s.x - 230, 126)
 
 
 func _build_quest_tracker() -> void:
@@ -109,7 +177,13 @@ func _on_quest_changed(title: String, steps: Array) -> void:
 	_quest_title.text = title
 	for c in _quest_steps.get_children():
 		c.queue_free()
+	# Like the reference: only the objective you're on (finished ones drop off).
+	var shown: Array = []
 	for step in steps:
+		if not step["done"]:
+			shown.append(step)
+			break
+	for step in shown:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override(&"separation", 8)
 		var bullet := Control.new()
@@ -168,6 +242,19 @@ func _label(font: Font, font_size: int, color: Color, add: bool = true) -> Label
 
 func _draw_hud() -> void:
 	var s := _canvas.get_viewport_rect().size
+	# Boss bar: a long bar under the boss's name at the top of the screen.
+	if _boss_name.visible:
+		var w := 420.0
+		var at := Vector2(s.x * 0.5 - w * 0.5, 42)
+		_canvas.draw_rect(Rect2(at - Vector2(2, 2), Vector2(w + 4, 12)), GOLD_DARK)
+		_canvas.draw_rect(Rect2(at, Vector2(w, 8)), Color(0.08, 0.05, 0.05))
+		_canvas.draw_rect(Rect2(at, Vector2(w * clampf(_boss_hp / maxf(_boss_max, 1.0), 0.0, 1.0), 8)), Color(0.78, 0.16, 0.12))
+		_canvas.draw_line(at, at + Vector2(w * clampf(_boss_hp / maxf(_boss_max, 1.0), 0.0, 1.0), 0), Color(1.0, 0.45, 0.35), 1.0)
+	# Tutorial prompts: a soft dark panel behind them, top-left.
+	if _tips.text != "":
+		_canvas.draw_rect(Rect2(_tips.position - Vector2(10, 6), _tips.size + Vector2(20, 12)), Color(0.02, 0.03, 0.06, 0.6))
+	if _toast_left > 0.0:
+		_canvas.draw_rect(Rect2(_toast_kind.position - Vector2(10, 6), Vector2(220, 42)), Color(0.04, 0.05, 0.08, 0.7 * _toast_kind.modulate.a))
 	# Quick slots: a diamond cluster bottom-left (1 top, 2 left, 3 right, 4 bottom).
 	var c := Vector2(52, s.y - 52)
 	for i in 4:

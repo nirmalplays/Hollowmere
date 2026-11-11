@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/enemy/enemy_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/entities/enemy/enemy_attack_data.gd" id="2"]
+[ext_resource type="Resource" path="res://data/sprites/hollow_shield.tres" id="3"]
+[ext_resource type="Resource" path="res://data/fx/hit_spark.tres" id="4"]
+
+[sub_resource type="Resource" id="a0"]
+script = ExtResource("2")
+id = &"bash"
+shape = 1
+trigger_range = 30.0
+telegraph_ms = 800
+active_ms = 120
+recovery_ms = 650
+cooldown_ms = 1700
+damage = 12.0
+knockback = 170.0
+poise_damage = 25.0
+reach = 18.0
+box_size = Vector2(26, 22)
+
+[resource]
+script = ExtResource("1")
+id = &"hollow_shield"
+display_name = "Shielded Hollowed"
+max_hp = 60.0
+xp = 18
+move_speed = 40.0
+aggro_radius = 170.0
+leash_radius = 340.0
+max_poise = 45.0
+stagger_ms = 1500
+shielded = true
+is_boss = false
+attacks = Array[ExtResource("2")]([SubResource("a0")])
+sprite_sheet = ExtResource("3")
+hit_fx = ExtResource("4")

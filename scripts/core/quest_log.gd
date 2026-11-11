@@ -26,6 +26,13 @@ func complete(index: int) -> void:
 		quest_changed.emit(title, steps)
 
 
+## Rewrites a step's text (e.g. a counter: "Put down the crawlers (2/3)").
+func set_step_text(index: int, text: String) -> void:
+	if index >= 0 and index < steps.size():
+		steps[index]["text"] = text
+		quest_changed.emit(title, steps)
+
+
 func clear() -> void:
 	title = ""
 	steps.clear()

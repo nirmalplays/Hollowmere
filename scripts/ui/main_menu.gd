@@ -2,7 +2,7 @@ extends Control
 ## M0 main menu. Solo is the default path and never blocked by co-op (GAME_PLAN 9.0).
 ## Solo starts in the Greywood glade until zones and world creation exist (M7).
 
-const SOLO_START_SCENE: String = "res://scenes/world/greywood_glade.tscn"
+const SOLO_START_SCENE: String = "res://scenes/world/underroot_caves.tscn"
 
 @onready var _solo_button: Button = $Center/SoloButton
 @onready var _quit_button: Button = $Center/QuitButton

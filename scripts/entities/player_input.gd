@@ -4,7 +4,7 @@ extends Node
 ## buffered presses. The Player never reads Input directly: in co-op (M11) remote
 ## intents arrive over the network instead and the host applies them the same way.
 
-const BUFFERED: Array[StringName] = [&"attack_light", &"attack_heavy", &"dodge"]
+const BUFFERED: Array[StringName] = [&"attack_light", &"attack_heavy", &"dodge", &"interact"]
 
 ## Seconds the mouse stays the aim source after it last moved or clicked.
 @export var mouse_aim_timeout: float = 2.0

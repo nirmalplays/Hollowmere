@@ -62,6 +62,26 @@ CHARACTERS = {
         {"path": "weapon/sword/arming/universal/fg/{anim}/{color}.png", "color": "iron", "skip": "slash"},
         {"path": "weapon/sword/arming/attack_slash/fg/{color}.png", "color": "iron", "only": "slash", "oversize": True},
     ],
+    "hollow_shield": [
+        {"path": "body/bodies/skeleton/{anim}.png", "tint": (0.82, 0.88, 0.96)},
+        {"path": "head/heads/skeleton/adult/{anim}.png", "tint": (0.82, 0.88, 0.96)},
+        {"path": "shield/round/{anim}/{color}.png", "color": "black"},
+        {"path": "weapon/sword/arming/universal/fg/{anim}/{color}.png", "color": "iron", "skip": "slash"},
+        {"path": "weapon/sword/arming/attack_slash/fg/{color}.png", "color": "iron", "only": "slash", "oversize": True},
+    ],
+    # The Gaunt Sexton (QUESTS ACT1_MQ01): a Hollowed gravedigger, ash-pale, sack hood, shovel.
+    "gaunt_sexton": [
+        {"path": "tools/shovel/bg/{anim}.png"},
+        {"path": "cape/tattered/bg/{anim}.png", "tint": (0.34, 0.32, 0.3)},
+        {"path": "body/bodies/male/{anim}.png", "tint": (0.78, 0.8, 0.84)},
+        {"path": "head/heads/human/male/{anim}.png", "tint": (0.78, 0.8, 0.84)},
+        {"path": "feet/boots/basic/male/{anim}.png"},
+        {"path": "legs/pants/male/{anim}/{color}.png", "color": "brown"},
+        {"path": "torso/armour/leather/male/{anim}.png", "tint": (0.45, 0.42, 0.4)},
+        {"path": "cape/tattered/fg/{anim}.png", "tint": (0.34, 0.32, 0.3)},
+        {"path": "hat/cloth/hood_sack/adult/{anim}.png", "tint": (0.62, 0.58, 0.52)},
+        {"path": "tools/shovel/fg/{anim}.png"},
+    ],
     "hollowed_zombie": [
         {"path": "body/bodies/zombie/{anim}/zombie.png"},
         {"path": "head/heads/zombie/adult/{anim}.png"},
@@ -139,9 +159,15 @@ def available(layers, lpc_anim):
     return 0
 
 
+# Characters whose attack is a thrust (shovels, spears) rather than a slash.
+ATTACK_ANIM = {"gaunt_sexton": "thrust"}
+
+
 def build(name, layers):
     rows, meta = [], []
     for our, lpc_anim, first, count, fps, loop, fallback in ANIMS:
+        if our == "attack" and name in ATTACK_ANIM:
+            lpc_anim, count = ATTACK_ANIM[name], 8
         total = available(layers, lpc_anim)
         if total == 0 and fallback:
             lpc_anim, first, count = fallback

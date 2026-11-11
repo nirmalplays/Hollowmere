@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/inscription.gd" id="1"]
+
+[node name="CryptInscription" type="Node2D"]
+script = ExtResource("1")
+text = "Cut deep into the wall, the letters still sharp:
+EIGHT BREATHS TAKEN. EIGHT BREATHS KEPT.
+WHEN THE LAST IS LOST, REMEMBER US."
+radius = 40.0

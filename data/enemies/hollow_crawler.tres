@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/enemy/enemy_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/entities/enemy/enemy_attack_data.gd" id="2"]
+[ext_resource type="Resource" path="res://data/sprites/hollowed_zombie.tres" id="3"]
+[ext_resource type="Resource" path="res://data/fx/hit_spark.tres" id="4"]
+
+[sub_resource type="Resource" id="a0"]
+script = ExtResource("2")
+id = &"claw"
+shape = 1
+trigger_range = 26.0
+telegraph_ms = 650
+active_ms = 120
+recovery_ms = 500
+cooldown_ms = 1400
+damage = 8.0
+knockback = 90.0
+poise_damage = 10.0
+reach = 16.0
+box_size = Vector2(22, 18)
+
+[resource]
+script = ExtResource("1")
+id = &"hollow_crawler"
+display_name = "Crawling Hollowed"
+max_hp = 30.0
+xp = 8
+move_speed = 34.0
+aggro_radius = 150.0
+leash_radius = 340.0
+max_poise = 15.0
+stagger_ms = 1500
+shielded = false
+is_boss = false
+attacks = Array[ExtResource("2")]([SubResource("a0")])
+sprite_sheet = ExtResource("3")
+hit_fx = ExtResource("4")

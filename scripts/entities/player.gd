@@ -5,8 +5,10 @@ extends CharacterBody2D
 ## resolves hits; solo is peer 1 with no other peers, through the same code path.
 
 signal facing_changed(direction: Vector2)
+signal respawned
 
-const CHEST_HEIGHT: float = 18.0  ## pixels above the feet where blows land
+const CHEST_HEIGHT: float = 18.0
+const REST_RANGE: float = 40.0  ## pixels above the feet where blows land
 const HIT_COLOR := Color(1.0, 0.55, 0.45)
 const BLOCK_COLOR := Color(0.75, 0.8, 0.9)
 
@@ -45,6 +47,11 @@ func _ready() -> void:
 	stats.reset()
 	hitbox.hit_landed.connect(_on_hit_landed)
 	states.setup(self)
+	# The lantern only lights once it is carried (ACT1_MQ01 O1; the glade assumes it is).
+	$Lantern.visible = GameState.flags.get(&"has_cradle_lantern", true)
+	EventBus.story_flag_changed.connect(func(flag: StringName, value: Variant) -> void:
+		if flag == &"has_cradle_lantern":
+			$Lantern.visible = bool(value))
 
 
 func _physics_process(delta: float) -> void:
@@ -127,6 +134,8 @@ func try_start_action() -> bool:
 
 
 func try_start_attack_or_dodge() -> bool:
+	if input.consume(&"interact") and _try_rest():
+		return true
 	if not stats.can_act():
 		return false
 	if input.consume(&"dodge"):
@@ -138,6 +147,20 @@ func try_start_attack_or_dodge() -> bool:
 	if input.consume(&"attack_light"):
 		states.transition(&"Attack", {"attack": weapon.light})
 		return true
+	return false
+
+
+## The Rest (STORY_BIBLE 4): with the Cradle Lantern, lay a staggered Hollowed to rest.
+func _try_rest() -> bool:
+	if not GameState.flags.get(&"has_cradle_lantern", false):
+		return false
+	for node in get_tree().get_nodes_in_group(&"enemies"):
+		var enemy := node as Enemy
+		if enemy and enemy.can_rest() and enemy.global_position.distance_to(global_position) < REST_RANGE:
+			face(enemy.global_position - global_position)
+			play_timed(&"attack", 0.5)
+			enemy.rest(self)
+			return true
 	return false
 
 
@@ -228,6 +251,16 @@ func respawn() -> void:
 	Flash.clear(sprite)
 	AudioManager.sfx(&"respawn", -3.0, 0.0)
 	states.transition(&"Idle")
+	respawned.emit()
+
+
+## A death the story demands (ACT1_MQ01 O6): no Pressure, no Scar.
+func die_scripted() -> void:
+	if stats.is_dead():
+		return
+	stats.take_damage(int(ceil(stats.hp)))
+	AudioManager.sfx(&"player_death")
+	states.transition(&"Dead")
 
 
 # --- animation ----------------------------------------------------------------
