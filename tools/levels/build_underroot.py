@@ -1,8 +1,9 @@
 """Build the Underroot Caves (ACT1_MQ01 The Waking): layout + the prop defs it uses.
 
-Rooms follow the quest's beats in order (QUESTS.md 2): cradle chamber -> crypt hall ->
-the long corridor (grunts, the collapse) -> guard room (shield, first Rests) -> ossuary
-(the Gaunt Sexton) -> stairwell. Hand-placed: edit ROOMS/PLACES and re-run.
+The cave follows the quest's beats in order (QUESTS.md 2): the Cradle Hollow -> the
+Nameless Hall -> the Old Descent (grunts, the collapse) -> the Wardens' Mess (shield,
+first Rests) -> the Sexton's Round (boss) -> the gate stair. The shape and placements
+live in underroot_map.py; the prop definitions live here.
 
   python -I tools/levels/build_underroot.py
 """
@@ -11,46 +12,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from propgen import footprint  # noqa: E402
+from underroot_map import layout_rows  # noqa: E402
 
 PROJECT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-W, H = 48, 36
-
-# Floor rectangles (x0, y0, x1, y1) inclusive.
-ROOMS = [
-    (5, 23, 18, 31),   # A: cradle chamber
-    (11, 15, 12, 22),  # corridor up
-    (4, 5, 26, 14),    # B: crypt hall
-    (27, 8, 33, 10),   # corridor east
-    (31, 11, 33, 25),  # the long corridor south (the collapse)
-    (24, 26, 40, 32),  # D: guard room
-    (38, 17, 40, 25),  # corridor north to the ossuary
-    (37, 3, 46, 16),   # E: ossuary (boss), reachable only through the guard room
-    (41, 1, 43, 2),    # stairwell out
-]
-
-# (x, y, char)
-PLACES = [
-    # A: the cradle chamber. 'M' yours, C empty, K shattered, G glowing (Edrin's is 'X', scratched).
-    (11, 25, "M"), (7, 25, "C"), (9, 25, "K"), (14, 25, "C"), (16, 25, "G"),
-    (7, 29, "X"), (9, 29, "C"), (14, 29, "C"),
-    (7, 26, "n"), (9, 26, "n"), (14, 26, "n"), (16, 26, "n"), (7, 30, "n"), (9, 30, "n"), (14, 30, "n"),
-    (12, 27, "L"), (11, 28, "P"), (12, 29, "Z"),
-    (5, 23, "T"), (18, 23, "T"), (5, 31, "T"), (18, 31, "T"), (6, 31, "b"), (17, 31, "k"), (5, 27, "w"),
-    # B: the crypt hall.
-    (11, 14, "R"), (15, 5, "I"), (8, 10, "c"), (16, 9, "c"), (22, 11, "c"),
-    (6, 5, "H"), (24, 5, "H"), (4, 5, "w"), (26, 5, "w"), (5, 12, "b"), (20, 13, "k"), (24, 12, "x"),
-    (9, 6, "T"), (21, 6, "T"), (4, 14, "T"), (26, 14, "T"), (13, 8, "B"), (18, 12, "b"),
-    # The long corridor: grunts, then the ceiling gives way.
-    (30, 9, "g"), (32, 15, "g"), (32, 21, "D"), (33, 12, "T"), (31, 24, "x"), (33, 18, "b"),
-    # D: the guard room.
-    (31, 29, "h"), (27, 30, "v"), (35, 30, "v"), (26, 27, "O"), (29, 27, "u"), (37, 31, "k"),
-    (24, 26, "T"), (40, 26, "T"), (24, 32, "T"), (34, 27, "B"), (25, 31, "b"),
-    # E: the ossuary. Bone heaps round the walls, the Sexton digs in the middle.
-    (42, 10, "S"), (37, 3, "T"), (46, 3, "T"), (37, 16, "T"), (46, 16, "T"),
-    (38, 5, "k"), (45, 6, "b"), (38, 14, "b"), (45, 14, "k"), (39, 3, "H"), (44, 3, "H"),
-    (38, 9, "x"), (45, 11, "x"), (42, 2, "E"), (37, 4, "w"), (46, 4, "w"),
-]
-
 PROP_DIR = "res://assets/art/props/lpc/"
 # name -> (textures, base_inset, footprint mode, jitter, light or None, flip)
 PROPS = {
@@ -94,70 +58,6 @@ def box_footprint(path, inset):
     from PIL import Image
     w, h = Image.open(path).size
     return [(-w / 2 + 2, -h * 0.45), (w / 2 - 2, -h * 0.45), (w / 2 - 2, -inset + 1.0), (-w / 2 + 2, -inset + 1.0)]
-
-
-def layout_rows():
-    """Carve the rooms, then roughen them into caves: corners are cut, edges bulge and
-    bite at random (seeded), so no room reads as a rectangle. Anything hand-placed keeps
-    its floor, and a flood fill rejects any bite that would cut the path."""
-    import random
-    rng = random.Random(41)
-    g = [["#"] * W for _ in range(H)]
-    owner = {}
-    for i, (x0, y0, x1, y1) in enumerate(ROOMS):
-        for y in range(y0, y1 + 1):
-            for x in range(x0, x1 + 1):
-                g[y][x] = "."
-                owner[(x, y)] = i
-    placed = {(x, y) for x, y, _ in PLACES}
-    keep = set(placed)
-    for x, y in placed:  # room to stand next to anything placed
-        keep |= {(x + dx, y + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
-
-    def connected():
-        floor = {(x, y) for y in range(H) for x in range(W) if g[y][x] != "#"}
-        start = next(iter(floor))
-        seen, todo = {start}, [start]
-        while todo:
-            x, y = todo.pop()
-            for n in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
-                if n in floor and n not in seen:
-                    seen.add(n)
-                    todo.append(n)
-        return len(seen) == len(floor)
-
-    def bite(x, y):
-        if (x, y) in keep or g[y][x] == "#":
-            return
-        g[y][x] = "#"
-        if not connected():
-            g[y][x] = "."
-
-    for i, (x0, y0, x1, y1) in enumerate(ROOMS):
-        if min(x1 - x0, y1 - y0) < 5:
-            continue  # corridors keep their width
-        for cx, cy, sx, sy in ((x0, y0, 1, 1), (x1, y0, -1, 1), (x0, y1, 1, -1), (x1, y1, -1, -1)):
-            for dx, dy in ((0, 0), (1, 0), (0, 1)) + (((2, 0),) if rng.random() < 0.5 else ((0, 2),)):
-                bite(cx + sx * dx, cy + sy * dy)
-        # Bulges: push the wall out a tile here and there, never toward another room.
-        for y in range(max(1, y0 - 1), min(H - 2, y1 + 1) + 1):
-            for x in range(max(1, x0 - 1), min(W - 2, x1 + 1) + 1):
-                if g[y][x] != "#" or rng.random() > 0.3:
-                    continue
-                near = {owner.get((x + dx, y + dy)) for dx in range(-3, 4) for dy in range(-3, 4)} - {None}
-                touches = any(owner.get(n) == i and g[n[1]][n[0]] != "#" for n in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
-                if near == {i} and touches:
-                    g[y][x] = "."
-        # Bites: nibble the edge inward.
-        for y in range(y0, y1 + 1):
-            for x in range(x0, x1 + 1):
-                edge = x in (x0, x1) or y in (y0, y1)
-                if edge and rng.random() < 0.22:
-                    bite(x, y)
-    for x, y, ch in PLACES:
-        g[y][x] = ch
-    assert connected()
-    return ["".join(r) for r in g]
 
 
 def write_props():
