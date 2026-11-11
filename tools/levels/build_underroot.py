@@ -12,7 +12,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from propgen import footprint  # noqa: E402
-from underroot_map import layout_rows  # noqa: E402
+from underroot_map import layout_rows, named_places  # noqa: E402
 
 PROJECT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 PROP_DIR = "res://assets/art/props/lpc/"
@@ -106,7 +106,9 @@ def write_layout(rows):
     lines += ["", "[resource]", 'script = ExtResource("1")', 'rows = "' + "\n".join(rows) + '\n"',
               'tileset = ExtResource("2")', "tile_seed = 9", 'wall_char = "#"', 'wall_set = "crypt"',
               'floors = {\n".": [' + ", ".join(f'"{f}"' for f in floors) + "]\n}",
-              "props = {\n" + props + "\n}", "markers = {\n" + markers + "\n}", 'prop_floor = "."', ""]
+              "props = {\n" + props + "\n}", "markers = {\n" + markers + "\n}", 'prop_floor = "."',
+              "place_names = PackedStringArray(" + ", ".join('"%s"' % n for n, *_ in named_places()) + ")",
+              "place_rects = Array[Rect2i]([" + ", ".join("Rect2i(%d, %d, %d, %d)" % (x0, y0, x1 - x0, y1 - y0) for _, x0, y0, x1, y1 in named_places()) + "])", ""]
     os.makedirs(os.path.join(PROJECT, "data", "areas"), exist_ok=True)
     with open(os.path.join(PROJECT, "data", "areas", "underroot_caves.tres"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines))

@@ -16,6 +16,10 @@ extends Resource
 @export var props: Dictionary = {}
 @export var markers: Dictionary = {}
 @export var prop_floor: String = "."
+## Named places inside the area, in cells: walking into one announces it, the way a
+## zone is really a string of named spots. Same index in both arrays.
+@export var place_names: PackedStringArray = []
+@export var place_rects: Array[Rect2i] = []
 
 
 func lines() -> PackedStringArray:

@@ -112,3 +112,5 @@ markers = {
 "v": ExtResource("m1")
 }
 prop_floor = "."
+place_names = PackedStringArray("The Cradle Hollow", "The Nameless Hall", "The Nameless Hall", "The Wardens' Mess", "The Sexton's Round", "The Old Descent")
+place_rects = Array[Rect2i]([Rect2i(4, 31, 18, 12), Rect2i(3, 6, 24, 13), Rect2i(18, 5, 13, 10), Rect2i(29, 31, 19, 11), Rect2i(44, 3, 16, 16), Rect2i(35, 14, 8, 16)])

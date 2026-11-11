@@ -49,3 +49,80 @@ presentation and feel**: never its art, names, text or maps.
 | Quest log, deeds board, area banners, map | QUESTS 0, 5; GAME_PLAN 7 | M7 |
 | Camps/rest points, crafting, forge | GAME_PLAN 8 | M8 |
 | Portrait dialogue, NPC services (talk/train/trade) | QUESTS 3, GAME_PLAN 9 | M9 |
+
+# Part 2: how its places and missions are built (1:12 to 2:54 of the walkthrough)
+
+Second pass over the footage, looking only at construction. Again: we take the
+**method**, never the art, names or maps.
+
+## How places are named
+| What | Their pattern (examples seen) | Our equivalent |
+|---|---|---|
+| Zones | "The" + adjective + noun, or a compound + biome: The Lost Caverns, The Guild Hall, Wildwood Forest | The Underroot Caves, The Ashen Reach, Thornwick |
+| Named spots inside a zone | Shown on the map and in quest text, not as banners (a "Sanctum" fast-travel point) | Every cavern has a name in the level file: the Cradle Hollow, the Nameless Hall, the Old Descent, the Wardens' Mess, the Sexton's Round |
+| NPCs | First name + an epithet under it: "The Travelling Merchant", "The Gentlest Spirit", "Dwarven Poet", "Guild Leader" | Name + epithet on the dialogue portrait and the bark plate |
+| Quests | Short and literary, often possessive or "The X of Y": A Village in Crisis, A Merchant's Lost Tools, The Art of Runesmithing, Verses Beneath the Bark, a named character's "Lament" | QUESTS.md already follows this (The Waking) |
+| Bosses and elites | Adjective + creature for bosses; role names for elites (a warden, a caller, a weaver) | The Gaunt Sexton; elites get role names |
+
+## How a location is constructed
+1. **One continuous landmass, never rooms and corridors.** The map screen shows a zone as
+   a winding ribbon of ground that loops around black lakes and voids, with the hub in
+   the middle and points of interest as icons along it.
+2. **Edges are natural.** Canopy masses, cliffs, water and darkness bound the play space.
+   No straight wall runs longer than a few steps.
+3. **The ground is painted, not tiled.** Two or three tones in soft blobs; the lighter
+   tone is the path and leads the eye. No visible grid.
+4. **Every screen has a landmark:** a giant stump, a ruined arch, a rune circle, a crystal
+   cluster, a wrecked cart, a dock. You can always say where you are.
+5. **Light leads.** Lamp posts, crystals and campfires sit along the intended route;
+   side pockets are darker.
+6. **Rest points are pockets off the path:** tent, bedroll, fire. Safe, warm-lit.
+7. **Biome shift signals danger.** Green forest, then blue night marsh, then a red and
+   purple corrupted wood, then the boss arena: an enclosed round clearing with its own
+   palette.
+8. **Everything breathes:** rain, drifting leaves, swaying canopy and grass, light shafts,
+   floating wisps.
+
+## How missions are built
+- **Main quest shape:** three parallel objectives in any order ("find and slay the first /
+  second / third source"), then a gate ("slay monsters to open the way 0/8"), then the boss.
+- **Side quests are found, not listed:** an NPC in trouble barks at you in the wild
+  ("Hey you! Help me out!"), and the quest starts on the spot.
+- **Deeds trigger by place:** walking into an elite's territory pops "New Deed" with its
+  own small objective.
+- **Fetch quests always turn:** "find the lost tools" becomes "slay the ambushers", then
+  "return to the merchant". Gather quests ask for small counts (5 wood, 5 stone).
+- **The tracker shows only the active quest**, one to four live objectives, counters inline.
+- **Enemies are never idle props.** Packs of two to five roam clearings and engage on
+  sight; elites carry a red outline and a role name; bosses get the bar and their name.
+- **Numbers stay small:** hits read 6 to 16 on fodder, 40 to 95 for spells and crits.
+
+## What we changed because of this
+- The Underroot is now carved from lumpy caverns and brush-stroke passages
+  (`tools/levels/underroot_map.py`); each cavern is named and has a landmark.
+- The Hollowed no longer wait for the quest: they attack on sight, and The Waking's
+  objectives are conditions that can be met in any order.
+- Still owed: painted ground (floor variation by region), a rest pocket with a reward,
+  three-way objectives in the first outdoor zone, found side quests and place-triggered deeds.
+
+## Every banner in the walkthrough (automated scan, one frame per second)
+A script looked for the banner's white title text in all three hours of footage and
+pulled 130 hits. What they show:
+
+- **A zone is a string of named sub-areas**, and the banner fires every time you cross
+  into one. Names share a regional prefix: a village, its farmlands, its cross roads,
+  its road waygate, and north / south waypoints, all carrying the same first word.
+  Wild places drop the prefix and get evocative names (a pool of remembrance, an old
+  ones' ruins, a hidden grove, an elite's own grove). Interiors take "The".
+- **Fast travel points are named places too** (waypoints, a waygate) and announce
+  themselves like any other spot.
+- **"Quest complete" uses the same banner** with the quest's name beneath, and it fires
+  often: about 25 times in three hours, so roughly one every seven minutes. Early quests
+  are tutorials by name (first steps, learning to build, learning to train, new lessons,
+  reach the village), then chores for the village (pitching in, thinning the fields,
+  maintaining the defences), then the wild (a refugee, a poet's verses, a lost shipment).
+- **Deeds are a board:** "Available Deeds (4/10)" with repeatable patrol and scouting jobs.
+
+Applied: `AreaLayout.place_names / place_rects` and `AreaScene` announce each named
+place in the Underroot as the player walks into it. Thornwick and the Ashen Reach should
+share a prefix scheme the same way (Thornwick Gate, Thornwick Green, Thornwick Mill...).

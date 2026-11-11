@@ -27,6 +27,14 @@ PASSAGES = [
     ([(52, 4), (52, 1)], 0.8),                        # the gate stair
 ]
 
+# Named places (announced on entering): (name, x0, y0, x1, y1) in cells.
+def named_places():
+    names = {"cradle": "The Cradle Hollow", "hall": "The Nameless Hall", "hall_e": "The Nameless Hall",
+             "guard": "The Wardens' Mess", "ossuary": "The Sexton's Round"}
+    out = [(names[k], int(cx - rx), int(cy - ry), int(cx + rx) + 1, int(cy + ry) + 1) for k, (cx, cy, rx, ry) in CAVERNS.items()]
+    out.append(("The Old Descent", 35, 14, 43, 30))
+    return out
+
 
 def carve():
     rng = random.Random(7)
