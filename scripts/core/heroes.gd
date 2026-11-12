@@ -40,7 +40,12 @@ static func hero_class(id: String) -> Dictionary:
 
 
 static func sheet_path(profile: Dictionary) -> String:
-	return "res://data/sprites/hero_%s_%s.tres" % [origin(profile.get("origin", "human"))["id"], hero_class(profile.get("class", "bruiser"))["id"]]
+	var c: Dictionary = hero_class(profile.get("class", "bruiser"))
+	# A class with its own hand-animated sheet uses it for every origin (the origin then
+	# shows as build and bearing); the rest fall back to the layered LPC looks.
+	if c.has("sheet") and ResourceLoader.exists(c["sheet"]):
+		return c["sheet"]
+	return "res://data/sprites/hero_%s_%s.tres" % [origin(profile.get("origin", "human"))["id"], c["id"]]
 
 
 ## Attribute scores shown in the creator: the class's base plus the origin's lean.

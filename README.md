@@ -42,3 +42,17 @@ Compatibility (`gl_compatibility`) for broad desktop support. Viewport 480x270, 
   - `godot --headless --path . --script res://tools/dev/probe_enemies.gd` (every enemy attacks)
   - `... probe_flow.gd` (combo, ability, reading), `probe_rest.gd`, `probe_classes.gd`,
     `probe_echoes.gd`, `probe_save.gd`
+
+## Audio and hero art pass (2026-11-12)
+- **All effects replaced** with real CC0 recordings (Kenney Impact / RPG / UI, OpenGameArt
+  voice and creature packs; full list in ASSETS.md). Each action is a set of 3 to 6
+  takes played through an `AudioStreamRandomizer`, on five buses: Music, Ambient, SFX,
+  Voice, UI (all adjustable in Settings and the pause menu).
+- **Voices:** the hero grunts on the big swings (and sometimes the small ones), gasps
+  when hit; Hollowed groan before they strike and the boss roars.
+- **Timing:** swings, grunts and impacts fire on the active frame of the attack, never on
+  the button press. Big hits duck the music for a moment.
+- **Hero:** the Bruiser uses a new 8-direction hand-animated sheet (PixelLab, built with
+  `tools/art/import_pixellab.py`). Arcanist and Prowler still use the layered LPC looks.
+- **Fixed:** effects streaked in from the map corner on their first frame after frame
+  interpolation was turned on; one-shot effects now opt out of interpolation.

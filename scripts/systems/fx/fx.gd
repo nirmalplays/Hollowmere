@@ -12,6 +12,7 @@ static func spawn(def: FxDef, at: Vector2, direction: Vector2, context: Node) ->
 	if def == null or context == null or not context.is_inside_tree():
 		return null
 	var sprite := AnimatedSprite2D.new()
+	sprite.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF  # placed once: never slide in from the origin
 	sprite.sprite_frames = def.frames()
 	sprite.centered = false
 	sprite.offset = -def.anchor

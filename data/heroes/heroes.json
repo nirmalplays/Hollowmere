@@ -24,7 +24,7 @@
   ],
   "classes": [
     {
-      "id": "bruiser", "name": "Bruiser", "role": "Sword and shield, in the thick of it",
+      "id": "bruiser", "name": "Bruiser", "sheet": "res://data/sprites/unlaid_pl.tres", "role": "Sword and shield, in the thick of it",
       "blurb": "You were buried with a blade across your chest. Heavy swings that stagger, a shield that holds, and a slam that clears the ground around you.",
       "weapon": "res://data/items/weapons/warden_blade.tres", "weapon_name": "Warden's Blade",
       "attack_text": "Three weighty cuts; the third knocks them back.",

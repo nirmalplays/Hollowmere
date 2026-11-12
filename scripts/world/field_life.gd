@@ -20,6 +20,7 @@ var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	z_index = 50
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	_rng.randomize()
 	for i in LEAVES:
 		_leaves.append(_new_leaf(true))

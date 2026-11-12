@@ -16,7 +16,7 @@ const MAIN_MENU_PATH: String = "res://scenes/ui/main_menu.tscn"
 const ROW_H: float = 32.0
 const LEFT: float = 70.0
 const TOP: float = 190.0
-const BUSES: Array = [["Music", &"Music"], ["Ambience", &"Ambient"], ["Effects", &"SFX"], ["Interface", &"UI"]]
+const BUSES: Array = [["Music", &"Music"], ["Ambience", &"Ambient"], ["Effects", &"SFX"], ["Voices", &"Voice"], ["Interface", &"UI"]]
 
 var area: AreaScene
 

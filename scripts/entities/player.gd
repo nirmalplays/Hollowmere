@@ -75,6 +75,7 @@ func _ready() -> void:
 	_camera.enabled = input.is_local()
 	if _camera.enabled:
 		_camera.make_current()
+	add_child(Prop.make_light(Color(0.9, 0.93, 1.0), 1.25, 0.42, Vector2(0, -CHEST_HEIGHT)))
 	juice = BodyJuice.new()
 	add_child(juice)
 	juice.setup(self, sprite, tuning.max_speed)
@@ -300,6 +301,7 @@ func throw_bolt(dir: Vector2, info: DamageInfo, shape: Dictionary = {}) -> void:
 		bolt.set(key, shape[key])
 	get_parent().add_child(bolt)
 	bolt.global_position = chest_position() + dir * 10.0
+	bolt.reset_physics_interpolation()
 
 
 ## Grave Slam: a ring of force around you. Hits everything close, staggers the light.

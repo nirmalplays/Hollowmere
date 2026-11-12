@@ -25,22 +25,22 @@ from import_lpc import PROJECT, write_sheet_def  # noqa: E402
 DIRS = {"e": ("east", False), "se": ("south-east", False), "s": ("south", False), "sw": ("south-east", True),
         "w": ("east", True), "nw": ("north-east", True), "n": ("north", False), "ne": ("north-east", False)}
 ORDER = ["south", "south-east", "east", "north-east", "north"]
-# our animation -> (source animation, fps, loop, frames to keep or None)
+# our animation -> (source animations in order of preference, fps, loop, frames to keep or None)
 ANIMS = [
-    ("idle", "idle", 6, True, None),
-    ("walk", "run", 12, True, None),
-    ("run", "run", 14, True, None),
-    ("attack", "slash", 16, False, None),
-    ("block", "idle", 1, True, 1),
-    ("hurt", "hurt", 10, False, None),
-    ("dead", "death", 9, False, None),
+    ("idle", ("idle3", "idle"), 5, True, None),
+    ("walk", ("run3", "run"), 12, True, None),
+    ("run", ("run3", "run"), 14, True, None),
+    ("attack", ("slash",), 16, False, None),
+    ("block", ("idle3", "idle"), 1, True, 1),
+    ("hurt", ("hurt",), 10, False, None),
+    ("dead", ("death",), 9, False, None),
 ]
 
 
-def frames(src, anim, direction):
-    """Frames for an animation and direction; falls back to the nearest direction, then the rotation."""
+def frames(src, anims, direction):
+    """Frames for the first animation that exists; falls back to the nearest direction, then the rotation."""
     want = ORDER.index(direction)
-    for near in sorted(ORDER, key=lambda d: abs(ORDER.index(d) - want)):
+    for anim, near in [(a, d) for a in anims for d in sorted(ORDER, key=lambda d: abs(ORDER.index(d) - want))]:
         folder = os.path.join(src, anim, near)
         if os.path.isdir(folder):
             files = sorted((f for f in os.listdir(folder) if f.endswith(".png")), key=lambda f: int(os.path.splitext(f)[0]))

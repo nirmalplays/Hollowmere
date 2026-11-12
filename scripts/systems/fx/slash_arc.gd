@@ -19,6 +19,7 @@ static func spawn(context: Node, at: Vector2, direction: Vector2, shape: Diction
 	if context == null or not context.is_inside_tree():
 		return
 	var arc := SlashArc.new()
+	arc.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	for key: String in shape:
 		arc.set(key, shape[key])
 	arc.rotation = direction.angle()

@@ -49,6 +49,7 @@ func dust(direction: Vector2, amount: int = 6) -> void:
 	if body == null or not body.is_inside_tree():
 		return
 	var p := CPUParticles2D.new()
+	p.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	p.one_shot = true
 	p.emitting = true
 	p.amount = amount
@@ -99,6 +100,7 @@ func _spawn_ghost() -> void:
 	if sprite.sprite_frames == null or not body.is_inside_tree():
 		return
 	var ghost := Sprite2D.new()
+	ghost.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	ghost.texture = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
 	ghost.offset = sprite.offset
 	ghost.scale = sprite.scale

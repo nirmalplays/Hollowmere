@@ -19,6 +19,7 @@ static func burst(parent: Node, at: Vector2, total: int) -> void:
 	var left := total
 	for i in count:
 		var wisp := EchoWisp.new()
+		wisp.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF  # it moves every rendered frame
 		wisp.value = left if i == count - 1 else total / count
 		left -= wisp.value
 		var ang := randf() * TAU

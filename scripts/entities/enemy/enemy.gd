@@ -369,6 +369,7 @@ func receive_hit(info: DamageInfo) -> int:
 ## Chips of light thrown off along the blow.
 func _sparks(at: Vector2, direction: Vector2, amount: int) -> void:
 	var p := CPUParticles2D.new()
+	p.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	p.one_shot = true
 	p.emitting = true
 	p.amount = amount

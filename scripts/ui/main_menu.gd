@@ -277,7 +277,7 @@ func _close_panel() -> void:
 func _settings_panel() -> Control:
 	var box := _parchment(Vector2(460, 330), "Settings")
 	var v: VBoxContainer = box.get_child(0)
-	for bus in [["Music", &"Music"], ["Ambience", &"Ambient"], ["Effects", &"SFX"], ["Interface", &"UI"]]:
+	for bus in [["Music", &"Music"], ["Ambience", &"Ambient"], ["Effects", &"SFX"], ["Voices", &"Voice"], ["Interface", &"UI"]]:
 		var row := HBoxContainer.new()
 		var name := _label(BODY_FONT, 17, Color(0.18, 0.15, 0.2))
 		name.text = bus[0]

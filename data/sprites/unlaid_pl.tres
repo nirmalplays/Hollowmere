@@ -9,8 +9,8 @@ script = ExtResource("2")
 name = &"idle_e"
 row = 0
 column = 0
-frame_count = 1
-fps = 6.00
+frame_count = 4
+fps = 5.00
 loop = true
 
 [sub_resource type="Resource" id="a1"]
@@ -18,8 +18,8 @@ script = ExtResource("2")
 name = &"idle_se"
 row = 1
 column = 0
-frame_count = 1
-fps = 6.00
+frame_count = 4
+fps = 5.00
 loop = true
 
 [sub_resource type="Resource" id="a2"]
@@ -27,8 +27,8 @@ script = ExtResource("2")
 name = &"idle_s"
 row = 2
 column = 0
-frame_count = 1
-fps = 6.00
+frame_count = 4
+fps = 5.00
 loop = true
 
 [sub_resource type="Resource" id="a3"]
@@ -36,8 +36,8 @@ script = ExtResource("2")
 name = &"idle_sw"
 row = 3
 column = 0
-frame_count = 1
-fps = 6.00
+frame_count = 4
+fps = 5.00
 loop = true
 
 [sub_resource type="Resource" id="a4"]
@@ -45,8 +45,8 @@ script = ExtResource("2")
 name = &"idle_w"
 row = 4
 column = 0
-frame_count = 1
-fps = 6.00
+frame_count = 4
+fps = 5.00
 loop = true
 
 [sub_resource type="Resource" id="a5"]
@@ -54,8 +54,8 @@ script = ExtResource("2")
 name = &"idle_nw"
 row = 5
 column = 0
-frame_count = 1
-fps = 6.00
+frame_count = 4
+fps = 5.00
 loop = true
 
 [sub_resource type="Resource" id="a6"]
@@ -63,8 +63,8 @@ script = ExtResource("2")
 name = &"idle_n"
 row = 6
 column = 0
-frame_count = 1
-fps = 6.00
+frame_count = 4
+fps = 5.00
 loop = true
 
 [sub_resource type="Resource" id="a7"]
@@ -72,8 +72,8 @@ script = ExtResource("2")
 name = &"idle_ne"
 row = 7
 column = 0
-frame_count = 1
-fps = 6.00
+frame_count = 4
+fps = 5.00
 loop = true
 
 [sub_resource type="Resource" id="a8"]
@@ -225,7 +225,7 @@ script = ExtResource("2")
 name = &"attack_e"
 row = 24
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 16.00
 loop = false
 
@@ -234,7 +234,7 @@ script = ExtResource("2")
 name = &"attack_se"
 row = 25
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 16.00
 loop = false
 
@@ -243,7 +243,7 @@ script = ExtResource("2")
 name = &"attack_s"
 row = 26
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 16.00
 loop = false
 
@@ -252,7 +252,7 @@ script = ExtResource("2")
 name = &"attack_sw"
 row = 27
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 16.00
 loop = false
 
@@ -261,7 +261,7 @@ script = ExtResource("2")
 name = &"attack_w"
 row = 28
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 16.00
 loop = false
 
@@ -270,7 +270,7 @@ script = ExtResource("2")
 name = &"attack_nw"
 row = 29
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 16.00
 loop = false
 
@@ -279,7 +279,7 @@ script = ExtResource("2")
 name = &"attack_n"
 row = 30
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 16.00
 loop = false
 
@@ -288,7 +288,7 @@ script = ExtResource("2")
 name = &"attack_ne"
 row = 31
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 16.00
 loop = false
 
