@@ -76,6 +76,7 @@ func _ready() -> void:
 	for node in entities.get_children():
 		if node is Enemy:
 			_enemies.append(node)
+	EventBus.enemy_killed.connect(_on_enemy_killed)
 	_start()
 	if player:
 		_apply_save()
@@ -114,6 +115,17 @@ func _apply_save() -> void:
 	player.flasks_changed.emit(player.flasks, player.combat.flask_charges)
 	place = _place_at(player.global_position)
 	_last_announced = place
+
+
+## The fallen leave Echoes; a soul laid to rest leaves half again as many.
+func _on_enemy_killed(enemy: Node, _killer: Node) -> void:
+	var e := enemy as Enemy
+	if e == null or e.data == null:
+		return
+	var amount := e.data.xp
+	if e.get(&"_was_rested"):
+		amount = int(amount * 1.5)
+	EchoWisp.burst(entities, e.global_position, amount)
 
 
 func _capture_quest() -> Dictionary:

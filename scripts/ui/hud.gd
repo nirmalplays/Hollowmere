@@ -37,6 +37,7 @@ var _exhausted: bool = false
 var _flasks: int = 0
 var _flasks_max: int = 0
 var _flask_flash: float = 0.0
+var _echo_pop: float = 0.0
 var _t: float = 0.0
 var _canvas: Control
 
@@ -121,6 +122,7 @@ func bind(player: Player) -> void:
 			_flask_flash = 0.6
 		_flasks = n
 		_flasks_max = m)
+	player.echoes_changed.connect(func(_total: int) -> void: _echo_pop = 1.0)
 	_hp = player.stats.hp
 	_hp_max = player.combat.max_hp
 	_hp_chip = _hp
@@ -170,6 +172,7 @@ func _process(delta: float) -> void:
 	_toast_left = maxf(0.0, _toast_left - delta)
 	_hp_flash = maxf(0.0, _hp_flash - delta)
 	_flask_flash = maxf(0.0, _flask_flash - delta)
+	_echo_pop = maxf(0.0, _echo_pop - delta * 4.0)
 	_quest_flare = maxf(0.0, _quest_flare - delta * 0.7)
 	_tip_alpha = move_toward(_tip_alpha, 1.0 if _tip_text != "" else 0.0, delta * 4.0)
 	_hp_chip = move_toward(_hp_chip, _hp, _hp_max * 0.5 * delta) if _hp_chip > _hp else _hp
@@ -324,6 +327,12 @@ func _draw_vitals() -> void:
 		_canvas.draw_arc(c, 5.0, -PI / 2, -PI / 2 + TAU * ready, 16, EMBER if ready >= 1.0 else IRON_EDGE, 1.5)
 		_canvas.draw_circle(c, 2.5, EMBER_HOT if ready >= 1.0 else Color(0.4, 0.22, 0.14))
 		_text(PIXEL_FONT, c + Vector2(10, 4), Keys.label(&"spell_1"), 9, ASH_DIM)
+	# Echoes carried: a pale mote and a count that jumps when one arrives.
+	if _player and (_player.echoes > 0 or not _player.levels.is_empty()):
+		var e := Vector2(x + 60, 53)
+		_canvas.draw_circle(e, 5.0 + 2.0 * _echo_pop, Color(0.5, 0.8, 1.0, 0.3))
+		_canvas.draw_circle(e, 2.2, Color(0.88, 0.97, 1.0))
+		_text(PIXEL_FONT, e + Vector2(9, 4 - 2.0 * _echo_pop), str(_player.echoes), 12, Color(0.72, 0.9, 1.0).lerp(Color.WHITE, _echo_pop))
 
 
 func _bar(at: Vector2, w: float, h: float, k: float, col: Color, chip: float, flash: bool) -> void:

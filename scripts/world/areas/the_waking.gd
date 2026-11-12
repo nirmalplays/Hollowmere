@@ -44,6 +44,9 @@ Drink from your flask with [{heal}]",
 ]
 ## One-time explainers (QUESTS.md 7), shown when the concept first matters.
 const CARDS := {
+	3: ["Echoes", "The pale motes the Hollowed leave behind are Echoes. They run to you on their own.
+
+Carry them to a fire and rest: the flame will take them and make you stronger. A soul you lay to rest, rather than cut down, leaves half again as many."],
 	1: ["The Cradle Lantern", "It was lit before you woke, and it has not gone out.
 
 The lantern is your light in the dark, and it lets you lay a Hollowed to rest: when one is staggered, stand beside it and press {interact}. A rested soul passes on, and the Hollow loosens its grip on the land."],

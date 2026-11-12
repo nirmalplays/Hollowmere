@@ -64,3 +64,6 @@ func _rest() -> void:
 	AudioManager.sfx(&"respawn", -8.0, 0.0)
 	EventBus.toast_shown.emit("Hearth", "You will rise here")
 	SaveManager.save_game.call_deferred()
+	var menu := KindleMenu.new()
+	menu.player = player
+	get_tree().current_scene.add_child(menu)

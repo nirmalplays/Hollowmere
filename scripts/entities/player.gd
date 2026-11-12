@@ -8,6 +8,7 @@ signal facing_changed(direction: Vector2)
 signal respawned
 signal flasks_changed(charges: int, max_charges: int)
 signal ember_thrown
+signal echoes_changed(total: int)
 
 const CHEST_HEIGHT: float = 18.0
 const REST_RANGE: float = 62.0
@@ -31,6 +32,14 @@ var hero: Dictionary = {}  ## {"name", "origin", "class"}; empty = the plain Unl
 var ability: String = "ember"  ## what the ability key does (the class decides)
 var ability_name: String = "Lantern Ember"
 var ability_cooldown: float = 0.9
+var echoes: int = 0  ## what the Hollowed left behind; spent at a fire
+var levels: Dictionary = {}  ## attribute id -> levels kindled
+
+var _base_hp: float = 100.0
+var _base_stamina: float = 100.0
+var _base_regen: float = 45.0
+var _base_cooldown: float = 0.9
+var _base_flask: float = 0.4
 
 @onready var input: PlayerInput = $Input
 @onready var stats: CombatStats = $Stats
@@ -50,6 +59,17 @@ func _ready() -> void:
 	set_multiplayer_authority(peer_id)
 	spawn_point = global_position
 	_apply_hero(GameState.players.get(peer_id, {}))
+	if combat.resource_path != "":
+		combat = combat.duplicate()  # levels change it; never the shared file
+	_base_hp = combat.max_hp
+	_base_stamina = combat.max_stamina
+	_base_regen = combat.stamina_regen
+	_base_cooldown = ability_cooldown
+	_base_flask = combat.flask_heal_fraction
+	echoes = int(hero.get("echoes", 0))
+	for key: String in hero.get("levels", {}):
+		levels[key] = int(hero["levels"][key])
+	_apply_levels()
 	sprite.sprite_frames = SpriteFramesBuilder.build(sprite_sheet)
 	sprite.offset = sprite_sheet.foot_offset()
 	_camera.enabled = input.is_local()
@@ -262,7 +282,7 @@ func _throw_ember() -> void:
 func _ability_info(amount: float, poise: float, knock: float, type: StringName = &"fire") -> DamageInfo:
 	var info := DamageInfo.new()
 	info.source = self
-	info.amount = amount
+	info.amount = amount * (1.0 + 0.1 * attribute_level("intellect"))
 	info.damage_type = type
 	info.poise_damage = poise
 	info.knockback = knock
@@ -312,7 +332,70 @@ func make_damage_info(attack: AttackData) -> DamageInfo:
 
 ## Base damage before attack multipliers. M3 adds attribute scaling.
 func attack_power() -> float:
-	return weapon.base_damage
+	return weapon.base_damage * (1.0 + 0.08 * attribute_level("might"))
+
+
+# --- echoes and kindling ----------------------------------------------------------
+
+func attribute_level(id: String) -> int:
+	return int(levels.get(id, 0))
+
+
+func kindle_cost() -> int:
+	var total := 0
+	for key: String in levels:
+		total += int(levels[key])
+	return 30 + total * 18
+
+
+func gain_echoes(amount: int) -> void:
+	echoes += amount
+	_store_progress()
+	echoes_changed.emit(echoes)
+	AudioManager.sfx(&"coins", -16.0, 0.2)
+
+
+## Spend Echoes on one more level of an attribute (at a fire). False if you can't.
+func raise_attribute(id: String) -> bool:
+	var cost := kindle_cost()
+	if echoes < cost or attribute_level(id) >= 10:
+		return false
+	echoes -= cost
+	levels[id] = attribute_level(id) + 1
+	_apply_levels()
+	stats.heal(combat.max_hp)
+	_store_progress()
+	echoes_changed.emit(echoes)
+	return true
+
+
+func _apply_levels() -> void:
+	combat.max_hp = _base_hp + 12.0 * attribute_level("vitality")
+	combat.max_stamina = _base_stamina + 8.0 * attribute_level("agility")
+	combat.stamina_regen = _base_regen * (1.0 + 0.06 * attribute_level("agility"))
+	combat.flask_heal_fraction = _base_flask + 0.04 * attribute_level("spirit")
+	ability_cooldown = _base_cooldown * pow(0.95, attribute_level("intellect"))
+	if stats and stats.tuning:
+		stats.hp_changed.emit(stats.hp, combat.max_hp)
+		stats.stamina_changed.emit(stats.stamina, combat.max_stamina)
+
+
+## Progress rides in the hero profile, which is what a journey saves.
+func _store_progress() -> void:
+	if GameState.players.has(peer_id):
+		GameState.players[peer_id]["echoes"] = echoes
+		GameState.players[peer_id]["levels"] = levels.duplicate()
+
+
+## [label, value] rows for the fire's ledger.
+func stat_lines() -> Array:
+	return [
+		["Health", str(int(combat.max_hp))],
+		["Stamina", str(int(combat.max_stamina))],
+		["Blade damage", "%.0f" % attack_power()],
+		["%s every" % ability_name, "%.1f s" % ability_cooldown],
+		["Flask mends", "%d%%" % int(combat.flask_heal_fraction * 100.0)],
+	]
 
 
 # --- taking hits --------------------------------------------------------------

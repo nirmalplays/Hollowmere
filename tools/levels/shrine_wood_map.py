@@ -103,6 +103,7 @@ def places(g):
     put(at("ring", 1, 0), "L")
     put(at("ring", -1, 1), "P")
     put(at("ring", 1, 1), "Z")
+    put(at("ring", 6, 0), "F")  # the first fire: rest, and kindle what you carry
     for deg in (195, 345, 150, 30):
         put(edge(g, "ring", deg, 1.0), "T")
     put(edge(g, "ring", 125, 1.5), "o")
