@@ -26,3 +26,19 @@ Compatibility (`gl_compatibility`) for broad desktop support. Viewport 480x270, 
 - **M0 (done):** project skeleton, pixel settings, folder layout, autoload stubs (EventBus, DataRegistry, GameState, NetManager, SaveManager), full InputMap, boots to a main menu.
 - **M1 (done):** Solo Game opens a test room built from `data/rooms/test_room.tres`. 8-direction movement with acceleration/friction, 4-direction animated 16x24 player (generated art), wall collision, camera with room limits, lantern light, F3 debug overlay, Esc returns to menu, pixel UI theme.
 - **Visual overhaul (after M2):** switched to an isometric world (Dimraeth-style camera). Characters (8 directions, full animation sets) from Flare (CC-BY-SA), environment from CC0 packs (KipperFalcon forest/cave, isometric trees, dark ruins, props and tents), all pixelized to one look. First area: the Greywood glade (ruined shrine, dead Hollow grove, camp, plateau, pond) with the Hollow Husk training enemy. All M0–M2 systems and tests carried over.
+
+## What changed in the feel pass (and how to test it)
+- **Fullscreen and smooth frames.** The game starts fullscreen with fractional scaling, and
+  physics interpolation is on, so movement is smooth on 120 Hz+ screens.
+- **Combat flows.** Hold attack for a three-step combo you can walk through; Space dashes
+  out of any swing; E is the class ability. Every action leans, squashes and springs back;
+  dashes leave ghosts, swings leave arcs, hits throw sparks and shove the enemy.
+- **Rest (F) works mid-fight.** A staggered Hollowed shows `[F] Rest` over its head and
+  stays down 2.4 s; F works from a swing, a block or a walk.
+- **Echoes.** The fallen leave pale motes that fly to you. Rest at a fire (one stands in
+  the Cradle Ring) to spend them on Might, Vitality, Agility, Intellect or Spirit.
+- **Checks** (run from the project root with the Godot console build):
+  - `godot --headless --path . res://tests/test_runner.tscn`
+  - `godot --headless --path . --script res://tools/dev/probe_enemies.gd` (every enemy attacks)
+  - `... probe_flow.gd` (combo, ability, reading), `probe_rest.gd`, `probe_classes.gd`,
+    `probe_echoes.gd`, `probe_save.gd`
