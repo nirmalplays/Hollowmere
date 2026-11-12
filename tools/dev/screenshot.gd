@@ -19,7 +19,7 @@ func _initialize() -> void:
 	for i in range(3, args.size()):
 		var parts := args[i].split(":")
 		_inputs.append({"action": StringName(parts[0]), "from": int(parts[1]), "to": int(parts[2]) if parts.size() > 2 else int(parts[1]) + 2})
-	root.add_child.call_deferred((load(scene_path) as PackedScene).instantiate())
+	change_scene_to_file.call_deferred(scene_path)  # as the current scene, so scene changes work
 
 
 func _physics_process(_delta: float) -> bool:

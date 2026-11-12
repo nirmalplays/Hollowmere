@@ -1,0 +1,54 @@
+{
+  "origins": [
+    {
+      "id": "human", "name": "Human", "epithet": "The Stubborn",
+      "blurb": "The valley's own people: farmers, wardens, gravediggers. Nothing in them is remarkable except that they do not stop.",
+      "trait": "Stubborn", "trait_text": "One more sip in the Ember Flask.",
+      "hp": 1.0, "stamina": 1.0, "speed": 1.0, "regen": 1.0, "defense": 0, "flasks": 1, "scale": 1.0,
+      "lean": {"might": 0, "agility": 0, "vitality": 0, "intellect": 0, "spirit": 1}
+    },
+    {
+      "id": "bullhorn", "name": "Bullhorn", "epithet": "The Horned Folk",
+      "blurb": "Broad, horned, slow to anger. They came down from the salt cliffs as smiths and stayed as neighbours. The Hollow finds them hard to move.",
+      "trait": "Thick Hide", "trait_text": "A quarter more health and tougher skin, but a heavier stride.",
+      "hp": 1.25, "stamina": 1.0, "speed": 0.94, "regen": 1.0, "defense": 8, "flasks": 0, "scale": 1.12,
+      "lean": {"might": 2, "agility": -1, "vitality": 2, "intellect": 0, "spirit": 0}
+    },
+    {
+      "id": "sylvan", "name": "Sylvan", "epithet": "The Forest Folk",
+      "blurb": "Moss-skinned and long-eared, raised under the Greywood's eaves. They hear a wood change its mind before the birds do.",
+      "trait": "Light Step", "trait_text": "Quicker on their feet and quicker to catch their breath, but slighter.",
+      "hp": 0.9, "stamina": 1.0, "speed": 1.1, "regen": 1.3, "defense": 0, "flasks": 0, "scale": 0.97,
+      "lean": {"might": -1, "agility": 2, "vitality": -1, "intellect": 1, "spirit": 1}
+    }
+  ],
+  "classes": [
+    {
+      "id": "bruiser", "name": "Bruiser", "role": "Sword and shield, in the thick of it",
+      "blurb": "You were buried with a blade across your chest. Heavy swings that stagger, a shield that holds, and a slam that clears the ground around you.",
+      "weapon": "res://data/items/weapons/warden_blade.tres", "weapon_name": "Warden's Blade",
+      "attack_text": "Three weighty cuts; the third knocks them back.",
+      "ability": "slam", "ability_name": "Grave Slam", "ability_text": "Strike the earth: everything near you is hit and shaken.", "ability_cooldown": 4.0,
+      "hp": 1.25, "stamina": 1.0, "speed": 0.97,
+      "stats": {"might": 4, "agility": 2, "vitality": 4, "intellect": 1, "spirit": 2}
+    },
+    {
+      "id": "arcanist", "name": "Arcanist", "role": "Staff and ember, from a distance",
+      "blurb": "You were buried with your hands folded round a staff. Every swing throws fire; you are dangerous far away and fragile up close.",
+      "weapon": "res://data/items/weapons/ash_staff.tres", "weapon_name": "Ash Staff",
+      "attack_text": "Each strike looses a bolt of ember at the cursor.",
+      "ability": "lance", "ability_name": "Cinder Lance", "ability_text": "One great bolt that hits hard and flies far.", "ability_cooldown": 2.5,
+      "hp": 0.8, "stamina": 0.95, "speed": 1.0,
+      "stats": {"might": 1, "agility": 2, "vitality": 2, "intellect": 5, "spirit": 3}
+    },
+    {
+      "id": "prowler", "name": "Prowler", "role": "Knife and footwork, never where they swing",
+      "blurb": "You were buried shallow and in a hurry. Fast cuts, a longer dash, and a fan of thrown knives for anything that keeps its distance.",
+      "weapon": "res://data/items/weapons/twin_fang.tres", "weapon_name": "Twin Fang",
+      "attack_text": "A flurry of quick cuts you can dance through.",
+      "ability": "fan", "ability_name": "Knife Fan", "ability_text": "Three thrown blades in a spread.", "ability_cooldown": 2.0,
+      "hp": 0.9, "stamina": 1.15, "speed": 1.08,
+      "stats": {"might": 2, "agility": 5, "vitality": 2, "intellect": 2, "spirit": 2}
+    }
+  ]
+}

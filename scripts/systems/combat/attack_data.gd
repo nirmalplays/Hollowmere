@@ -16,6 +16,8 @@ extends Resource
 @export var stamina_cost: float = 18.0
 @export var knockback: float = 60.0
 @export var poise_damage: float = 10.0
+## The strike throws a bolt at the cursor instead of cutting (staves).
+@export var projectile: bool = false
 @export_group("Shape")
 @export var reach: float = 12.0  ## hitbox center distance from the body
 @export var hitbox_size: Vector2 = Vector2(18, 14)  ## x = along the swing direction

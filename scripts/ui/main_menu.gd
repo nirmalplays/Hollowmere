@@ -235,13 +235,19 @@ func _pick_slot(slot: int, fresh: bool) -> void:
 
 func _begin(slot: int, fresh: bool) -> void:
 	_ready_for_input = false
+	_list.visible = false
+	_hint.visible = false
+	_overlay.queue_redraw()
 	AudioManager.sfx(&"game_start", -4.0, 0.0)
 	AudioManager.stop_music(1.0)
 	var tw := create_tween()
 	tw.tween_property(_shade, ^"color:a", 1.0, 0.9)
 	tw.tween_callback(func() -> void:
-		if fresh or not SaveManager.load_game(slot):
-			SaveManager.new_game(slot))
+		if fresh:
+			CharacterCreator.slot = slot
+			get_tree().change_scene_to_file("res://scenes/ui/character_creator.tscn")
+		elif not SaveManager.load_game(slot):
+			SaveManager.new_game(slot, Heroes.DEFAULT))
 
 
 func _open_panel(panel: Control) -> void:

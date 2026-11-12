@@ -30,7 +30,7 @@ const TIPS: Array[String] = [
 Take the lantern: [{interact}]",
 	"Follow the trail north",
 	"Light attack [{attack_light}]   Heavy attack [{attack_heavy}]
-Hold attack to chain a combo. Throw an ember from the lantern: [{spell_1}]",
+Hold attack to chain a combo. Your class ability: [{spell_1}]",
 	"Read the Listening Stone: [{interact}]",
 	"Dash with [{dodge}] when the ground flashes red: it cancels any swing
 The start of a dash can't be hit",

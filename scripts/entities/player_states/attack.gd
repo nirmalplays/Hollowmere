@@ -69,7 +69,10 @@ func _chain() -> bool:
 func _begin_active() -> void:
 	_phase = Phase.ACTIVE
 	player.velocity += _dir * attack.lunge_speed
-	player.hitbox.shape_rect(attack.hitbox_size, _dir, attack.reach, Player.CHEST_HEIGHT)
-	player.hitbox.activate(player.make_damage_info(attack))
+	if attack.projectile:
+		player.throw_bolt(_dir, player.make_damage_info(attack))
+	else:
+		player.hitbox.shape_rect(attack.hitbox_size, _dir, attack.reach, Player.CHEST_HEIGHT)
+		player.hitbox.activate(player.make_damage_info(attack))
 	AudioManager.sfx(attack.sound, -2.0, 0.1)
 	Fx.spawn(attack.fx, player.chest_position(), _dir, player)

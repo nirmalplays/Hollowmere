@@ -11,8 +11,6 @@ signal ember_thrown
 
 const CHEST_HEIGHT: float = 18.0
 const REST_RANGE: float = 40.0
-const EMBER_COOLDOWN: float = 0.9
-const EMBER_DAMAGE: float = 10.0
 const EMBER_STATES: Array[StringName] = [&"Idle", &"Move", &"Attack", &"Block"]  ## pixels above the feet where blows land
 const HIT_COLOR := Color(1.0, 0.55, 0.45)
 const BLOCK_COLOR := Color(0.75, 0.8, 0.9)
@@ -28,7 +26,11 @@ var peer_id: int = Const.SOLO_PEER_ID
 var facing: Vector2 = Vector2.DOWN
 var spawn_point: Vector2 = Vector2.ZERO  ## the Hearth this player rises at
 var flasks: int = 3
-var ember_cooldown: float = 0.0  ## seconds until the lantern can throw again
+var ember_cooldown: float = 0.0  ## seconds until the ability is ready again
+var hero: Dictionary = {}  ## {"name", "origin", "class"}; empty = the plain Unlaid (tests)
+var ability: String = "ember"  ## what the ability key does (the class decides)
+var ability_name: String = "Lantern Ember"
+var ability_cooldown: float = 0.9
 
 @onready var input: PlayerInput = $Input
 @onready var stats: CombatStats = $Stats
@@ -45,6 +47,7 @@ func _ready() -> void:
 	add_child(Prop.make_shadow(0.55))  # soft ground shadow under the feet
 	set_multiplayer_authority(peer_id)
 	spawn_point = global_position
+	_apply_hero(GameState.players.get(peer_id, {}))
 	sprite.sprite_frames = SpriteFramesBuilder.build(sprite_sheet)
 	sprite.offset = sprite_sheet.foot_offset()
 	_camera.enabled = input.is_local()
@@ -73,6 +76,31 @@ func _physics_process(delta: float) -> void:
 	var regen := states.current.stamina_regen_mult()
 	if regen > 0.0:
 		stats.regen(delta, regen)
+
+
+## Who this Unlaid was: the origin shapes the body, the class the kit (data/heroes).
+## Tuning resources are shared, so a hero works on its own copies.
+func _apply_hero(profile: Dictionary) -> void:
+	if not profile.has("class"):
+		return
+	hero = profile
+	var o := Heroes.origin(profile.get("origin", ""))
+	var c := Heroes.hero_class(profile["class"])
+	combat = combat.duplicate()
+	tuning = tuning.duplicate()
+	combat.max_hp = roundf(combat.max_hp * float(o["hp"]) * float(c["hp"]))
+	combat.max_stamina = roundf(combat.max_stamina * float(o["stamina"]) * float(c["stamina"]))
+	combat.stamina_regen *= float(o["regen"])
+	combat.defense += float(o["defense"])
+	combat.flask_charges += int(o["flasks"])
+	tuning.max_speed *= float(o["speed"]) * float(c["speed"])
+	weapon = load(c["weapon"])
+	ability = c["ability"]
+	ability_name = c["ability_name"]
+	ability_cooldown = float(c["ability_cooldown"])
+	if ResourceLoader.exists(Heroes.sheet_path(profile)):
+		sprite_sheet = load(Heroes.sheet_path(profile))
+	sprite.scale *= float(o["scale"])
 
 
 # --- movement helpers for states -------------------------------------------
@@ -184,30 +212,67 @@ func _try_rest() -> bool:
 	return false
 
 
-## The Cradle Lantern spits an ember at the cursor. It never locks you in place: throw
-## while walking, between swings, behind your guard. Needs the lantern.
+## The ability key. It never locks you in place: use it walking, between swings, behind
+## your guard. What it does comes from the class; all of it runs on the Cradle Lantern.
 func _throw_ember() -> void:
 	if ember_cooldown > 0.0 or not states.current_name() in EMBER_STATES:
 		return
 	if not GameState.flags.get(&"has_cradle_lantern", false):
 		return
-	ember_cooldown = EMBER_COOLDOWN
+	ember_cooldown = ability_cooldown
 	var dir := aim_direction()
+	match ability:
+		"slam":
+			_slam()
+		"lance":
+			throw_bolt(dir, _ability_info(24.0, 30.0, 120.0), {"speed": 430.0, "life": 1.1, "radius": 10.0})
+		"fan":
+			for turn: float in [-0.24, 0.0, 0.24]:
+				throw_bolt(dir.rotated(turn), _ability_info(8.0, 6.0, 30.0, &"physical"), {"speed": 400.0, "life": 0.6, "radius": 5.0, "blade": true})
+		_:
+			throw_bolt(dir, _ability_info(10.0, 8.0, 40.0))
+	AudioManager.sfx(&"swing_heavy", -6.0, 0.2)
+	ember_thrown.emit()
+
+
+func _ability_info(amount: float, poise: float, knock: float, type: StringName = &"fire") -> DamageInfo:
+	var info := DamageInfo.new()
+	info.source = self
+	info.amount = amount
+	info.damage_type = type
+	info.poise_damage = poise
+	info.knockback = knock
+	info.attack_id = &"ability"
+	return info
+
+
+## Looses a bolt from the chest. `shape` may set speed, life, radius, blade.
+func throw_bolt(dir: Vector2, info: DamageInfo, shape: Dictionary = {}) -> void:
 	var bolt := EmberBolt.new()
 	bolt.direction = dir
 	bolt.hit_fx = hit_fx
-	var info := DamageInfo.new()
-	info.source = self
-	info.amount = EMBER_DAMAGE
-	info.damage_type = &"fire"
-	info.poise_damage = 8.0
-	info.knockback = 40.0
-	info.attack_id = &"ember"
 	bolt.info = info
+	for key: String in shape:
+		bolt.set(key, shape[key])
 	get_parent().add_child(bolt)
 	bolt.global_position = chest_position() + dir * 10.0
-	AudioManager.sfx(&"swing_heavy", -6.0, 0.2)
-	ember_thrown.emit()
+
+
+## Grave Slam: a ring of force around you. Hits everything close, staggers the light.
+func _slam() -> void:
+	var ring := Hitbox.new()
+	ring.team = hitbox.team
+	add_child(ring)
+	ring.shape_circle(52.0, CHEST_HEIGHT * 0.5)
+	ring.activate(_ability_info(18.0, 45.0, 190.0, &"physical"))
+	get_tree().create_timer(0.12).timeout.connect(ring.queue_free)
+	HitFeedback.shake(4.0, 0.25)
+	Fx.spawn(parry_fx, global_position + Vector2(0, -6), Vector2.RIGHT, self)
+	var flash := Prop.make_light(Color(1.0, 0.7, 0.4), 2.2, 1.1, Vector2(0, -8))
+	add_child(flash)
+	var tw := create_tween()
+	tw.tween_property(flash, ^"energy", 0.0, 0.35)
+	tw.tween_callback(flash.queue_free)
 
 
 func make_damage_info(attack: AttackData) -> DamageInfo:

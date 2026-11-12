@@ -1,0 +1,100 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/combat/weapon_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/systems/combat/attack_data.gd" id="2"]
+[ext_resource type="Resource" path="res://data/fx/slash_light.tres" id="3"]
+[ext_resource type="Resource" path="res://data/fx/slash_heavy.tres" id="4"]
+
+[sub_resource type="Resource" id="light"]
+script = ExtResource("2")
+id = &"light"
+windup_ms = 100
+active_ms = 80
+recovery_ms = 200
+chain_ms = 90
+move_mult = 0.65
+damage_mult = 1.0
+damage_type = &"physical"
+stamina_cost = 7.0
+knockback = 80.0
+poise_damage = 16.0
+reach = 17.0
+hitbox_size = Vector2(26, 26)
+lunge_speed = 70.0
+hit_stop_ms = 35
+shake = 1.0
+fx = ExtResource("3")
+
+[sub_resource type="Resource" id="light2"]
+script = ExtResource("2")
+id = &"light"
+windup_ms = 90
+active_ms = 80
+recovery_ms = 200
+chain_ms = 90
+move_mult = 0.65
+damage_mult = 1.0
+damage_type = &"physical"
+stamina_cost = 7.0
+knockback = 80.0
+poise_damage = 16.0
+reach = 17.0
+hitbox_size = Vector2(26, 26)
+lunge_speed = 80.0
+hit_stop_ms = 35
+shake = 1.0
+fx = ExtResource("3")
+
+[sub_resource type="Resource" id="light3"]
+script = ExtResource("2")
+id = &"light"
+windup_ms = 140
+active_ms = 100
+recovery_ms = 280
+chain_ms = 170
+move_mult = 0.45
+damage_mult = 1.7
+damage_type = &"physical"
+stamina_cost = 9.0
+knockback = 170.0
+poise_damage = 32.0
+reach = 19.0
+hitbox_size = Vector2(32, 30)
+lunge_speed = 130.0
+hit_stop_ms = 70
+shake = 2.0
+fx = ExtResource("4")
+sound = &"swing_heavy"
+
+[sub_resource type="Resource" id="heavy"]
+script = ExtResource("2")
+id = &"heavy"
+windup_ms = 240
+active_ms = 110
+recovery_ms = 260
+chain_ms = 160
+move_mult = 0.3
+damage_mult = 2.4
+damage_type = &"physical"
+stamina_cost = 22.0
+knockback = 150.0
+poise_damage = 55.0
+reach = 20.0
+hitbox_size = Vector2(34, 30)
+lunge_speed = 150.0
+hit_stop_ms = 90
+shake = 2.5
+fx = ExtResource("4")
+sound = &"swing_heavy"
+
+[resource]
+script = ExtResource("1")
+id = &"warden_blade"
+display_name = "Warden's Blade"
+base_damage = 15.0
+light = SubResource("light")
+light_combo = Array[ExtResource("2")]([SubResource("light"), SubResource("light2"), SubResource("light3")])
+heavy = SubResource("heavy")
+block_reduction = 0.7
+block_stamina_per_damage = 1.2
+attribute_requirements = {}

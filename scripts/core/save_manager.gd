@@ -8,7 +8,7 @@ extends Node
 
 signal saved(slot: int)
 
-const SAVE_VERSION: int = 1
+const SAVE_VERSION: int = 2  ## 2: the journey opens in the Shrine Wood (cave saves are retired)
 const SLOTS: int = 3
 const DIR: String = "user://saves/"
 const START_SCENE: String = "res://scenes/world/shrine_wood.tscn"
@@ -67,7 +67,9 @@ func describe(slot: int) -> String:
 	var where: String = data.get("place", "")
 	if where == "":
 		where = data.get("area_title", "")
-	return "%s  ·  %s  ·  %s" % [where, data.get("quest", ""), clock(float(data.get("play_time", 0.0)))]
+	var hero: Dictionary = data.get("hero", {})
+	var who := "%s, %s  ·  " % [hero.get("name", "Unlaid"), Heroes.title(hero)] if hero.has("class") else ""
+	return "%s%s  ·  %s" % [who, where, clock(float(data.get("play_time", 0.0)))]
 
 
 static func clock(seconds: float) -> String:
@@ -80,12 +82,13 @@ func delete(slot: int) -> void:
 		DirAccess.remove_absolute(path(slot))
 
 
-func new_game(slot: int) -> void:
+func new_game(slot: int, hero: Dictionary = {}) -> void:
 	delete(slot)
 	current_slot = slot
 	pending = {}
 	play_time = 0.0
 	GameState.start_solo()
+	GameState.players[Const.SOLO_PEER_ID] = hero.duplicate()
 	get_tree().paused = false
 	get_tree().change_scene_to_file(START_SCENE)
 
@@ -98,11 +101,16 @@ func load_game(slot: int) -> bool:
 	pending = data
 	play_time = float(data.get("play_time", 0.0))
 	GameState.start_solo()
+	GameState.players[Const.SOLO_PEER_ID] = (data.get("hero", {}) as Dictionary).duplicate()
 	var flags: Dictionary = data.get("flags", {})
 	for key: String in flags:
 		GameState.flags[StringName(key)] = flags[key]
 	get_tree().paused = false
-	get_tree().change_scene_to_file(String(data.get("area", START_SCENE)))
+	var area := String(data.get("area", START_SCENE))
+	if not ResourceLoader.exists(area):  # a place that no longer exists: begin its road again
+		area = START_SCENE
+		pending = {}
+	get_tree().change_scene_to_file(area)
 	return true
 
 
@@ -117,6 +125,7 @@ func save_game() -> void:
 	data["version"] = SAVE_VERSION
 	data["saved_at"] = Time.get_unix_time_from_system()
 	data["play_time"] = play_time
+	data["hero"] = GameState.players.get(Const.SOLO_PEER_ID, {})
 	var flags := {}
 	for key: Variant in GameState.flags:
 		flags[String(key)] = GameState.flags[key]

@@ -318,7 +318,7 @@ func _draw_vitals() -> void:
 	_bar(Vector2(x, 36), st_w, 5, _stamina / maxf(_stamina_max, 1.0), st_col, 0.0, false)
 	# The lantern's ember throw: a coal that dims while it rekindles. Only once you carry it.
 	if _player and GameState.flags.get(&"has_cradle_lantern", false):
-		var ready := 1.0 - clampf(_player.ember_cooldown / Player.EMBER_COOLDOWN, 0.0, 1.0)
+		var ready := 1.0 - clampf(_player.ember_cooldown / maxf(_player.ability_cooldown, 0.01), 0.0, 1.0)
 		var c := Vector2(x + 6, 53)
 		_canvas.draw_circle(c, 6.0, Color(0, 0, 0, 0.6))
 		_canvas.draw_arc(c, 5.0, -PI / 2, -PI / 2 + TAU * ready, 16, EMBER if ready >= 1.0 else IRON_EDGE, 1.5)

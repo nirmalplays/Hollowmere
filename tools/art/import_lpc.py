@@ -88,6 +88,59 @@ CHARACTERS = {
     ],
 }
 
+# --- playable heroes: hero_<origin>_<class>, origin = who you were, class = how you fight
+FUR = (0.62, 0.47, 0.38)
+MOSS_SKIN = (0.78, 0.86, 0.7)
+ORIGINS = {
+    "human": [
+        {"path": "body/bodies/male/{anim}.png"},
+        {"path": "head/heads/human/male/{anim}.png"},
+        {"path": "hair/plain/adult/{anim}.png", "tint": (0.42, 0.28, 0.18)},
+    ],
+    "bullhorn": [
+        {"path": "body/bodies/male/{anim}.png", "tint": FUR},
+        {"path": "head/heads/minotaur/male/{anim}.png", "tint": FUR},
+    ],
+    "sylvan": [
+        {"path": "body/bodies/male/{anim}.png", "tint": MOSS_SKIN},
+        {"path": "head/heads/human/male/{anim}.png", "tint": MOSS_SKIN},
+        {"path": "head/ears/elven/adult/{anim}.png", "tint": MOSS_SKIN},
+        {"path": "hair/long/adult/{anim}.png", "tint": (0.34, 0.52, 0.3)},
+    ],
+}
+# class -> (layers behind the body, layers over it)
+CLASSES = {
+    "bruiser": (
+        [{"path": "weapon/sword/arming/attack_slash/bg/{color}.png", "color": "steel", "only": "slash", "oversize": True}],
+        [{"path": "feet/boots/basic/male/{anim}.png"},
+         {"path": "legs/pants/male/{anim}/{color}.png", "color": "black"},
+         {"path": "torso/armour/plate/male/{anim}.png"},
+         {"path": "shield/round/{anim}/{color}.png", "color": "brown"},
+         {"path": "weapon/sword/arming/universal/fg/{anim}/{color}.png", "color": "steel", "skip": "slash"},
+         {"path": "weapon/sword/arming/attack_slash/fg/{color}.png", "color": "steel", "only": "slash", "oversize": True}]),
+    "arcanist": (
+        [{"path": "weapon/magic/gnarled/universal/{anim}/background.png", "skip": "thrust"},
+         {"path": "weapon/magic/gnarled/thrust/background.png", "only": "thrust", "size": 192},
+         {"path": "cape/solid/bg/{anim}.png", "tint": (0.3, 0.22, 0.46)}],
+        [{"path": "feet/boots/basic/male/{anim}.png"},
+         {"path": "legs/pants/male/{anim}/{color}.png", "color": "black"},
+         {"path": "torso/clothes/longsleeve/longsleeve/male/{anim}.png", "tint": (0.44, 0.32, 0.62)},
+         {"path": "cape/solid/fg/{anim}.png", "tint": (0.3, 0.22, 0.46)},
+         {"path": "weapon/magic/gnarled/universal/{anim}/foreground.png", "skip": "thrust"},
+         {"path": "weapon/magic/gnarled/thrust/foreground.png", "only": "thrust", "size": 192}]),
+    "prowler": (
+        [{"path": "weapon/sword/dagger/behind/{anim}/dagger.png"},
+         {"path": "cape/tattered/bg/{anim}.png", "tint": (0.24, 0.34, 0.26)}],
+        [{"path": "feet/boots/basic/male/{anim}.png"},
+         {"path": "legs/pants/male/{anim}/{color}.png", "color": "black"},
+         {"path": "torso/armour/leather/male/{anim}.png", "tint": (0.46, 0.44, 0.38)},
+         {"path": "cape/tattered/fg/{anim}.png", "tint": (0.24, 0.34, 0.26)},
+         {"path": "weapon/sword/dagger/{anim}/dagger.png"}]),
+}
+for _origin, _body in ORIGINS.items():
+    for _class, (_behind, _over) in CLASSES.items():
+        CHARACTERS["hero_%s_%s" % (_origin, _class)] = _behind + _body + _over
+
 _cache = {}
 
 
@@ -118,7 +171,7 @@ def layer_sheet(layer, lpc_anim):
         if key not in _cache:
             _cache[key] = tint(img, layer["tint"])
         img = _cache[key]
-    return img, (128 if layer.get("oversize") else 64)
+    return img, layer.get("size", 128 if layer.get("oversize") else 64)
 
 
 # Standing poses many items don't draw: borrow the item's first walk frame instead.
@@ -141,7 +194,10 @@ def frame(layers, lpc_anim, row, col):
             col = col_saved
             continue
         cell = img.crop((col * size, r * size, col * size + size, r * size + size))
-        off = (FRAME - size) // 2
+        if size > FRAME:
+            trim = (size - FRAME) // 2
+            cell = cell.crop((trim, trim, trim + FRAME, trim + FRAME))
+        off = max(0, (FRAME - size) // 2)
         out.alpha_composite(cell, (off, off))
         col = col_saved
     return out
@@ -160,6 +216,7 @@ def available(layers, lpc_anim):
 
 # Characters whose attack is a thrust (shovels, spears) rather than a slash.
 ATTACK_ANIM = {"gaunt_sexton": "thrust"}
+ATTACK_ANIM.update({"hero_%s_arcanist" % o: "thrust" for o in ("human", "bullhorn", "sylvan")})
 
 
 def build(name, layers):
@@ -206,10 +263,8 @@ def write_sheet_def(name, frame, meta, foot_inset):
     out += ["[resource]", 'script = ExtResource("1")', 'texture = ExtResource("3")',
             f"frame_size = Vector2i({frame[0]}, {frame[1]})", f'animations = Array[ExtResource("2")]([{refs}])',
             f"foot_inset = {foot_inset}", ""]
-    with open(os.path.join(PROJECT, "data", "sprites", name + ".tres"), "w", encoding="utf-8", newline="
-") as f:
-        f.write("
-".join(out))
+    with open(os.path.join(PROJECT, "data", "sprites", name + ".tres"), "w", encoding="utf-8", newline="\n") as f:
+        f.write("\n".join(out))
 
 
 def main():
