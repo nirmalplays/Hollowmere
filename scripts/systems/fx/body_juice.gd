@@ -77,16 +77,35 @@ func dust(direction: Vector2, amount: int = 6) -> void:
 func _process(delta: float) -> void:
 	if sprite == null:
 		return
-	# A damped spring pulls the shape back to rest.
-	var accel := (Vector2.ONE - _scale) * SPRING - _vel * DAMPING
-	_vel += accel * delta
-	_scale += _vel * delta
-	var speed := body.get_real_velocity().length() if body else 0.0
+	# A damped spring pulls the shape back to rest. Stepped in small slices: one long
+	# frame (a hitch when the first hit compiles its effects) would otherwise fling the
+	# spring to infinity and every body would vanish.
+	var left := minf(delta, 0.1)
+	while left > 0.0:
+		var dt := minf(left, 1.0 / 120.0)
+		left -= dt
+		_vel += ((Vector2.ONE - _scale) * SPRING - _vel * DAMPING) * dt
+		_scale += _vel * dt
+	if not (_scale.is_finite() and _vel.is_finite()):
+		_scale = Vector2.ONE
+		_vel = Vector2.ZERO
+	_scale = _scale.clamp(Vector2(0.5, 0.5), Vector2(1.6, 1.6))
+	# The body's own velocity, never get_real_velocity(): during hit-stop time stands
+	# still, the engine divides movement by zero seconds, and the NaN that comes back
+	# would poison the scale and rotation for good (the body vanishes).
+	var moving: Vector2 = body.velocity if body else Vector2.ZERO
+	if not moving.is_finite():
+		moving = Vector2.ZERO
+	var speed := moving.length()
 	# A walker's bounce: a small rise and fall in step with the stride.
 	_bob += delta * (5.0 + speed * 0.09)
 	var bounce := 1.0 + 0.022 * sin(_bob * 2.0) * clampf(speed / top_speed, 0.0, 1.0) + 0.012 * sin(_bob * 0.45)
 	sprite.scale = _base * Vector2(_scale.x * (2.0 - bounce), _scale.y * bounce)
-	var lean := clampf(body.get_real_velocity().x / top_speed, -1.4, 1.4) * LEAN if body else 0.0
+	var lean := clampf(moving.x / top_speed, -1.4, 1.4) * LEAN
+	if not is_finite(sprite.rotation):
+		sprite.rotation = 0.0
+	if not is_finite(_bob):
+		_bob = 0.0
 	sprite.rotation = lerp_angle(sprite.rotation, lean, 1.0 - exp(-14.0 * delta))
 	if _ghost_left > 0.0:
 		_ghost_left -= delta
