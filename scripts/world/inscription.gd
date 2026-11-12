@@ -81,7 +81,7 @@ func _draw_carving() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if _near and event.is_action_pressed(&"interact"):
 		EventBus.lore_shown.emit(text)
-		AudioManager.sfx(&"ui_select", -6.0, 0.0)
+		AudioManager.sfx(&"ui_click", -6.0, 0.0)
 		if not _was_read:
 			_was_read = true
 			read.emit()

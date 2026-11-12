@@ -88,7 +88,7 @@ func _ready() -> void:
 		_tip_text = Keys.fmt(t)
 		if t != "":
 			_tip_alpha = 0.0
-			AudioManager.sfx(&"ui_move", -10.0, 0.0))
+			AudioManager.sfx(&"ui_hover", -10.0, 0.0))
 	EventBus.tutorial_card.connect(_show_card)
 	EventBus.quest_completed.connect(func(title: String) -> void:
 		_complete_text = title
@@ -275,7 +275,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_card.queue_free()
 		_card = null
 		get_tree().paused = false
-		AudioManager.sfx(&"ui_select", -6.0, 0.0)
+		AudioManager.sfx(&"ui_click", -6.0, 0.0)
 		get_viewport().set_input_as_handled()
 
 

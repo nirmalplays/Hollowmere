@@ -36,7 +36,7 @@ func _ready() -> void:
 	_canvas.draw.connect(_draw_menu)
 	add_child(_canvas)
 	get_tree().paused = true
-	AudioManager.sfx(&"ui_select", -8.0, 0.0)
+	AudioManager.sfx(&"ui_click", -8.0, 0.0)
 	_show("main")
 
 
@@ -107,7 +107,7 @@ func _input(event: InputEvent) -> void:
 		var i := _row_at(event.position)
 		if i >= 0 and i != _sel:
 			_sel = i
-			AudioManager.sfx(&"ui_move", -12.0, 0.04)
+			AudioManager.sfx(&"ui_hover", -12.0, 0.04)
 		return
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var i := _row_at(event.position)
@@ -131,20 +131,20 @@ func _row_at(at: Vector2) -> int:
 
 func _move(by: int) -> void:
 	_sel = (_sel + by + _rows.size()) % _rows.size()
-	AudioManager.sfx(&"ui_move", -10.0, 0.04)
+	AudioManager.sfx(&"ui_hover", -10.0, 0.04)
 
 
 func _nudge(by: float) -> void:
 	var row: Dictionary = _rows[_sel]
 	if row.has("bus"):
 		AudioManager.set_bus_volume(row["bus"], clampf(AudioManager.get_bus_volume(row["bus"]) + by, 0.0, 1.0))
-		AudioManager.sfx(&"ui_move", -8.0, 0.0)
+		AudioManager.sfx(&"ui_hover", -8.0, 0.0)
 
 
 func _activate() -> void:
 	var row: Dictionary = _rows[_sel]
 	if row.has("act"):
-		AudioManager.sfx(&"ui_select", -6.0, 0.0)
+		AudioManager.sfx(&"ui_click", -6.0, 0.0)
 		(row["act"] as Callable).call()
 
 

@@ -56,10 +56,10 @@ func _input(event: InputEvent) -> void:
 		_close()
 	elif event.is_action_pressed(&"ui_down") or event.is_action_pressed(&"move_down"):
 		_sel = (_sel + 1) % ROWS.size()
-		AudioManager.sfx(&"ui_move", -10.0, 0.04)
+		AudioManager.sfx(&"ui_hover", -10.0, 0.04)
 	elif event.is_action_pressed(&"ui_up") or event.is_action_pressed(&"move_up"):
 		_sel = (_sel + ROWS.size() - 1) % ROWS.size()
-		AudioManager.sfx(&"ui_move", -10.0, 0.04)
+		AudioManager.sfx(&"ui_hover", -10.0, 0.04)
 	elif event.is_action_pressed(&"ui_accept") or event.is_action_pressed(&"interact"):
 		_kindle()
 	elif event is InputEventMouseMotion:

@@ -275,7 +275,7 @@ func _throw_ember() -> void:
 				throw_bolt(dir.rotated(turn), _ability_info(8.0, 6.0, 30.0, &"physical"), {"speed": 400.0, "life": 0.6, "radius": 5.0, "blade": true})
 		_:
 			throw_bolt(dir, _ability_info(10.0, 8.0, 40.0))
-	AudioManager.sfx(&"swing_heavy", -6.0, 0.2)
+	AudioManager.sfx(&"hit_heavy" if ability == "slam" else &"spell_cast", -4.0, 0.2)
 	ember_thrown.emit()
 
 
@@ -412,7 +412,9 @@ func receive_hit(info: DamageInfo) -> int:
 	var reduction := weapon.block_reduction if blocked else 0.0
 	if blocked:
 		stats.spend_stamina(info.amount * weapon.block_stamina_per_damage)
-	AudioManager.sfx(&"block" if blocked else &"player_hurt", -2.0, 0.1)
+	AudioManager.sfx(&"hit_armor" if blocked else &"hit_flesh", -2.0, 0.1)
+	if not blocked:
+		AudioManager.sfx(&"voice_hurt", -4.0, 0.1, 150)
 	var dmg := DamageCalc.from_info(info, combat.defense, combat.resistances, reduction)
 	stats.take_damage(dmg)
 	EventBus.damage_dealt.emit(info.source, self, dmg, info.damage_type)
@@ -421,7 +423,7 @@ func receive_hit(info: DamageInfo) -> int:
 	Fx.spawn(hit_fx, chest_position(), info.direction, self)
 	juice.punch(Vector2(0.86, 1.14) if blocked else Vector2(1.28, 0.74))
 	if stats.is_dead():
-		AudioManager.sfx(&"player_death")
+		AudioManager.sfx(&"voice_death")
 		states.transition(&"Dead")
 		return DamageInfo.Result.HIT
 	if blocked:
@@ -439,8 +441,8 @@ func receive_hit(info: DamageInfo) -> int:
 
 func _on_parry(info: DamageInfo) -> void:
 	states.transition(&"Parry")
-	AudioManager.sfx(&"parry")
-	AudioManager.sfx(&"block", -3.0, 0.1, 0)
+	AudioManager.sfx(&"parry_clang")
+	AudioManager.sfx(&"hit_armor", -3.0, 0.1, 0)
 	Fx.spawn(parry_fx, chest_position() - info.direction * 8.0, Vector2.RIGHT, self)
 	HitFeedback.hit_stop(0.12)
 	HitFeedback.shake(3.0, 0.2)
@@ -481,7 +483,7 @@ func die_scripted() -> void:
 	if stats.is_dead():
 		return
 	stats.take_damage(int(ceil(stats.hp)))
-	AudioManager.sfx(&"player_death")
+	AudioManager.sfx(&"voice_death")
 	states.transition(&"Dead")
 
 

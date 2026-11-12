@@ -1,12 +1,19 @@
 """Copy the game's audio into assets/audio with clean names and write the sound bank.
 
-Sources:
-  - the owner's packs, dropped in the project root (BGM/, Climate sounds/,
-    Sound effects/, Special effect/), git-ignored as raw files
-  - CC0 packs in $HOLLOWMERE_SOURCES/audio: RPG Sound Pack (artisticdude),
-    80 CC0 RPG SFX (rubberduck), 50 RPG Sound Effects (Kenney)
-Output: assets/audio/<group>/<name>.<ext> and data/audio/sound_bank.tres
-(name -> list of variations; one is picked at random each play).
+Every effect is a real recording from a CC0 pack (nothing is synthesised here; this
+script only copies files). Each action gets three or more variations where the packs
+have them, and AudioManager plays one at random with a little pitch and level drift.
+
+Sources in $HOLLOWMERE_SOURCES/audio (see ASSETS.md for URLs and licences):
+  impact/      Kenney Impact Sounds   (footsteps, punches, plate and metal hits)
+  RPGsounds_Kenney/  Kenney RPG Audio (cloth, knives, coins, books)
+  ui_audio/    Kenney UI Audio        (clicks, rollovers, switches)
+  rpg_sound_pack/    RPG Sound Pack, artisticdude (swings, unsheathing, magic)
+  80-CC0-RPG-SFX_0/  80 CC0 RPG SFX, rubberduck (blades, spells, items, creatures)
+  voice_dl/    OpenGameArt CC0 voices: male grunts, hurt sounds, hit sounds and a
+               death, monster growls, 80 CC0 creature SFX
+Music and weather beds are the owner's own tracks (BGM/, Climate sounds/ in the
+project root).
 
   python -I tools/audio/import_audio.py
 """
@@ -16,57 +23,67 @@ import shutil
 PROJECT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 SOURCES = os.environ.get("HOLLOWMERE_SOURCES", os.path.join(os.path.dirname(PROJECT), "hollowmere_sources"))
 A = os.path.join(SOURCES, "audio")
+IMPACT = os.path.join(A, "impact", "addons", "kenney impact sounds")
+KEN = os.path.join(A, "RPGsounds_Kenney", "OGG")
+UI = os.path.join(A, "ui_audio", "addons", "kenney_ui_audio")
 RPG = os.path.join(A, "rpg_sound_pack", "RPG Sound Pack")
 CC80 = os.path.join(A, "80-CC0-RPG-SFX_0")
-KEN = os.path.join(A, "RPGsounds_Kenney", "OGG")
+V = os.path.join(A, "voice_dl")
+CREATURE = os.path.join(V, "80-cc0-creature-sfx")
 OWN = PROJECT
 
-# sound name -> (group, [source files])
+
+def seq(pattern, numbers):
+    return [pattern % n for n in numbers]
+
+
+# sound name -> (group, [source files]); group decides the bus (see AudioManager)
 BANK = {
-    # music (looped)
+    # music and weather (looped): the owner's own tracks
     "music_menu": ("music", [f"{OWN}/BGM/Intro music.mp3"]),
     "music_explore": ("music", [f"{OWN}/BGM/Exploration 1.mp3", f"{OWN}/BGM/Exploration 2.mp3", f"{OWN}/BGM/Exploration 3.mp3"]),
     "music_battle": ("music", [f"{OWN}/BGM/Battle 1.mp3"]),
     "music_miniboss": ("music", [f"{OWN}/BGM/Mini battle 1.mp3", f"{OWN}/BGM/Miini battle 2.mp3", f"{OWN}/BGM/Mini battle 3.mp3"]),
     "music_cutscene": ("music", [f"{OWN}/BGM/First cut scene BGM.mp3"]),
-    # ambience (looped)
     "amb_forest": ("ambient", [f"{OWN}/Climate sounds/Breeze and birds.mp3"]),
     "amb_fire": ("ambient", [f"{OWN}/Climate sounds/Fire burn.mp3"]),
     "amb_rain": ("ambient", [f"{OWN}/Climate sounds/Rain.mp3"]),
-    "amb_cave": ("ambient", [f"{A}/dungeon_ambient_1.ogg"]),  # Loopable Dungeon Ambience (CC0, OpenGameArt)
     "thunder": ("ambient", [f"{OWN}/Climate sounds/Thunder.mp3"]),
-    # interface
-    "ui_move": ("ui", [f"{OWN}/Sound effects/mixkit-game-ball-tap-2073.wav"]),
-    "ui_select": ("ui", [f"{RPG}/interface/interface2.wav"]),
-    "ui_back": ("ui", [f"{RPG}/interface/interface5.wav"]),
-    "game_start": ("ui", [f"{OWN}/Sound effects/freesound_community-game-start-6104.mp3"]),
-    # player
-    "footstep": ("sfx", [f"{KEN}/footstep0{i}.ogg" for i in range(10)]),
-    "swing_light": ("sfx", [f"{RPG}/battle/swing.wav", f"{RPG}/battle/swing2.wav", f"{RPG}/battle/swing3.wav"]),
-    "swing_heavy": ("sfx", [f"{CC80}/blade_01.ogg", f"{CC80}/blade_02.ogg", f"{CC80}/blade_03.ogg"]),
-    "dodge": ("sfx", [f"{KEN}/cloth{i}.ogg" for i in range(1, 5)]),
-    "block": ("sfx", [f"{CC80}/metal_01.ogg", f"{CC80}/metal_02.ogg", f"{CC80}/metal_03.ogg"]),
-    "parry": ("sfx", [f"{OWN}/Sound effects/mixkit-magic-glitter-shot-2353.wav"]),
-    "player_hurt": ("sfx", [f"{OWN}/Sound effects/mixkit-small-hit-in-a-game-2072.wav"]),
-    "player_death": ("sfx", [f"{OWN}/Sound effects/mixkit-player-losing-or-failing-2042.wav"]),
-    "respawn": ("sfx", [f"{OWN}/Sound effects/universfield-game-respawn-153317.mp3"]),
-    # enemies
-    "hit_flesh": ("sfx", [f"{OWN}/Sound effects/mixkit-game-blood-pop-slide-2363.wav", f"{OWN}/Sound effects/mixkit-small-hit-in-a-game-2072.wav"]),
-    "enemy_hurt": ("sfx", [f"{CC80}/creature_hurt_01.ogg", f"{CC80}/creature_hurt_02.ogg"]),
-    "enemy_die": ("sfx", [f"{CC80}/creature_die_01.ogg"]),
-    "enemy_windup": ("sfx", [f"{CC80}/creature_misc_0{i}.ogg" for i in range(1, 5)]),
-    # rewards and story beats (used from M4+)
-    "pickup": ("sfx", [f"{OWN}/Sound effects/floraphonic-power-up-sparkle-1-177983.mp3"]),
-    "coins": ("sfx", [f"{CC80}/item_coins_0{i}.ogg" for i in range(1, 5)]),
-    "treasure": ("sfx", [f"{OWN}/Sound effects/mixkit-video-game-treasure-2066.wav"]),
-    "quest_complete": ("sfx", [f"{OWN}/Sound effects/mixkit-medieval-show-fanfare-announcement-226.wav"]),
-    "level_up": ("sfx", [f"{OWN}/Sound effects/mixkit-game-level-completed-2059.wav"]),
-    "game_over": ("sfx", [f"{OWN}/Sound effects/alphix-game-over-417465.mp3"]),
-    # spells (M5)
-    "spell_air": ("spells", [f"{OWN}/Special effect/Air.mp3"]),
-    "spell_earth": ("spells", [f"{OWN}/Special effect/Earth.mp3"]),
-    "spell_fire": ("spells", [f"{OWN}/Special effect/Fire.mp3"]),
-    "spell_water": ("spells", [f"{OWN}/Special effect/Wave.mp3"]),
+    # interface (Kenney UI Audio)
+    "ui_hover": ("ui", seq(UI + "/rollover%d.wav", (1, 2, 3, 4))),
+    "ui_click": ("ui", seq(UI + "/click%d.wav", (1, 2, 3, 4, 5))),
+    "ui_back": ("ui", seq(UI + "/switch%d.wav", (2, 3, 4))),
+    "game_start": ("ui", seq(RPG + "/battle/sword-unsheathe%s.wav", ("", "2", "3"))),
+    # the body (Kenney Impact Sounds, Kenney RPG Audio)
+    "footstep": ("sfx", seq(IMPACT + "/footstep_grass_00%d.ogg", range(5))),
+    "footstep_stone": ("sfx", seq(IMPACT + "/footstep_concrete_00%d.ogg", range(5))),
+    "dodge_whoosh": ("sfx", seq(KEN + "/cloth%d.ogg", (1, 2, 3, 4))),
+    # steel
+    "sword_swing_light": ("sfx", [f"{RPG}/battle/swing.wav", f"{RPG}/battle/swing2.wav", f"{RPG}/battle/swing3.wav"]),
+    "sword_swing_heavy": ("sfx", seq(CC80 + "/blade_0%d.ogg", (1, 2, 3))),
+    "hit_flesh": ("sfx", seq(IMPACT + "/impact_punch_medium_00%d.ogg", range(5))),
+    "hit_heavy": ("sfx", seq(IMPACT + "/impact_punch_heavy_00%d.ogg", range(5))),
+    "hit_armor": ("sfx", seq(IMPACT + "/impact_plate_medium_00%d.ogg", range(5))),
+    "parry_clang": ("sfx", seq(IMPACT + "/impact_metal_heavy_00%d.ogg", range(5))),
+    # the hero's voice (OpenGameArt CC0)
+    "voice_attack": ("voice", seq(V + "/male-gruntyelling-sounds/yelling sounds/3grunt%d.wav", (1, 2, 3, 4, 5, 6))),
+    "voice_dodge": ("voice", seq(V + "/male-gruntyelling-sounds/yelling sounds/3grunt%d.wav", (2, 4, 6))),
+    "voice_hurt": ("voice", [V + "/hurt-sound-effects--hurt_01_0.mp3"] + seq(V + "/hurt-sound-effects--hurt_0%d.mp3", (2, 3, 4, 5, 6))),
+    "voice_death": ("voice", [V + "/5-hit-sounds-dying/ogg/die1.ogg"]),
+    # the Hollowed
+    "hollowed_groan": ("voice", seq(CREATURE + "/grunt_0%d.ogg", (1, 2, 3, 4, 5))),
+    "hollowed_hurt": ("voice", seq(CREATURE + "/hurt_0%d.ogg", (1, 2, 3, 4, 5))),
+    "hollowed_die": ("voice", [CC80 + "/creature_die_01.ogg"] + seq(V + "/16-monster-growls/monster.%d.ogg", (1, 2, 3))),
+    "boss_telegraph": ("voice", seq(CREATURE + "/roar_0%d.ogg", (1, 2, 3))),
+    # lantern, spells, rewards
+    "lantern_rest": ("sfx", seq(CC80 + "/spell_0%d.ogg", (1, 2))),
+    "spell_cast": ("sfx", seq(CC80 + "/spell_fire_0%d.ogg", (1, 2, 3, 4))),
+    "pickup": ("sfx", seq(CC80 + "/item_gem_0%d.ogg", (1, 2, 3, 4))),
+    "coins": ("sfx", seq(CC80 + "/item_coins_0%d.ogg", (1, 2, 3, 4))),
+    "treasure": ("sfx", seq(CC80 + "/lock_0%d.ogg", (1, 2, 3))),
+    "level_up": ("sfx", [f"{RPG}/inventory/metal-ringing.wav"]),
+    "quest_complete": ("sfx", [f"{KEN}/bookClose.ogg", f"{KEN}/bookPlace1.ogg"]),
+    "respawn": ("sfx", [f"{RPG}/battle/magic1.wav"]),
 }
 LOOPED_GROUPS = {"music", "ambient"}
 

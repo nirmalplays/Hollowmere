@@ -76,6 +76,8 @@ func _begin_active() -> void:
 		player.hitbox.shape_rect(attack.hitbox_size, _dir, attack.reach, Player.CHEST_HEIGHT)
 		player.hitbox.activate(player.make_damage_info(attack))
 	AudioManager.sfx(attack.sound, -2.0, 0.1)
+	if attack.damage_mult > 1.3 or randf() < 0.4:  # effort you can hear: always on the big swings
+		AudioManager.sfx(&"voice_attack", -7.0, 0.1, 120)
 	var big := attack.damage_mult > 1.3
 	player.juice.punch(Vector2(1.22, 0.82) if big else Vector2(1.13, 0.9))
 	if not attack.projectile:

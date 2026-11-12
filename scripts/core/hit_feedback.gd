@@ -14,6 +14,8 @@ func hit_stop(seconds: float) -> void:
 	if seconds <= 0.0:
 		return
 	seconds = minf(seconds, MAX_STOP)
+	if seconds >= 0.06:
+		AudioManager.duck(seconds + 0.1)
 	_stop_until_ms = maxi(_stop_until_ms, Time.get_ticks_msec() + int(seconds * 1000.0))
 	Engine.time_scale = 0.0
 	# Wait out whatever freeze is left (another hit may have extended it). Timers use

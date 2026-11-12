@@ -17,8 +17,10 @@ func enter(_msg: Dictionary) -> void:
 		player.face(_dir)
 	player.play_directional(&"run", ANIM_SPEED, true)
 	player.sprite.modulate.a = IFRAME_ALPHA
-	AudioManager.sfx(&"dodge", -4.0, 0.15)
+	AudioManager.sfx(&"dodge_whoosh", -4.0, 0.15)
 	player.juice.punch(Vector2(1.3, 0.72))
+	if randf() < 0.5:
+		AudioManager.sfx(&"voice_dodge", -12.0, 0.1, 200)
 	player.juice.ghosts(player.combat.dodge_duration)
 	player.juice.dust(_dir, 8)
 

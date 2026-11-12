@@ -148,7 +148,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _set_column(c: int) -> void:
 	_column = clampi(c, 0, 2)
-	AudioManager.sfx(&"ui_move", -10.0, 0.04)
+	AudioManager.sfx(&"ui_hover", -10.0, 0.04)
 	if _column == 2:
 		_name.grab_focus()
 		_name.caret_column = _name.text.length()
@@ -163,7 +163,7 @@ func _step(by: int) -> void:
 		_class = posmod(_class + by, Heroes.classes().size())
 	else:
 		return
-	AudioManager.sfx(&"ui_move", -8.0, 0.04)
+	AudioManager.sfx(&"ui_hover", -8.0, 0.04)
 	_refresh()
 
 
@@ -183,7 +183,7 @@ func _click(at: Vector2) -> void:
 					_origin = i
 				else:
 					_class = i
-				AudioManager.sfx(&"ui_select", -8.0, 0.0)
+				AudioManager.sfx(&"ui_click", -8.0, 0.0)
 				_refresh()
 				return
 

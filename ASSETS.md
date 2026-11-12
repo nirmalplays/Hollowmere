@@ -69,3 +69,22 @@ for every layer's artists. Licensed CC-BY-SA 3.0 / GPL 3.0. This credit must app
 |---|---|---|---|
 | `hero_<origin>_<class>` sheets (9) | Universal LPC layers, composited by `tools/art/import_lpc.py` | CC-BY-SA 3.0 / GPL 3.0 (see LPC_CREDITS.csv) | the creator's nine looks |
 | "Unlaid Bruiser" 8-direction character and its animations | generated with PixelLab (the owner's account) | owned by the account holder under PixelLab's terms | replacement hero art, in progress |
+
+## Audio (replaced 2026-11-12: every effect is a real recording from a CC0 pack)
+The previous effect files were removed; `tools/audio/import_audio.py` copies these into
+`assets/audio/` and writes `data/audio/sound_bank.tres`. Nothing is synthesised.
+
+| Pack | Author | Source | Licence | Used for |
+|---|---|---|---|---|
+| Impact Sounds | Kenney | kenney.nl/assets/impact-sounds (fetched from the mirror github.com/Boyquotes/kenney-impact-sounds-for-godot) | CC0 | footsteps (grass, stone), flesh hits, heavy hits, plate hits, parry clang |
+| RPG Audio | Kenney | kenney.nl/assets/rpg-audio | CC0 | dash cloth, quest book |
+| UI Audio | Kenney | github.com/Calinou/kenney-ui-audio | CC0 | hover, click, back |
+| RPG Sound Pack | artisticdude | opengameart.org/content/rpg-sound-pack | CC0 | light swings, unsheathing, rise at the Hearth, level up |
+| 80 CC0 RPG SFX | rubberduck | opengameart.org/content/80-cc0-rpg-sfx | CC0 | heavy swings, spells, lantern rest, pickups, coins, a death |
+| Male grunt/yelling sounds | opengameart.org/content/male-gruntyelling-sounds | same | CC0 (also offered as OGA-BY 3.0) | the hero's attack and dash grunts |
+| Hurt sound effects | opengameart.org/content/hurt-sound-effects | same | CC0 | the hero's pain |
+| 5 Hit Sounds + Dying | opengameart.org/content/5-hit-sounds-dying | same | CC0 | the hero's death |
+| 80 CC0 creature SFX | rubberduck | opengameart.org/content/80-cc0-creature-sfx | CC0 | Hollowed groans and pain, the boss's roar |
+| 16 monster growls | opengameart.org/content/16-monster-growls | same | CC0 | Hollowed deaths |
+
+Music (`BGM/`) and weather beds (`Climate sounds/`) are still the owner's own tracks.

@@ -167,7 +167,7 @@ func _select(i: int) -> void:
 	if _rows.is_empty():
 		return
 	if i != _sel:
-		AudioManager.sfx(&"ui_move", -10.0, 0.04)
+		AudioManager.sfx(&"ui_hover", -10.0, 0.04)
 	_sel = clampi(i, 0, _rows.size() - 1)
 	for j in _rows.size():
 		(_rows[j]["node"] as _MenuRow).selected = j == _sel
@@ -181,7 +181,7 @@ func _activate() -> void:
 	if item.get("off", false):
 		AudioManager.sfx(&"ui_back", -6.0, 0.0)
 		return
-	AudioManager.sfx(&"ui_select", -4.0, 0.0)
+	AudioManager.sfx(&"ui_click", -4.0, 0.0)
 	(item["act"] as Callable).call()
 
 
@@ -291,7 +291,7 @@ func _settings_panel() -> Control:
 		slider.value = AudioManager.get_bus_volume(bus[1])
 		slider.value_changed.connect(func(val: float) -> void:
 			AudioManager.set_bus_volume(bus[1], val)
-			AudioManager.sfx(&"ui_move", -8.0, 0.0))
+			AudioManager.sfx(&"ui_hover", -8.0, 0.0))
 		row.add_child(slider)
 		v.add_child(row)
 	var fs := CheckButton.new()

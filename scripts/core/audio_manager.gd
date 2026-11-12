@@ -1,16 +1,18 @@
 extends Node
 ## Plays music, ambience and sound effects by name (GAME_PLAN 11.4).
-## Buses: Master > Music, Ambient, SFX, UI (default_bus_layout.tres).
+## Buses: Master > Music, Ambient, SFX, Voice, UI (default_bus_layout.tres).
+## Every effect is a set of real recordings: one is picked at random each time, with a
+## little pitch and level drift, so nothing repeats exactly (AudioStreamRandomizer).
 ##   AudioManager.music(&"music_explore")         crossfades to a looping track
 ##   AudioManager.ambient(&"amb_forest")          one looping ambience bed
-##   AudioManager.sfx(&"swing_light")             a one-shot, random variation + pitch
-##   AudioManager.sfx_at(&"enemy_hurt", position) positional (fades with distance)
+##   AudioManager.sfx(&"sword_swing_light")             a one-shot, random variation + pitch
+##   AudioManager.sfx_at(&"hollowed_hurt", position) positional (fades with distance)
 
 const BANK_PATH: String = "res://data/audio/sound_bank.tres"
 const FADE_TIME: float = 1.2
 const SFX_VOICES: int = 16
 const QUIET_DB: float = -60.0
-const BUS_FOR_GROUP := {&"music": &"Music", &"ambient": &"Ambient", &"sfx": &"SFX", &"ui": &"UI", &"spells": &"SFX"}
+const BUS_FOR_GROUP := {&"music": &"Music", &"ambient": &"Ambient", &"sfx": &"SFX", &"ui": &"UI", &"voice": &"Voice"}
 
 var bank: SoundBank
 
@@ -21,12 +23,14 @@ var _ambient: AudioStreamPlayer
 var _ambient_name: StringName = &""
 var _voices: Array[AudioStreamPlayer] = []
 var _next_voice: int = 0
+var _random: Dictionary = {}  # sound -> AudioStreamRandomizer over its variations
 var _last_played: Dictionary = {}  # sound -> msec, to stop machine-gun stacking
 ## Music is placed, not constant (docs/DESIGN_SPEC.md 5): exploration is ambience only;
 ## music plays in music zones (towns, shrines, story beats) and in boss fights.
 var area_music: StringName = &""  ## an area's own track, if it has one (towns); usually empty
 var _zone_music: StringName = &""
 var _boss: Node
+var _bus_rest: Dictionary = {}  # bus -> its volume before a duck
 
 
 func _ready() -> void:
@@ -38,6 +42,16 @@ func _ready() -> void:
 	for i in SFX_VOICES:
 		_voices.append(_make_player(&"SFX"))
 	EventBus.enemy_aggro.connect(_on_enemy_aggro)
+	if bank:
+		for sound: StringName in bank.sounds:
+			if bank.groups.get(sound, &"sfx") in [&"music", &"ambient"]:
+				continue
+			var r := AudioStreamRandomizer.new()
+			r.random_pitch = 1.15
+			r.random_volume_offset_db = 1.5
+			for stream: AudioStream in bank.variations(sound):
+				r.add_stream(-1, stream)
+			_random[sound] = r
 
 
 ## Areas call this instead of music(): it becomes the calm state to return to.
@@ -128,7 +142,7 @@ func sfx(sound: StringName, volume_db: float = 0.0, pitch_jitter: float = 0.06, 
 	voice.bus = BUS_FOR_GROUP.get(bank.groups.get(sound, &"sfx"), &"SFX")
 	voice.stream = stream
 	voice.volume_db = volume_db
-	voice.pitch_scale = 1.0 + randf_range(-pitch_jitter, pitch_jitter)
+	voice.pitch_scale = 1.0 + randf_range(-pitch_jitter, pitch_jitter) * 0.5
 	voice.play()
 
 
@@ -138,7 +152,7 @@ func sfx_at(sound: StringName, at: Vector2, volume_db: float = 0.0, pitch_jitter
 	if stream == null:
 		return
 	var p := AudioStreamPlayer2D.new()
-	p.bus = &"SFX"
+	p.bus = BUS_FOR_GROUP.get(bank.groups.get(sound, &"sfx"), &"SFX")
 	p.stream = stream
 	p.volume_db = volume_db
 	p.pitch_scale = 1.0 + randf_range(-pitch_jitter, pitch_jitter)
@@ -162,6 +176,29 @@ func make_emitter(sound: StringName, volume_db: float = -4.0, max_distance: floa
 	return p
 
 
+## A blow lands: music and the air drop back for a moment so the hit owns the mix.
+## Runs on real time, so it works through hit-stop.
+func duck(seconds: float, depth_db: float = -7.0) -> void:
+	for bus: StringName in [&"Music", &"Ambient"]:
+		var idx := AudioServer.get_bus_index(bus)
+		if idx < 0 or AudioServer.is_bus_mute(idx):
+			continue
+		var rest: float = _bus_rest.get(bus, AudioServer.get_bus_volume_db(idx))
+		_bus_rest[bus] = rest
+		AudioServer.set_bus_volume_db(idx, rest + depth_db)
+		_unduck(bus, idx, rest, seconds)
+
+
+## Real-time timers (they ignore time scale), stepping the bus back up to where it was.
+func _unduck(bus: StringName, idx: int, rest: float, seconds: float) -> void:
+	await get_tree().create_timer(seconds, true, false, true).timeout
+	for step in 5:
+		AudioServer.set_bus_volume_db(idx, lerpf(AudioServer.get_bus_volume_db(idx), rest, 0.5))
+		await get_tree().create_timer(0.06, true, false, true).timeout
+	AudioServer.set_bus_volume_db(idx, rest)
+	_bus_rest.erase(bus)
+
+
 func set_bus_volume(bus: StringName, linear: float) -> void:
 	var idx := AudioServer.get_bus_index(bus)
 	if idx >= 0:
@@ -181,7 +218,7 @@ func _ready_stream(sound: StringName, min_gap_ms: int) -> AudioStream:
 	if now - int(_last_played.get(sound, -100000)) < min_gap_ms:
 		return null
 	_last_played[sound] = now
-	return bank.pick(sound)
+	return _random.get(sound, bank.pick(sound))
 
 
 func _make_player(bus: StringName) -> AudioStreamPlayer:

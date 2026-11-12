@@ -26,4 +26,4 @@ extends Resource
 @export var hit_stop_ms: int = 50
 @export var shake: float = 1.0
 @export var fx: FxDef
-@export var sound: StringName = &"swing_light"
+@export var sound: StringName = &"sword_swing_light"

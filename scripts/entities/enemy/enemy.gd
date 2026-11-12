@@ -132,7 +132,7 @@ func rest(by: Node) -> void:
 	hp = 0.0
 	health_changed.emit(hp, data.max_hp)
 	Fx.text(global_position + Vector2(0, -BODY_HEIGHT - 18), "Rest", REST_FX_COLOR, self)
-	AudioManager.sfx_at(&"pickup", global_position, -4.0, 0.0)
+	AudioManager.sfx_at(&"lantern_rest", global_position, -2.0, 0.0)
 	var glow := Prop.make_light(REST_FX_COLOR, 2.0, 0.8, Vector2(0, -BODY_HEIGHT))
 	add_child(glow)
 	create_tween().tween_property(glow, ^"energy", 0.0, 1.5)
@@ -232,7 +232,7 @@ func _enter(next: State) -> void:
 			_show_telegraph()
 			_play_attack_part(0, _attack_frames() / 2, _attack.telegraph_ms)
 			Flash.pulse(sprite, data.telegraph_color, _attack.telegraph_ms / 1000.0, 3, 0.55)
-			AudioManager.sfx_at(&"enemy_windup", global_position, -4.0, 0.15)
+			AudioManager.sfx_at(&"boss_telegraph" if data.is_boss else &"hollowed_groan", global_position, -4.0, 0.15)
 		State.ACTIVE:
 			juice.punch(Vector2(1.18, 0.86))
 			var half := _attack_frames() / 2
@@ -331,7 +331,7 @@ func receive_hit(info: DamageInfo) -> int:
 		poise -= info.poise_damage * 0.5
 		_poise_delay = data.poise_regen_delay
 		Fx.text(at + Vector2(0, -14), "Blocked", BLOCK_COLOR, self)
-		AudioManager.sfx_at(&"block", global_position, -2.0, 0.1)
+		AudioManager.sfx_at(&"hit_armor", global_position, -2.0, 0.1)
 		if poise <= 0.0:
 			_stagger()
 		return DamageInfo.Result.BLOCKED
@@ -346,16 +346,16 @@ func receive_hit(info: DamageInfo) -> int:
 	Fx.text(at + Vector2(0, -14), str(dmg) + ("!" if info.crit else ""), CRIT_COLOR if info.crit else HIT_COLOR, self)
 	Fx.spawn(data.hit_fx, at, info.direction, self)
 	Flash.hit(sprite, Color.WHITE, 0.12)
-	AudioManager.sfx_at(&"hit_flesh", global_position, -2.0, 0.1)
+	AudioManager.sfx_at(&"hit_heavy" if info.crit or dmg >= 18 else &"hit_flesh", global_position, -1.0, 0.1)
 	var weight := 0.35 if data.is_boss else 1.0
 	velocity = info.direction * info.knockback * weight * (1.2 if state == State.TELEGRAPH else 3.0)
 	juice.punch(Vector2(1.0, 1.0).lerp(Vector2(1.34, 0.7), weight))
 	_sparks(at, info.direction, 10 if info.crit else 6)
 	if hp <= 0.0:
-		AudioManager.sfx_at(&"enemy_die", global_position)
+		AudioManager.sfx_at(&"hollowed_die", global_position)
 		_enter(State.DEAD)
 		return DamageInfo.Result.HIT
-	AudioManager.sfx_at(&"enemy_hurt", global_position, -6.0, 0.15)
+	AudioManager.sfx_at(&"hollowed_hurt", global_position, -6.0, 0.15)
 	if phase == 1 and data.phase2_at > 0.0 and hp <= data.max_hp * data.phase2_at:
 		_begin_phase_two()
 	if not riposte:
