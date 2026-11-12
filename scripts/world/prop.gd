@@ -27,7 +27,8 @@ func setup(def: PropDef, index: int, flip: bool) -> void:
 	var footprint := def.footprints[index] if index < def.footprints.size() else PackedVector2Array()
 	if flip:
 		footprint = _mirrored(footprint)
-	_add_shadow(footprint, tex)
+	if def.soft_shadow:
+		_add_shadow(footprint, tex)
 	sprite = Sprite2D.new()
 	sprite.texture = tex
 	sprite.centered = false

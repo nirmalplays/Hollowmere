@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="PropDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/prop_def.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/props/lpc/cradle_shattered.png" id="t0"]
+
+[resource]
+script = ExtResource("1")
+textures = Array[Texture2D]([ExtResource("t0")])
+base_inset = 2
+jitter = 0.0
+flip_randomly = false
+soft_shadow = true
+footprints = Array[PackedVector2Array]([PackedVector2Array(-16.0, -23.4, 16.0, -23.4, 16.0, -1.0, -16.0, -1.0)])

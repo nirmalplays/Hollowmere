@@ -14,7 +14,7 @@ var _failed: bool = false
 
 func _initialize() -> void:
 	var args := OS.get_cmdline_user_args()
-	var path: String = args[0] if args.size() > 0 else "res://scenes/world/underroot_caves.tscn"
+	var path: String = args[0] if args.size() > 0 else "res://scenes/world/shrine_wood.tscn"
 	_area = (load(path) as PackedScene).instantiate()
 	root.add_child.call_deferred(_area)
 

@@ -21,6 +21,8 @@ static func build(layout: AreaLayout, floor_layer: TileMapLayer, wall_layer: Til
 	var rng := RandomNumberGenerator.new()
 	rng.seed = layout.tile_seed
 	var grid := layout.lines()
+	var painted := layout.ground != null
+	wall_layer.visible = not painted
 	var result := Result.new()
 	var width := 0
 	for y in grid.size():
@@ -30,10 +32,11 @@ static func build(layout: AreaLayout, floor_layer: TileMapLayer, wall_layer: Til
 			var cell := Vector2i(x, y)
 			var at := floor_layer.map_to_local(cell)
 			if ch == layout.wall_char:
-				_set_tile(wall_layer, cell, tiles, _wall_tile(layout, grid, x, y, rng))
+				_set_tile(wall_layer, cell, tiles, layout.wall_set + "_void" if painted else _wall_tile(layout, grid, x, y, rng))
 				continue
 			var floor_ch := ch if layout.floors.has(ch) else layout.prop_floor
-			_set_tile(floor_layer, cell, tiles, _pick(layout.floors.get(floor_ch, []), rng))
+			if not painted:
+				_set_tile(floor_layer, cell, tiles, _pick(layout.floors.get(floor_ch, []), rng))
 			if layout.props.has(ch):
 				var prop := Prop.new()
 				prop.position = at
@@ -45,6 +48,12 @@ static func build(layout: AreaLayout, floor_layer: TileMapLayer, wall_layer: Til
 				result.placements.append({"scene": layout.markers[ch], "position": at, "char": ch})
 			elif ch == SPAWN:
 				result.spawns.append(at)
+	for i in layout.scatter_points.size():
+		var sdef: PropDef = layout.scatter_defs[layout.scatter_index[i]]
+		var sprop := Prop.new()
+		sprop.position = layout.scatter_points[i]
+		sprop.setup(sdef, rng.randi() % sdef.textures.size(), sdef.flip_randomly and rng.randf() < 0.5)
+		props_parent.add_child(sprop)
 	var ts := layout.tileset.tile_size
 	result.bounds = Rect2i(0, 0, width * ts.x, grid.size() * ts.y)
 	return result

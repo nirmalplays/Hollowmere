@@ -12,7 +12,7 @@ var _lore: Array = []
 
 
 func _initialize() -> void:
-	_area = (load("res://scenes/world/underroot_caves.tscn") as PackedScene).instantiate()
+	_area = (load("res://scenes/world/shrine_wood.tscn") as PackedScene).instantiate()
 	root.add_child.call_deferred(_area)
 
 

@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/areas/the_waking.gd" id="1"]
+[ext_resource type="Resource" path="res://data/areas/shrine_wood.tres" id="2"]
+
+[node name="ShrineWood" type="Node2D"]
+script = ExtResource("1")
+layout = ExtResource("2")
+area_title = "The Shrine Wood"
+music = &""
+ambience = &"amb_forest"
+ambient_light = Color(0.62, 0.68, 0.8, 1)
+reverb = false
+outdoors = true
+
+[node name="Ambient" type="CanvasModulate" parent="."]
+
+[node name="Floor" type="TileMapLayer" parent="."]
+
+[node name="Walls" type="TileMapLayer" parent="."]
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Entities" type="Node2D" parent="World"]
+y_sort_enabled = true
+
+[node name="FxLayer" type="CanvasLayer" parent="."]
+layer = 2
+follow_viewport_enabled = true

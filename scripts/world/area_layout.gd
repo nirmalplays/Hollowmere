@@ -16,6 +16,14 @@ extends Resource
 @export var props: Dictionary = {}
 @export var markers: Dictionary = {}
 @export var prop_floor: String = "."
+## Outdoor areas: one painted picture for the whole ground instead of floor tiles, and
+## the wall cells keep their collision but are not drawn (the forest stands on them).
+@export var ground: Texture2D
+## Props placed freely in pixels (not on the grid): the forest wall, tufts, stones.
+## scatter_points[i] uses scatter_defs[scatter_index[i]].
+@export var scatter_defs: Array[PropDef] = []
+@export var scatter_points: PackedVector2Array = []
+@export var scatter_index: PackedInt32Array = []
 ## Named places inside the area, in cells: walking into one announces it, the way a
 ## zone is really a string of named spots. Same index in both arrays.
 @export var place_names: PackedStringArray = []

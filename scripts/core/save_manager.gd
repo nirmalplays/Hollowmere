@@ -11,7 +11,7 @@ signal saved(slot: int)
 const SAVE_VERSION: int = 1
 const SLOTS: int = 3
 const DIR: String = "user://saves/"
-const START_SCENE: String = "res://scenes/world/underroot_caves.tscn"
+const START_SCENE: String = "res://scenes/world/shrine_wood.tscn"
 const NUMERALS: Array[String] = ["I", "II", "III"]
 
 var current_slot: int = -1  ## the journey being played; -1 = none (menus, tests)

@@ -5,7 +5,7 @@ extends Control
 ## ember with a small flame beside it; what it does is written underneath, keys bottom-left.
 ## Up/Down/W/S, Enter/Space, Esc, or the mouse.
 
-const SOLO_START_SCENE: String = "res://scenes/world/underroot_caves.tscn"
+const SOLO_START_SCENE: String = "res://scenes/world/shrine_wood.tscn"
 const MENU_FONT: Font = preload("res://assets/fonts/PixelifySans.ttf")
 const BODY_FONT: Font = preload("res://assets/fonts/Alegreya.ttf")
 const TITLE_FONT: Font = preload("res://assets/fonts/Cinzel.ttf")

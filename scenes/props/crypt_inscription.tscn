@@ -9,4 +9,5 @@ EIGHT BREATHS TAKEN. EIGHT BREATHS KEPT.
 WHEN THE LAST IS LOST, REMEMBER US."
 radius = 60.0
 marked = true
-prompt = "Read the cracked wall"
+prompt = "Read the Listening Stone"
+mark_offset = Vector2(0, -22)

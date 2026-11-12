@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PropDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/prop_def.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/props/lpc/brazier.png" id="t0"]
+
+[resource]
+script = ExtResource("1")
+textures = Array[Texture2D]([ExtResource("t0")])
+base_inset = 2
+jitter = 0.0
+flip_randomly = false
+soft_shadow = true
+footprints = Array[PackedVector2Array]([PackedVector2Array(3.0, -0.8, 2.0, 0.5, -0.5, 1.0, -3.0, 0.5, -4.0, -0.8, -3.0, -2.0, -0.5, -2.5, 2.0, -2.0)])
+sound = &"amb_fire"
+light_color = Color(1.0, 0.66, 0.32, 1)
+light_energy = 1.5
+light_scale = 1.2
+light_height = 52.0

@@ -13,6 +13,8 @@ extends Resource
 ## Random offset in pixels so rows of props don't look gridded.
 @export var jitter: float = 5.0
 @export var flip_randomly: bool = true
+## False when the picture already has its shadow painted in (the big trees).
+@export var soft_shadow: bool = true
 ## Looping positional sound (e.g. &"amb_fire"); empty = silent.
 @export var sound: StringName = &""
 ## Wind sway in pixels at the free edge (0 = rigid). Trees and grass sway from the

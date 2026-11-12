@@ -6,7 +6,8 @@ extends Node2D
 ## A `marked` inscription is one the player is meant to find: its carving glows on
 ## the wall and lights the floor in front of it, so "read the wall" has a wall to read.
 
-signal read
+signal read  ## the first time only
+signal used  ## every time
 
 const GLYPH := Color(0.62, 0.82, 1.0)
 const KEY_FONT: Font = preload("res://assets/fonts/PixelifySans.ttf")
@@ -84,4 +85,5 @@ func _unhandled_input(event: InputEvent) -> void:
 		if not _was_read:
 			_was_read = true
 			read.emit()
+		used.emit()
 		get_viewport().set_input_as_handled()

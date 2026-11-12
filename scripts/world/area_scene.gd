@@ -2,7 +2,7 @@ class_name AreaScene
 extends Node2D
 ## A playable top-down area: builds its AreaLayout, spawns one Player per peer at the
 ## Hearth ('P'), adds the HUD, plays its music and ambience, and announces its title.
-## Story areas extend this and drive their quest beats (e.g. underroot_caves.gd).
+## Story areas extend this and drive their quest beats (e.g. the_waking.gd).
 
 const PLAYER_SCENE: PackedScene = preload("res://scenes/entities/player.tscn")
 const MAIN_MENU_PATH: String = "res://scenes/ui/main_menu.tscn"
@@ -13,6 +13,8 @@ const MAIN_MENU_PATH: String = "res://scenes/ui/main_menu.tscn"
 @export var ambience: StringName = &""
 @export var ambient_light: Color = Color(0.32, 0.34, 0.45)
 @export var reverb: bool = false
+## Open sky: leaves, fireflies and light shafts drift over the area.
+@export var outdoors: bool = false
 
 var player: Player
 var built: AreaBuilder.Result
@@ -33,6 +35,13 @@ func _ready() -> void:
 	_fx_layer.add_to_group(Fx.FX_ROOT_GROUP)
 	_ambient.color = ambient_light
 	built = AreaBuilder.build(layout, floor_layer, wall_layer, entities)
+	if layout.ground:
+		var ground := Sprite2D.new()
+		ground.texture = layout.ground
+		ground.centered = false
+		ground.z_index = -10
+		add_child(ground)
+		move_child(ground, 1)
 	for placement in built.placements:
 		var node := (placement["scene"] as PackedScene).instantiate() as Node2D
 		node.position = placement["position"]
@@ -54,6 +63,8 @@ func _ready() -> void:
 			hud = Hud.new()
 			add_child(hud)
 			hud.bind(p)
+	if outdoors:
+		_fx_layer.add_child(FieldLife.new())
 	AudioManager.set_area_music(music)
 	AudioManager.set_reverb(reverb)
 	if ambience != &"":
