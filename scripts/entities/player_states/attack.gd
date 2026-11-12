@@ -21,6 +21,7 @@ func enter(msg: Dictionary) -> void:
 	_dir = player.aim_direction()
 	player.face(_dir)
 	_phase = Phase.WINDUP
+	player.juice.punch(Vector2(0.92, 1.08))  # a breath in before the cut
 	# One swing animation stretched over wind-up + active + recovery, so the blade
 	# visibly lands when the hitbox turns on.
 	player.play_timed(&"attack", (attack.windup_ms + attack.active_ms + attack.recovery_ms) / 1000.0)
@@ -75,4 +76,13 @@ func _begin_active() -> void:
 		player.hitbox.shape_rect(attack.hitbox_size, _dir, attack.reach, Player.CHEST_HEIGHT)
 		player.hitbox.activate(player.make_damage_info(attack))
 	AudioManager.sfx(attack.sound, -2.0, 0.1)
-	Fx.spawn(attack.fx, player.chest_position(), _dir, player)
+	var big := attack.damage_mult > 1.3
+	player.juice.punch(Vector2(1.22, 0.82) if big else Vector2(1.13, 0.9))
+	if not attack.projectile:
+		# Alternate the sweep each step so a combo reads as left, right, then the big one.
+		SlashArc.spawn(player, player.chest_position() + _dir * 4.0, _dir, {"reach": attack.reach + attack.hitbox_size.x * 0.45,
+			"clockwise": step % 2 == 0, "thick": 13.0 if big else 8.0, "sweep": 2.9 if big else 2.2,
+			"life": 0.2 if big else 0.15, "color": Color(1.0, 0.82, 0.5) if big else Color(0.9, 0.95, 1.0)})
+	if attack.lunge_speed > 100.0:
+		player.juice.ghosts(0.12, Color(1.0, 0.85, 0.6))
+		player.juice.dust(_dir, 4)

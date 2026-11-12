@@ -43,6 +43,10 @@ window/stretch/scale_mode="fractional"
 2d_physics/layer_5="hurtbox"
 2d_physics/layer_6="interact"
 
+[physics]
+
+common/physics_interpolation=true
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

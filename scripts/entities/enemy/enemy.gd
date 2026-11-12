@@ -47,6 +47,8 @@ var _announced: bool = false
 @onready var marker: TelegraphMarker = $TelegraphMarker
 @onready var _animator := CharacterAnimator.new($Sprite)
 
+var juice: BodyJuice
+
 
 func _ready() -> void:
 	add_to_group(&"enemies")
@@ -56,12 +58,16 @@ func _ready() -> void:
 	sprite.offset = data.sprite_sheet.foot_offset()
 	hitbox.hit_landed.connect(_on_hit_landed)
 	marker.hide_marker()
+	juice = BodyJuice.new()
+	add_child(juice)
+	juice.setup(self, sprite, maxf(data.move_speed, 40.0))
 	_reset_pools()
 	_enter(State.IDLE)
 
 
 func _physics_process(delta: float) -> void:
 	state_time += delta
+	queue_redraw()
 	for id: StringName in _cooldowns.keys():
 		_cooldowns[id] = maxf(0.0, _cooldowns[id] - delta)
 	_regen_poise(delta)
@@ -228,6 +234,7 @@ func _enter(next: State) -> void:
 			Flash.pulse(sprite, data.telegraph_color, _attack.telegraph_ms / 1000.0, 3, 0.55)
 			AudioManager.sfx_at(&"enemy_windup", global_position, -4.0, 0.15)
 		State.ACTIVE:
+			juice.punch(Vector2(1.18, 0.86))
 			var half := _attack_frames() / 2
 			_play_attack_part(half, _attack_frames() - half, _attack.active_ms + _attack.recovery_ms)
 			_cooldowns[_attack.id] = _attack.cooldown_ms / 1000.0
@@ -236,6 +243,7 @@ func _enter(next: State) -> void:
 			pass  # hold the swing's last frame
 		State.STAGGER:
 			_animator.play(&"hurt", facing, 0.5, true)
+			juice.punch(Vector2(1.25, 0.78))
 			Flash.pulse(sprite, Color(1.0, 0.88, 0.54), data.stagger_ms / 1000.0, 3, 0.35)
 		State.DEAD:
 			if not _was_rested:
@@ -339,6 +347,10 @@ func receive_hit(info: DamageInfo) -> int:
 	Fx.spawn(data.hit_fx, at, info.direction, self)
 	Flash.hit(sprite, Color.WHITE, 0.12)
 	AudioManager.sfx_at(&"hit_flesh", global_position, -2.0, 0.1)
+	var weight := 0.35 if data.is_boss else 1.0
+	velocity = info.direction * info.knockback * weight * (1.2 if state == State.TELEGRAPH else 3.0)
+	juice.punch(Vector2(1.0, 1.0).lerp(Vector2(1.34, 0.7), weight))
+	_sparks(at, info.direction, 10 if info.crit else 6)
 	if hp <= 0.0:
 		AudioManager.sfx_at(&"enemy_die", global_position)
 		_enter(State.DEAD)
@@ -352,6 +364,49 @@ func receive_hit(info: DamageInfo) -> int:
 		if poise <= 0.0:
 			_stagger()
 	return DamageInfo.Result.HIT
+
+
+## Chips of light thrown off along the blow.
+func _sparks(at: Vector2, direction: Vector2, amount: int) -> void:
+	var p := CPUParticles2D.new()
+	p.one_shot = true
+	p.emitting = true
+	p.amount = amount
+	p.lifetime = 0.3
+	p.explosiveness = 1.0
+	p.direction = direction
+	p.spread = 38.0
+	p.gravity = Vector2(0, 160)
+	p.initial_velocity_min = 90.0
+	p.initial_velocity_max = 210.0
+	p.damping_min = 120.0
+	p.damping_max = 200.0
+	p.scale_amount_min = 1.0
+	p.scale_amount_max = 2.5
+	p.color = Color(1.0, 0.9, 0.62)
+	var fade := Gradient.new()
+	fade.colors = PackedColorArray([Color(1, 1, 1, 1), Color(1, 0.5, 0.2, 0)])
+	p.color_ramp = fade
+	var layer := get_tree().get_first_node_in_group(Fx.FX_ROOT_GROUP)
+	(layer if layer else get_parent()).add_child(p)
+	p.global_position = at
+	p.finished.connect(p.queue_free)
+
+
+## While it can be laid to rest, the key to do it floats over its head.
+func _draw() -> void:
+	if not can_rest() or not GameState.flags.get(&"has_cradle_lantern", false):
+		return
+	var font: Font = preload("res://assets/fonts/PixelifySans.ttf")
+	var key := Keys.label(&"interact")
+	var bob := sin(Time.get_ticks_msec() * 0.008) * 2.0
+	var at := Vector2(-22, -BODY_HEIGHT * sprite.scale.y - 46 + bob)
+	var cap := Rect2(at, Vector2(14, 14))
+	draw_rect(cap.grow(1), Color(1.0, 0.62, 0.25))
+	draw_rect(cap, Color(0.12, 0.1, 0.1))
+	draw_string(font, at + Vector2(0, 11), key, HORIZONTAL_ALIGNMENT_CENTER, 14, 10, Color(1.0, 0.86, 0.55))
+	draw_string(font, at + Vector2(19, 11), "Rest", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0, 0, 0, 0.9))
+	draw_string(font, at + Vector2(18, 10), "Rest", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1.0, 0.92, 0.7))
 
 
 ## Our attack was parried by `_by`: the opening the player earned.

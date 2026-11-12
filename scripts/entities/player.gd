@@ -10,7 +10,7 @@ signal flasks_changed(charges: int, max_charges: int)
 signal ember_thrown
 
 const CHEST_HEIGHT: float = 18.0
-const REST_RANGE: float = 40.0
+const REST_RANGE: float = 62.0
 const EMBER_STATES: Array[StringName] = [&"Idle", &"Move", &"Attack", &"Block"]  ## pixels above the feet where blows land
 const HIT_COLOR := Color(1.0, 0.55, 0.45)
 const BLOCK_COLOR := Color(0.75, 0.8, 0.9)
@@ -41,6 +41,8 @@ var ability_cooldown: float = 0.9
 @onready var _camera: Camera2D = $Camera
 @onready var _animator := CharacterAnimator.new($Sprite)
 
+var juice: BodyJuice  ## lean, squash, ghosts, dust
+
 
 func _ready() -> void:
 	add_to_group(&"players")
@@ -53,6 +55,9 @@ func _ready() -> void:
 	_camera.enabled = input.is_local()
 	if _camera.enabled:
 		_camera.make_current()
+	juice = BodyJuice.new()
+	add_child(juice)
+	juice.setup(self, sprite, tuning.max_speed)
 	stats.tuning = combat
 	stats.reset()
 	flasks = combat.flask_charges
@@ -72,6 +77,8 @@ func _physics_process(delta: float) -> void:
 	ember_cooldown = maxf(0.0, ember_cooldown - delta)
 	if input.consume(&"spell_1"):
 		_throw_ember()
+	if states.current_name() in EMBER_STATES and rest_target() != null and input.consume(&"interact"):
+		_try_rest()
 	states.physics_update(delta)
 	var regen := states.current.stamina_regen_mult()
 	if regen > 0.0:
@@ -198,18 +205,35 @@ func try_start_attack_or_dodge() -> bool:
 	return false
 
 
-## The Rest (STORY_BIBLE 4): with the Cradle Lantern, lay a staggered Hollowed to rest.
-func _try_rest() -> bool:
+## The staggered Hollowed the lantern could lay to rest right now, nearest first.
+func rest_target() -> Enemy:
 	if not GameState.flags.get(&"has_cradle_lantern", false):
-		return false
+		return null
+	var best: Enemy = null
+	var best_d := REST_RANGE
 	for node in get_tree().get_nodes_in_group(&"enemies"):
 		var enemy := node as Enemy
-		if enemy and enemy.can_rest() and enemy.global_position.distance_to(global_position) < REST_RANGE:
-			face(enemy.global_position - global_position)
-			play_timed(&"attack", 0.5)
-			enemy.rest(self)
-			return true
-	return false
+		if enemy and enemy.can_rest():
+			var d := enemy.global_position.distance_to(global_position)
+			if d < best_d:
+				best_d = d
+				best = enemy
+	return best
+
+
+## The Rest (STORY_BIBLE 4): with the Cradle Lantern, lay a staggered Hollowed to rest.
+func _try_rest() -> bool:
+	var enemy := rest_target()
+	if enemy == null:
+		return false
+	face(enemy.global_position - global_position)
+	if states.current_name() != &"Idle":
+		states.transition(&"Idle")
+	play_timed(&"attack", 0.5)
+	juice.punch(Vector2(0.85, 1.18))
+	HitFeedback.hit_stop(0.09)
+	enemy.rest(self)
+	return true
 
 
 ## The ability key. It never locks you in place: use it walking, between swings, behind
@@ -312,6 +336,7 @@ func receive_hit(info: DamageInfo) -> int:
 	Fx.text(chest_position() + Vector2(0, -16), str(dmg), BLOCK_COLOR if blocked else HIT_COLOR, self)
 	Flash.hit(sprite, Color.WHITE, 0.15)
 	Fx.spawn(hit_fx, chest_position(), info.direction, self)
+	juice.punch(Vector2(0.86, 1.14) if blocked else Vector2(1.28, 0.74))
 	if stats.is_dead():
 		AudioManager.sfx(&"player_death")
 		states.transition(&"Dead")
@@ -355,6 +380,7 @@ func _on_hit_landed(_target: Node, result: int, _info: DamageInfo) -> void:
 ## Rise at the Hearth (STORY_BIBLE 4). Pressure/Scars come with M7.
 func respawn() -> void:
 	global_position = spawn_point
+	reset_physics_interpolation()
 	velocity = Vector2.ZERO
 	facing = Vector2.DOWN
 	stats.reset()

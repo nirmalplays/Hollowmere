@@ -131,7 +131,7 @@ def write_enemy(eid, e):
     lines += ["[resource]", 'script = ExtResource("1")', f'id = &"{eid}"', f'display_name = "{e["name"]}"',
               f"max_hp = {float(e['hp'])}", f"xp = {e['xp']}", f"move_speed = {float(e['speed'])}",
               f"aggro_radius = {float(e['aggro'])}", f"leash_radius = {float(e.get('leash', 340))}",
-              f"max_poise = {float(e['poise'])}", f"stagger_ms = {e.get('stagger', 1500)}",
+              f"max_poise = {float(e['poise'])}", f"stagger_ms = {e.get('stagger', 2400)}",
               f"shielded = {fmt(e.get('shielded', False))}", f"is_boss = {fmt(e.get('boss', False))}",
               f"attacks = Array[ExtResource(\"2\")]([{', '.join(refs1)}])",
               'sprite_sheet = ExtResource("3")', 'hit_fx = ExtResource("4")']

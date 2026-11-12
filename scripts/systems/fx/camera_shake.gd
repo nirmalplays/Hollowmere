@@ -7,6 +7,10 @@ var _strength: float = 0.0
 var _start_ms: int = 0
 var _end_ms: int = 0
 var _rng := RandomNumberGenerator.new()
+var _look: Vector2 = Vector2.ZERO
+
+const LOOK_AHEAD: float = 0.14  ## how far toward the cursor the view leans
+const LOOK_MAX: float = 46.0
 
 
 func _ready() -> void:
@@ -22,7 +26,11 @@ func _on_shake(strength: float, duration: float) -> void:
 	_end_ms = now + int(duration * 1000.0)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if enabled:
+		var want: Vector2 = (get_global_mouse_position() - (get_parent() as Node2D).global_position) * LOOK_AHEAD
+		_look = _look.lerp(want.limit_length(LOOK_MAX), 1.0 - exp(-5.0 * delta))
+		position = _look.round()
 	var amp := _current_amplitude(Time.get_ticks_msec())
 	if amp <= 0.0:
 		offset = Vector2.ZERO
