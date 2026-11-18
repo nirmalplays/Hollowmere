@@ -10,3 +10,4 @@ user_data/
 # Local tooling
 /tools/godot/
 *.tmp
+__pycache__/

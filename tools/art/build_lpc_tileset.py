@@ -11,7 +11,7 @@ import os
 import shutil
 
 PROJECT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-SOURCES = os.environ.get("HOLLOWMERE_SOURCES", os.path.join(os.path.dirname(PROJECT), "hollowmere_sources"))
+SOURCES = os.environ.get("HOLLOWMERE_SOURCES", os.path.join(PROJECT, "sources"))
 ENV = os.path.join(SOURCES, "lpc_env")
 BASE = os.path.join(ENV, "lpc_base_assets", "LPC Base Assets", "tiles")
 OUT_DIR = "assets/art/tiles/lpc"

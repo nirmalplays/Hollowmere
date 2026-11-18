@@ -11,11 +11,8 @@ import os
 
 from PIL import Image, ImageEnhance, ImageFilter
 
-SOURCES = os.environ.get(
-    "HOLLOWMERE_SOURCES",
-    os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
-                 "hollowmere_sources"),
-)
+# The raw packs ship with the project in sources/; HOLLOWMERE_SOURCES overrides.
+SOURCES = os.environ.get("HOLLOWMERE_SOURCES", os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "sources"))
 
 OUTLINE = (26, 20, 32, 255)
 
