@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://dmvcved0iwqun"
+path="res://.godot/imported/Miini battle 2.mp3-82fb3a803ba6f5426998f62c41089361.mp3str"
+
+[deps]
+
+source_file="res://BGM/Miini battle 2.mp3"
+dest_files=["res://.godot/imported/Miini battle 2.mp3-82fb3a803ba6f5426998f62c41089361.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

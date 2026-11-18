@@ -21,7 +21,8 @@ import os
 import shutil
 
 PROJECT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-SOURCES = os.environ.get("HOLLOWMERE_SOURCES", os.path.join(os.path.dirname(PROJECT), "hollowmere_sources"))
+# The raw packs ship with the project in sources/; HOLLOWMERE_SOURCES overrides.
+SOURCES = os.environ.get("HOLLOWMERE_SOURCES", os.path.join(PROJECT, "sources"))
 A = os.path.join(SOURCES, "audio")
 IMPACT = os.path.join(A, "impact", "addons", "kenney impact sounds")
 KEN = os.path.join(A, "RPGsounds_Kenney", "OGG")

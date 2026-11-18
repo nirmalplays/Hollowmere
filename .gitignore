@@ -10,8 +10,3 @@ user_data/
 # Local tooling
 /tools/godot/
 *.tmp
-# User-supplied raw audio (organised copies live in assets/audio)
-/BGM/
-/Climate sounds/
-/Sound effects/
-/Special effect/

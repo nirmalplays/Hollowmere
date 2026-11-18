@@ -16,7 +16,8 @@ from collections import deque
 from PIL import Image
 
 PROJECT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-SOURCES = os.environ.get("HOLLOWMERE_SOURCES", os.path.join(os.path.dirname(PROJECT), "hollowmere_sources"))
+# The raw packs ship with the project in sources/; HOLLOWMERE_SOURCES overrides.
+SOURCES = os.environ.get("HOLLOWMERE_SOURCES", os.path.join(PROJECT, "sources"))
 ENV = os.path.join(SOURCES, "lpc_env")
 OUT = os.path.join(PROJECT, "assets", "art", "props", "wild")
 

@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://beyi46w7i5el6"
+path="res://.godot/imported/Exploration 1.mp3-27066399be58633ef4a10596e146cc8b.mp3str"
+
+[deps]
+
+source_file="res://BGM/Exploration 1.mp3"
+dest_files=["res://.godot/imported/Exploration 1.mp3-27066399be58633ef4a10596e146cc8b.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bedx8a382rhdy"
+path="res://.godot/imported/mixkit-player-losing-or-failing-2042.wav-34a3531a819c2833a3ac1e0edf086960.sample"
+
+[deps]
+
+source_file="res://Sound effects/mixkit-player-losing-or-failing-2042.wav"
+dest_files=["res://.godot/imported/mixkit-player-losing-or-failing-2042.wav-34a3531a819c2833a3ac1e0edf086960.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=0
