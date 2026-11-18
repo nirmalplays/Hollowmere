@@ -15,7 +15,11 @@ func enter(_msg: Dictionary) -> void:
 	_dir = move.normalized() if move != Vector2.ZERO else -player.facing
 	if move != Vector2.ZERO:
 		player.face(_dir)
-	player.play_directional(&"run", ANIM_SPEED, true)
+	# A real roll if the hero has one; otherwise the run, sped up into a dash.
+	if player.sprite.sprite_frames.has_animation(&"roll_s"):
+		player.play_timed(&"roll", player.combat.dodge_duration + player.combat.dodge_recovery)
+	else:
+		player.play_directional(&"run", ANIM_SPEED, true)
 	player.sprite.modulate.a = IFRAME_ALPHA
 	AudioManager.sfx(&"dodge_whoosh", -4.0, 0.15)
 	player.juice.punch(Vector2(1.3, 0.72))

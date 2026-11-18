@@ -34,6 +34,7 @@ ANIMS = [
     ("block", ("idle3", "idle"), 1, True, 1),
     ("hurt", ("hurt",), 10, False, None),
     ("dead", ("death",), 9, False, None),
+    ("roll", ("roll",), 20, False, None),
 ]
 
 

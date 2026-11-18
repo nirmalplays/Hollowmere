@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="SpriteSheetDef" load_steps=59 format=3]
+[gd_resource type="Resource" script_class="SpriteSheetDef" load_steps=67 format=3]
 
 [ext_resource type="Script" path="res://scripts/systems/animation/sprite_sheet_def.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/systems/animation/sprite_anim_row.gd" id="2"]
@@ -81,7 +81,7 @@ script = ExtResource("2")
 name = &"walk_e"
 row = 8
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 12.00
 loop = true
 
@@ -90,7 +90,7 @@ script = ExtResource("2")
 name = &"walk_se"
 row = 9
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 12.00
 loop = true
 
@@ -99,7 +99,7 @@ script = ExtResource("2")
 name = &"walk_s"
 row = 10
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 12.00
 loop = true
 
@@ -108,7 +108,7 @@ script = ExtResource("2")
 name = &"walk_sw"
 row = 11
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 12.00
 loop = true
 
@@ -117,7 +117,7 @@ script = ExtResource("2")
 name = &"walk_w"
 row = 12
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 12.00
 loop = true
 
@@ -126,7 +126,7 @@ script = ExtResource("2")
 name = &"walk_nw"
 row = 13
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 12.00
 loop = true
 
@@ -135,7 +135,7 @@ script = ExtResource("2")
 name = &"walk_n"
 row = 14
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 12.00
 loop = true
 
@@ -144,7 +144,7 @@ script = ExtResource("2")
 name = &"walk_ne"
 row = 15
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 12.00
 loop = true
 
@@ -153,7 +153,7 @@ script = ExtResource("2")
 name = &"run_e"
 row = 16
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 14.00
 loop = true
 
@@ -162,7 +162,7 @@ script = ExtResource("2")
 name = &"run_se"
 row = 17
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 14.00
 loop = true
 
@@ -171,7 +171,7 @@ script = ExtResource("2")
 name = &"run_s"
 row = 18
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 14.00
 loop = true
 
@@ -180,7 +180,7 @@ script = ExtResource("2")
 name = &"run_sw"
 row = 19
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 14.00
 loop = true
 
@@ -189,7 +189,7 @@ script = ExtResource("2")
 name = &"run_w"
 row = 20
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 14.00
 loop = true
 
@@ -198,7 +198,7 @@ script = ExtResource("2")
 name = &"run_nw"
 row = 21
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 14.00
 loop = true
 
@@ -207,7 +207,7 @@ script = ExtResource("2")
 name = &"run_n"
 row = 22
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 14.00
 loop = true
 
@@ -216,7 +216,7 @@ script = ExtResource("2")
 name = &"run_ne"
 row = 23
 column = 0
-frame_count = 8
+frame_count = 9
 fps = 14.00
 loop = true
 
@@ -441,7 +441,7 @@ script = ExtResource("2")
 name = &"dead_e"
 row = 48
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 9.00
 loop = false
 
@@ -450,7 +450,7 @@ script = ExtResource("2")
 name = &"dead_se"
 row = 49
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 9.00
 loop = false
 
@@ -459,7 +459,7 @@ script = ExtResource("2")
 name = &"dead_s"
 row = 50
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 9.00
 loop = false
 
@@ -468,7 +468,7 @@ script = ExtResource("2")
 name = &"dead_sw"
 row = 51
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 9.00
 loop = false
 
@@ -477,7 +477,7 @@ script = ExtResource("2")
 name = &"dead_w"
 row = 52
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 9.00
 loop = false
 
@@ -486,7 +486,7 @@ script = ExtResource("2")
 name = &"dead_nw"
 row = 53
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 9.00
 loop = false
 
@@ -495,7 +495,7 @@ script = ExtResource("2")
 name = &"dead_n"
 row = 54
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 9.00
 loop = false
 
@@ -504,13 +504,85 @@ script = ExtResource("2")
 name = &"dead_ne"
 row = 55
 column = 0
-frame_count = 1
+frame_count = 7
 fps = 9.00
+loop = false
+
+[sub_resource type="Resource" id="a56"]
+script = ExtResource("2")
+name = &"roll_e"
+row = 56
+column = 0
+frame_count = 7
+fps = 20.00
+loop = false
+
+[sub_resource type="Resource" id="a57"]
+script = ExtResource("2")
+name = &"roll_se"
+row = 57
+column = 0
+frame_count = 7
+fps = 20.00
+loop = false
+
+[sub_resource type="Resource" id="a58"]
+script = ExtResource("2")
+name = &"roll_s"
+row = 58
+column = 0
+frame_count = 7
+fps = 20.00
+loop = false
+
+[sub_resource type="Resource" id="a59"]
+script = ExtResource("2")
+name = &"roll_sw"
+row = 59
+column = 0
+frame_count = 7
+fps = 20.00
+loop = false
+
+[sub_resource type="Resource" id="a60"]
+script = ExtResource("2")
+name = &"roll_w"
+row = 60
+column = 0
+frame_count = 7
+fps = 20.00
+loop = false
+
+[sub_resource type="Resource" id="a61"]
+script = ExtResource("2")
+name = &"roll_nw"
+row = 61
+column = 0
+frame_count = 7
+fps = 20.00
+loop = false
+
+[sub_resource type="Resource" id="a62"]
+script = ExtResource("2")
+name = &"roll_n"
+row = 62
+column = 0
+frame_count = 7
+fps = 20.00
+loop = false
+
+[sub_resource type="Resource" id="a63"]
+script = ExtResource("2")
+name = &"roll_ne"
+row = 63
+column = 0
+frame_count = 7
+fps = 20.00
 loop = false
 
 [resource]
 script = ExtResource("1")
 texture = ExtResource("3")
 frame_size = Vector2i(64, 64)
-animations = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4"), SubResource("a5"), SubResource("a6"), SubResource("a7"), SubResource("a8"), SubResource("a9"), SubResource("a10"), SubResource("a11"), SubResource("a12"), SubResource("a13"), SubResource("a14"), SubResource("a15"), SubResource("a16"), SubResource("a17"), SubResource("a18"), SubResource("a19"), SubResource("a20"), SubResource("a21"), SubResource("a22"), SubResource("a23"), SubResource("a24"), SubResource("a25"), SubResource("a26"), SubResource("a27"), SubResource("a28"), SubResource("a29"), SubResource("a30"), SubResource("a31"), SubResource("a32"), SubResource("a33"), SubResource("a34"), SubResource("a35"), SubResource("a36"), SubResource("a37"), SubResource("a38"), SubResource("a39"), SubResource("a40"), SubResource("a41"), SubResource("a42"), SubResource("a43"), SubResource("a44"), SubResource("a45"), SubResource("a46"), SubResource("a47"), SubResource("a48"), SubResource("a49"), SubResource("a50"), SubResource("a51"), SubResource("a52"), SubResource("a53"), SubResource("a54"), SubResource("a55")])
+animations = Array[ExtResource("2")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4"), SubResource("a5"), SubResource("a6"), SubResource("a7"), SubResource("a8"), SubResource("a9"), SubResource("a10"), SubResource("a11"), SubResource("a12"), SubResource("a13"), SubResource("a14"), SubResource("a15"), SubResource("a16"), SubResource("a17"), SubResource("a18"), SubResource("a19"), SubResource("a20"), SubResource("a21"), SubResource("a22"), SubResource("a23"), SubResource("a24"), SubResource("a25"), SubResource("a26"), SubResource("a27"), SubResource("a28"), SubResource("a29"), SubResource("a30"), SubResource("a31"), SubResource("a32"), SubResource("a33"), SubResource("a34"), SubResource("a35"), SubResource("a36"), SubResource("a37"), SubResource("a38"), SubResource("a39"), SubResource("a40"), SubResource("a41"), SubResource("a42"), SubResource("a43"), SubResource("a44"), SubResource("a45"), SubResource("a46"), SubResource("a47"), SubResource("a48"), SubResource("a49"), SubResource("a50"), SubResource("a51"), SubResource("a52"), SubResource("a53"), SubResource("a54"), SubResource("a55"), SubResource("a56"), SubResource("a57"), SubResource("a58"), SubResource("a59"), SubResource("a60"), SubResource("a61"), SubResource("a62"), SubResource("a63")])
 foot_inset = 3
